@@ -1,0 +1,45 @@
+movies:
+ - Casablanca
+ - V for Vendetta
+shopping:
+ [milk, pumpkin pie, eggs, juice]
+blockA:
+  name: John Smith
+  age: 33
+blockB: {name: John Smith, age: 33}
+newLines-preserved: |
+  There once was a short man from Ealing
+  Who got on a bus to Darjeeling
+  It said on the door
+    "Please don't spit on the floor"
+  So he carefully spat on the ceiling
+newLines-folded: >
+  Wrapped text
+  will be folded
+  into a single
+  paragraph
+
+  Blank lines denote
+  paragraph breaks
+anchors:
+  - step:  &1                  # defines anchor label &1
+      instrument:      Lasik 2000
+      pulseEnergy:     5.4
+      pulseDuration:   12
+      repetition:      1000
+      spotSize:        1mm
+
+  - step: &2
+      instrument:      Lasik 2000
+      pulseEnergy:     5.0
+      pulseDuration:   10
+      repetition:      500
+      spotSize:        2mm
+  - step: *1                   # refers to the first step (with anchor &id001)
+  - step: *2                   # refers to the second step
+  - step:
+      <<: *1
+      spotSize: 2mm             # redefines just this key, refers rest from &id001
+  - step: *2
+picture: !!binary >
+  R0lGODdhDQAIAIAAAAAAANnZ2SwAAAAADQAIAAACF4SDGQar3xxbJ9p0qa7R0YxwzaFME1IAADs=

@@ -1,0 +1,2 @@
+io.vertx.ext.configuration.impl.spi.JsonProcessor
+io.vertx.ext.configuration.impl.spi.PropertiesConfigurationProcessor

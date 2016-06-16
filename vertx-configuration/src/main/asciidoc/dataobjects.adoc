@@ -1,0 +1,36 @@
+= Cheatsheets
+
+[[ConfigurationServiceOptions]]
+== ConfigurationServiceOptions
+
+++++
+ @author <a href="http://escoffier.me">Clement Escoffier</a>
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[broadcastAddress]]`broadcastAddress`|`String`|-
+|[[scanPeriod]]`scanPeriod`|`Number (long)`|-
+|[[stores]]`stores`|`Array of link:dataobjects.html#ConfigurationStoreOptions[ConfigurationStoreOptions]`|-
+|===
+
+[[ConfigurationStoreOptions]]
+== ConfigurationStoreOptions
+
+++++
+ @author <a href="http://escoffier.me">Clement Escoffier</a>
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[config]]`config`|`Json object`|-
+|[[format]]`format`|`String`|-
+|[[type]]`type`|`String`|-
+|===
+

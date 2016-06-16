@@ -1,0 +1,15 @@
+{
+  "key": "value",
+  "sub": {
+    "foo": "bar"
+  },
+  "array": [
+    1,
+    2,
+    3
+  ],
+  "int": 5,
+  "float": 25.3,
+  "true": true,
+  "false": false
+}
