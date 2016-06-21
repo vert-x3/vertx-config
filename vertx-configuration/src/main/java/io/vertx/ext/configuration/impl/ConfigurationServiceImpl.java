@@ -54,7 +54,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     Map<String, ConfigurationProcessor> processors = new HashMap<>();
     processorImpl.iterator().forEachRemaining(processor -> processors.put(processor.name(), processor));
 
-
     // Iterate over the configured `stores` to configuration the stores
     providers = new ArrayList<>();
     for (ConfigurationStoreOptions option : options.getStores()) {

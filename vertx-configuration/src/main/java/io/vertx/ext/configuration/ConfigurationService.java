@@ -18,8 +18,7 @@ public interface ConfigurationService {
 
   // TODO write documentation
   // TODO implementation to read kubernetes config map
-  // TODO implementation to read Zookeeper ?
-  // TODO implementation for Spring config
+  // TODO implementation to read Zookeeper / Consul ?
 
   /**
    * Creates an instance of the default implementation of the {@link ConfigurationService}.
