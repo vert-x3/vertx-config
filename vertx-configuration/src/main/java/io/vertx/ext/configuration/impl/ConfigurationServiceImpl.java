@@ -2,7 +2,6 @@ package io.vertx.ext.configuration.impl;
 
 
 import io.vertx.core.*;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -81,7 +80,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         throw new IllegalArgumentException("unknown configuration format: " + format + " (supported formats are: " +
             processors.keySet());
       }
-      providers.add(new ConfigurationProvider(store, processor));
+      providers.add(new ConfigurationProvider(store, processor, option.getConfig()));
     }
 
     this.broadcast = options.getBroadcastAddress();
@@ -144,7 +143,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
           if (!current.equals(ar.result())) {
             lastRetrieval = System.currentTimeMillis();
             current = ar.result();
-            listeners.stream().forEach(l -> l.handle(current));
+            listeners.forEach(l -> l.handle(current));
             broadcast(current, lastRetrieval);
           }
         }
@@ -163,7 +162,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     List<Future> futures = providers.stream()
         .map(s -> {
           Future<JsonObject> conf = Future.future();
-          s.get(vertx, conf.completer());
+          s.get(vertx, ar -> {
+            if (ar.succeeded()) {
+              conf.complete(ar.result());
+            } else {
+              conf.fail(ar.cause());
+            }
+          });
           return conf;
         })
         .collect(Collectors.toList());
@@ -174,7 +179,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
       } else {
         // Merge the different futures
         JsonObject json = new JsonObject();
-        futures.stream().forEach(future -> json.mergeIn((JsonObject) future.result()));
+        futures.forEach(future -> json.mergeIn((JsonObject) future.result()));
         completionHandler.handle(Future.succeededFuture(json));
       }
     });

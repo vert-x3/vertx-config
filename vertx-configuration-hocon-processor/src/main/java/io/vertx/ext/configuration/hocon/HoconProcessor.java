@@ -29,7 +29,7 @@ public class HoconProcessor implements ConfigurationProcessor {
   }
 
   @Override
-  public void process(Vertx vertx, Buffer input, Handler<AsyncResult<JsonObject>> handler) {
+  public void process(Vertx vertx, JsonObject configuration, Buffer input, Handler<AsyncResult<JsonObject>> handler) {
     // Use executeBlocking even if the bytes are in memory
     // Indeed, HOCON resolution can read others files (includes).
     vertx.executeBlocking(

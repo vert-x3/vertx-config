@@ -13,6 +13,6 @@ public interface ConfigurationProcessor {
 
   String name();
 
-  void process(Vertx vertx, Buffer input, Handler<AsyncResult<JsonObject>> handler);
+  void process(Vertx vertx, JsonObject configuration, Buffer input, Handler<AsyncResult<JsonObject>> handler);
 
 }

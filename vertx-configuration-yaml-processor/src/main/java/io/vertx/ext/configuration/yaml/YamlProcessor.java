@@ -31,7 +31,7 @@ public class YamlProcessor implements ConfigurationProcessor {
   }
 
   @Override
-  public void process(Vertx vertx, Buffer input, Handler<AsyncResult<JsonObject>> handler) {
+  public void process(Vertx vertx, JsonObject configuration, Buffer input, Handler<AsyncResult<JsonObject>> handler) {
     if (input.length() == 0) {
       // the parser does not support empty files, which should be managed to be homogeneous
       handler.handle(Future.succeededFuture(new JsonObject()));

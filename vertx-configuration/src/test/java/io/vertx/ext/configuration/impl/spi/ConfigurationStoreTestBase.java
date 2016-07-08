@@ -57,7 +57,7 @@ public abstract class ConfigurationStoreTestBase {
       if (buffer.failed()) {
         handler.handle(Future.failedFuture(buffer.cause()));
       } else {
-        JSON.process(vertx, buffer.result(), handler);
+        JSON.process(vertx, new JsonObject(), buffer.result(), handler);
       }
     });
   }
@@ -67,7 +67,7 @@ public abstract class ConfigurationStoreTestBase {
       if (buffer.failed()) {
         handler.handle(Future.failedFuture(buffer.cause()));
       } else {
-        PROPERTIES.process(vertx, buffer.result(), handler);
+        PROPERTIES.process(vertx, null, buffer.result(), handler);
       }
     });
   }

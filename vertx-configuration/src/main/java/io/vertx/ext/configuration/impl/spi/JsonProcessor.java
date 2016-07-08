@@ -16,7 +16,7 @@ import io.vertx.ext.configuration.spi.ConfigurationProcessor;
 public class JsonProcessor implements ConfigurationProcessor {
 
   @Override
-  public void process(Vertx vertx, Buffer input, Handler<AsyncResult<JsonObject>> handler) {
+  public void process(Vertx vertx, JsonObject configuration, Buffer input, Handler<AsyncResult<JsonObject>> handler) {
     try {
       JsonObject json = input.toJsonObject();
       if (json == null) {

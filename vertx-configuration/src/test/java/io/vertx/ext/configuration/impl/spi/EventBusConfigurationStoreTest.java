@@ -1,5 +1,7 @@
 package io.vertx.ext.configuration.impl.spi;
 
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
@@ -78,6 +80,8 @@ public class EventBusConfigurationStoreTest extends ConfigurationStoreTestBase {
     });
   }
 
+  Handler<AsyncResult<JsonObject>> handler;
+
   @Test
   public void testWithPublish(TestContext tc) {
     Async async = tc.async();
@@ -86,15 +90,25 @@ public class EventBusConfigurationStoreTest extends ConfigurationStoreTestBase {
     );
 
     getJsonConfiguration(vertx, store, ar -> {
+      if (ar.failed()) {
+        ar.cause().printStackTrace();
+      }
       assertThat(ar.result().isEmpty()).isTrue();
 
       vertx.eventBus().publish("config", new JsonObject(HttpConfigurationStoreTest.JSON));
-      AtomicReference<JsonObject> received = new AtomicReference<>();
-      getJsonConfiguration(vertx, store, ar2 -> received.set(ar2.result()));
-      await().until(() -> received.get() != null  && ! received.get().isEmpty());
 
-      ConfigurationChecker.check(received.get());
-      async.complete();
+      handler = (ar2) -> {
+        if (ar2.result().isEmpty()) {
+          // Retry as the publication may not have been dispatched yet.
+          getJsonConfiguration(vertx, store, handler);
+          return;
+        }
+        System.out.println(ar2.result());
+        ConfigurationChecker.check(ar2.result());
+        async.complete();
+      };
+
+      getJsonConfiguration(vertx, store, handler);
     });
   }
 

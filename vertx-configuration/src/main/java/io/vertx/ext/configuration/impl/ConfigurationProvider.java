@@ -15,13 +15,20 @@ import io.vertx.ext.configuration.spi.ConfigurationStore;
  */
 public class ConfigurationProvider {
 
-  private ConfigurationStore store;
+  private final JsonObject configuration;
 
-  private ConfigurationProcessor processor;
+  private final ConfigurationStore store;
 
-  public ConfigurationProvider(ConfigurationStore store, ConfigurationProcessor processor) {
+  private final ConfigurationProcessor processor;
+
+  public ConfigurationProvider(ConfigurationStore store, ConfigurationProcessor processor, JsonObject config) {
     this.store = store;
     this.processor = processor;
+    if (config == null) {
+      this.configuration = new JsonObject();
+    } else {
+      this.configuration = config;
+    }
   }
 
   void get(Vertx vertx, Handler<AsyncResult<JsonObject>> completionHandler) {
@@ -29,7 +36,7 @@ public class ConfigurationProvider {
       if (maybeBuffer.failed()) {
         completionHandler.handle(Future.failedFuture(maybeBuffer.cause()));
       } else {
-        processor.process(vertx, maybeBuffer.result(), maybeJson -> {
+        processor.process(vertx, configuration, maybeBuffer.result(), maybeJson -> {
           if (maybeJson.failed()) {
             completionHandler.handle(Future.failedFuture(maybeJson.cause()));
           } else {

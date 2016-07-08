@@ -56,6 +56,7 @@ public class ConfigurationStoreOptions {
   }
 
   public JsonObject getConfig() {
+    //TODO can contain store and format config
     return config;
   }
 

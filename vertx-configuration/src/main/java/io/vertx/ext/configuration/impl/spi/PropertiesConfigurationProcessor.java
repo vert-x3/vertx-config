@@ -25,7 +25,7 @@ public class PropertiesConfigurationProcessor implements ConfigurationProcessor 
   }
 
   @Override
-  public void process(Vertx vertx, Buffer input, Handler<AsyncResult<JsonObject>> handler) {
+  public void process(Vertx vertx, JsonObject configuration, Buffer input, Handler<AsyncResult<JsonObject>> handler) {
     // I'm not sure the executeBlocking is really required here as the buffer is in memory,
     // to the input stream is not blocking
     vertx.executeBlocking(
