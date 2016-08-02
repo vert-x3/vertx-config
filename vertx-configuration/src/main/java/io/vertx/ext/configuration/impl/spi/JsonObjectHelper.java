@@ -90,8 +90,8 @@ class JsonObjectHelper {
 
   static JsonObject from(Properties props) {
     JsonObject json = new JsonObject();
-    props.stringPropertyNames().stream()
-        .forEach(name -> put(json, name, props.getProperty(name)));
+    props.stringPropertyNames()
+      .forEach(name -> put(json, name, props.getProperty(name)));
     return json;
   }
 }

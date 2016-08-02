@@ -26,24 +26,24 @@ public class PropertiesConfigurationProcessor implements ConfigurationProcessor 
 
   @Override
   public void process(Vertx vertx, JsonObject configuration, Buffer input, Handler<AsyncResult<JsonObject>> handler) {
-    // I'm not sure the executeBlocking is really required here as the buffer is in memory,
-    // to the input stream is not blocking
-    vertx.executeBlocking(
-        future -> {
-          byte[] bytes = input.getBytes();
-          ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
-          Properties properties = new Properties();
-          try {
-            properties.load(stream);
-            future.complete(JsonObjectHelper.from(properties));
-          } catch (Exception e) {
-            future.fail(e);
-          } finally {
-            closeQuietly(stream);
-          }
-        },
-        handler
-    );
+    // I'm not sure the executeBlocking is really required here as the
+    // buffer is in memory,
+    // so the input stream is not blocking
+    vertx.executeBlocking(future -> {
+      byte[] bytes = input.getBytes();
+      ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
+      Properties properties = new Properties();
+      try {
+        properties.load(stream);
+        JsonObject created = JsonObjectHelper.from(properties);
+        future.complete(created);
+      } catch (Exception e) {
+        e.printStackTrace();
+        future.fail(e);
+      } finally {
+        closeQuietly(stream);
+      }
+    }, handler);
   }
 
   public static void closeQuietly(Closeable closeable) {
