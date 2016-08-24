@@ -26,6 +26,7 @@
     <module>vertx-configuration-yaml-processor</module>
     <module>vertx-configuration-spring-config-server-store</module>
     <module>vertx-configuration-kubernetes-configmap</module>
+    <module>vertx-configuration-redis-store</module>
   </modules>
 
   <build>
@@ -92,7 +93,6 @@
       <artifactId>vertx-rx-java</artifactId>
       <optional>true</optional>
     </dependency>
-
 
     <dependency>
       <groupId>io.vertx</groupId>
