@@ -4,3 +4,4 @@ io.vertx.ext.configuration.impl.spi.EnvVariablesConfigurationStore
 io.vertx.ext.configuration.impl.spi.SystemPropertiesConfigurationStore
 io.vertx.ext.configuration.impl.spi.HttpConfigurationStoreFactory
 io.vertx.ext.configuration.impl.spi.EventBusConfigurationStoreFactory
+io.vertx.ext.configuration.impl.spi.DirectoryConfigurationStoreFactory

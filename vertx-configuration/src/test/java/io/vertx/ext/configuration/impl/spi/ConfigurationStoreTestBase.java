@@ -5,6 +5,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.configuration.ConfigurationService;
 import io.vertx.ext.configuration.spi.ConfigurationProcessor;
 import io.vertx.ext.configuration.spi.ConfigurationStore;
 import io.vertx.ext.configuration.spi.ConfigurationStoreFactory;
@@ -31,6 +32,7 @@ public abstract class ConfigurationStoreTestBase {
   protected Vertx vertx;
   protected ConfigurationStoreFactory factory;
   protected ConfigurationStore store;
+  protected ConfigurationService service;
 
   @Before
   public void setUp(TestContext context) {
@@ -45,6 +47,10 @@ public abstract class ConfigurationStoreTestBase {
       store.close(v -> done.set(true));
       await().untilAtomic(done, is(true));
       done.set(false);
+    }
+
+    if (service != null) {
+      service.close();
     }
 
     vertx.close(v -> done.set(true));
