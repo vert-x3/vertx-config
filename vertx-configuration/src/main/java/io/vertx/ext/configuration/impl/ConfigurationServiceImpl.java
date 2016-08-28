@@ -12,6 +12,7 @@ import io.vertx.ext.configuration.ConfigurationStoreOptions;
 import io.vertx.ext.configuration.spi.ConfigurationProcessor;
 import io.vertx.ext.configuration.spi.ConfigurationStore;
 import io.vertx.ext.configuration.spi.ConfigurationStoreFactory;
+import io.vertx.ext.configuration.utils.Processors;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -40,18 +41,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         ServiceLoader.load(ConfigurationStoreFactory.class,
             ConfigurationStoreFactory.class.getClassLoader());
 
-    ServiceLoader<ConfigurationProcessor> processorImpl =
-        ServiceLoader.load(ConfigurationProcessor.class,
-            ConfigurationStoreFactory.class.getClassLoader());
-
     Map<String, ConfigurationStoreFactory> nameToImplMap = new HashMap<>();
     storeImpl.iterator().forEachRemaining(factory -> nameToImplMap.put(factory.name(), factory));
     if (nameToImplMap.isEmpty()) {
       throw new IllegalStateException("No configuration store implementations found on the classpath");
     }
-
-    Map<String, ConfigurationProcessor> processors = new HashMap<>();
-    processorImpl.iterator().forEachRemaining(processor -> processors.put(processor.name(), processor));
 
     // Iterate over the configured `stores` to configuration the stores
     providers = new ArrayList<>();
@@ -75,10 +69,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
       ConfigurationStore store = factory.create(vertx, config);
 
       String format = option.getFormat() != null ? option.getFormat() : "json";
-      ConfigurationProcessor processor = processors.get(format);
+      ConfigurationProcessor processor = Processors.get(format);
       if (processor == null) {
         throw new IllegalArgumentException("unknown configuration format: " + format + " (supported formats are: " +
-            processors.keySet());
+            Processors.getSupportedFormats());
       }
       providers.add(new ConfigurationProvider(store, processor, option.getConfig()));
     }
