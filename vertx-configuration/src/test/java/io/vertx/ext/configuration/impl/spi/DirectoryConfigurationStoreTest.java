@@ -197,11 +197,6 @@ public class DirectoryConfigurationStoreTest extends ConfigurationStoreTestBase 
                     .add(new JsonObject().put("pattern", "dir/?.json"))
                 ))));
     service.getConfiguration(ar -> {
-      if (ar.failed()) {
-        ar.cause().printStackTrace();
-        context.fail(ar.cause());
-        return;
-      }
       assertThat(ar.result().getString("b.name")).isEqualTo("B");
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       // Alphabetical order, so B is last.

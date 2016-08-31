@@ -104,4 +104,31 @@ public class FileSet {
       }
     });
   }
+
+  /**
+   * List all the files from a directory (recursive)
+   *
+   * @param root the root
+   * @return the list of files
+   */
+  public static List<File> traverse(File root) {
+    List<File> files = new ArrayList<>();
+    if (!root.isDirectory()) {
+      return files;
+    } else {
+      File[] children = root.listFiles();
+      if (children == null) {
+        return files;
+      } else {
+        for (File file : children) {
+          if (file.isDirectory()) {
+            files.addAll(traverse(file));
+          } else {
+            files.add(file);
+          }
+        }
+      }
+      return files;
+    }
+  }
 }

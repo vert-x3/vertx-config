@@ -113,6 +113,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     if (scan != -1) {
       vertx.cancelTimer(scan);
     }
+
+    for (ConfigurationProvider provider : providers) {
+      provider.close(v -> {});
+    }
   }
 
   @Override

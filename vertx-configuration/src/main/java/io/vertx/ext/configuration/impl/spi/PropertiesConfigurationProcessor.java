@@ -38,7 +38,6 @@ public class PropertiesConfigurationProcessor implements ConfigurationProcessor 
         JsonObject created = JsonObjectHelper.from(properties);
         future.complete(created);
       } catch (Exception e) {
-        e.printStackTrace();
         future.fail(e);
       } finally {
         closeQuietly(stream);
@@ -50,7 +49,7 @@ public class PropertiesConfigurationProcessor implements ConfigurationProcessor 
     if (closeable != null) {
       try {
         closeable.close();
-      } catch (IOException e) {
+      } catch (Exception e) {
         // Ignore it.
       }
     }

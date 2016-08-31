@@ -47,4 +47,8 @@ public class ConfigurationProvider {
     });
   }
 
+  void close(Handler<Void> handler) {
+    store.close(handler);
+  }
+
 }

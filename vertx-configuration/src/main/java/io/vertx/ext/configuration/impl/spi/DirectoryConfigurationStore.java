@@ -45,26 +45,7 @@ public class DirectoryConfigurationStore implements ConfigurationStore {
     }
   }
 
-  private List<File> traverse(File root) {
-    List<File> files = new ArrayList<>();
-    if (!root.isDirectory()) {
-      return files;
-    } else {
-      File[] children = root.listFiles();
-      if (children == null) {
-        return files;
-      } else {
-        for (File file : children) {
-          if (file.isDirectory()) {
-            files.addAll(traverse(file));
-          } else {
-            files.add(file);
-          }
-        }
-      }
-      return files;
-    }
-  }
+
 
   @Override
   public void get(Handler<AsyncResult<Buffer>> completionHandler) {
@@ -72,7 +53,7 @@ public class DirectoryConfigurationStore implements ConfigurationStore {
     vertx.<List<File>>executeBlocking(
         fut -> {
           try {
-            fut.complete(traverse(path));
+            fut.complete(FileSet.traverse(path));
           } catch (Throwable e) {
             fut.fail(e);
           }
