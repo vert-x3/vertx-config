@@ -12,7 +12,6 @@
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
-|[[broadcastAddress]]`broadcastAddress`|`String`|-
 |[[scanPeriod]]`scanPeriod`|`Number (long)`|-
 |[[stores]]`stores`|`Array of link:dataobjects.html#ConfigurationStoreOptions[ConfigurationStoreOptions]`|-
 |===

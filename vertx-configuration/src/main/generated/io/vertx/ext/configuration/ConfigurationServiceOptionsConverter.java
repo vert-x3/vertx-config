@@ -27,9 +27,6 @@ import io.vertx.core.json.JsonArray;
 public class ConfigurationServiceOptionsConverter {
 
   public static void fromJson(JsonObject json, ConfigurationServiceOptions obj) {
-    if (json.getValue("broadcastAddress") instanceof String) {
-      obj.setBroadcastAddress((String)json.getValue("broadcastAddress"));
-    }
     if (json.getValue("scanPeriod") instanceof Number) {
       obj.setScanPeriod(((Number)json.getValue("scanPeriod")).longValue());
     }
@@ -42,9 +39,6 @@ public class ConfigurationServiceOptionsConverter {
   }
 
   public static void toJson(ConfigurationServiceOptions obj, JsonObject json) {
-    if (obj.getBroadcastAddress() != null) {
-      json.put("broadcastAddress", obj.getBroadcastAddress());
-    }
     json.put("scanPeriod", obj.getScanPeriod());
     if (obj.getStores() != null) {
       json.put("stores", new JsonArray(

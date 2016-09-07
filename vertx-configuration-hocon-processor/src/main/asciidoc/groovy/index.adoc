@@ -1,0 +1,61 @@
+= Hocon Configuration Format
+
+The Hocon Configuration Format extends the Vert.x Configuration Service and provides the
+support for the HOCON(https://github.com/typesafehub/config/blob/master/HOCON.md) format.
+
+It supports includes, json, properties, macros...
+
+== Using the Hocon Configuration Format
+
+To use the Hocon Configuration Format, add the following dependency to the
+_dependencies_ section of your build descriptor:
+
+* Maven (in your `pom.xml`):
+
+[source,xml,subs="+attributes"]
+----
+<dependency>
+  <groupId>me.escoffier.vertx</groupId>
+  <artifactId>vertx-configuration-hocon-processor</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+</dependency>
+<dependency>
+  <groupId>me.escoffier.vertx</groupId>
+  <artifactId>vertx-configuration</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+</dependency>
+----
+
+* Gradle (in your `build.gradle` file):
+
+[source,groovy,subs="+attributes"]
+----
+compile 'me.escoffier.vertx:vertx-configuration:1.0.0-SNAPSHOT'
+compile 'me.escoffier.vertx:vertx-configuration-hocon-processor:1.0.0-SNAPSHOT'
+----
+
+== Configuring the store to use HOCON
+
+Once added to your classpath or dependencies, you need to configure the
+`link:../../groovydoc/io/vertx/groovy/ext/configuration/ConfigurationService.html[ConfigurationService]` to use this format:
+
+[source, groovy]
+----
+import io.vertx.groovy.ext.configuration.ConfigurationService
+def store = [
+  type:"file",
+  config:[
+    path:"my-config.yaml",
+    format:"yaml"
+  ]
+]
+
+def svc = ConfigurationService.create(vertx, [
+  stores:[
+    store
+  ]
+])
+
+----
+
+You just need to set `format` to `hocon`.

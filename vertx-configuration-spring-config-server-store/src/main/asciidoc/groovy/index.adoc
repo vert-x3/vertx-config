@@ -1,0 +1,64 @@
+= Spring Config Server Store
+
+The Spring Config Server Store extends the Vert.x Configuration Service and provides the
+a way to retrieve configuration from a Spring Server.
+
+== Using the Spring Config Server Store
+
+To use the Spring Config Server Store, add the following dependency to the
+_dependencies_ section of your build descriptor:
+
+* Maven (in your `pom.xml`):
+
+[source,xml,subs="+attributes"]
+----
+<dependency>
+  <groupId>me.escoffier.vertx</groupId>
+  <artifactId>vertx-configuration-spring-config-server-store</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+</dependency>
+<dependency>
+  <groupId>me.escoffier.vertx</groupId>
+  <artifactId>vertx-configuration</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+</dependency>
+----
+
+* Gradle (in your `build.gradle` file):
+
+[source,groovy,subs="+attributes"]
+----
+compile 'me.escoffier.vertx:vertx-configuration:1.0.0-SNAPSHOT'
+compile 'me.escoffier.vertx:vertx-configuration-spring-config-server-store:1.0.0-SNAPSHOT'
+----
+
+== Configuring the store
+
+Once added to your classpath or dependencies, you need to configure the
+`link:../../groovydoc/io/vertx/groovy/ext/configuration/ConfigurationService.html[ConfigurationService]` to use this store:
+
+[source, groovy]
+----
+import io.vertx.groovy.ext.configuration.ConfigurationService
+def store = [
+  type:"spring-config-server",
+  config:[
+    url:"http://localhost:8888/foo/development"
+  ]
+]
+
+def svc = ConfigurationService.create(vertx, [
+  stores:[
+    store
+  ]
+])
+
+----
+
+
+Configurable attributes are:
+
+* `url` - the `url` to retrieve the configuration (mandatory)
+* `timeout` - the timeout (in milliseconds) to retrieve the configuration, 3000 by default
+* `user` - the `user` (no authentication by default)
+* `password` - the `password`

@@ -12,12 +12,9 @@ import java.util.List;
 @DataObject(generateConverter = true)
 public class ConfigurationServiceOptions {
 
-  private static final String BROADCAST_ADDRESS_DEFAULT = "configuration";
   private static final long SCAN_PERIOD_DEFAULT = 5000L;
 
   private long scanPeriod = SCAN_PERIOD_DEFAULT;
-
-  private String broadcastAddress = BROADCAST_ADDRESS_DEFAULT;
 
   private List<ConfigurationStoreOptions> stores = new ArrayList<>();
 
@@ -27,7 +24,6 @@ public class ConfigurationServiceOptions {
 
   public ConfigurationServiceOptions(ConfigurationServiceOptions other) {
     this.scanPeriod = other.scanPeriod;
-    this.broadcastAddress = other.broadcastAddress;
     this.stores = other.stores;
   }
 
@@ -47,15 +43,6 @@ public class ConfigurationServiceOptions {
 
   public ConfigurationServiceOptions setScanPeriod(long scanPeriod) {
     this.scanPeriod = scanPeriod;
-    return this;
-  }
-
-  public String getBroadcastAddress() {
-    return broadcastAddress;
-  }
-
-  public ConfigurationServiceOptions setBroadcastAddress(String broadcastAddress) {
-    this.broadcastAddress = broadcastAddress;
     return this;
   }
 

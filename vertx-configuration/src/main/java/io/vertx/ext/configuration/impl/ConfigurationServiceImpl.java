@@ -2,7 +2,6 @@ package io.vertx.ext.configuration.impl;
 
 
 import io.vertx.core.*;
-import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -28,10 +27,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
   private final Vertx vertx;
   private final List<ConfigurationProvider> providers;
   private final long scan;
-  private final String broadcast;
   private final List<Handler<JsonObject>> listeners = new ArrayList<>();
 
-  private long lastRetrieval = System.currentTimeMillis();
   private JsonObject current = new JsonObject();
 
   public ConfigurationServiceImpl(Vertx vertx, ConfigurationServiceOptions options) {
@@ -77,20 +74,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
       providers.add(new ConfigurationProvider(store, processor, option.getConfig()));
     }
 
-    this.broadcast = options.getBroadcastAddress();
-
     if (options.getScanPeriod() > 0) {
       this.scan = vertx.setPeriodic(options.getScanPeriod(), l -> scan());
     } else {
       this.scan = -1;
     }
 
-    getConfiguration(ar -> {
-      if (ar.succeeded()) {
-        synchronized (ConfigurationServiceImpl.this) {
-          broadcast(current, lastRetrieval);
-        }
-      }
+    getConfiguration(x -> {
+      // Ignored.
     });
   }
 
@@ -101,7 +92,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
       if (ar.succeeded()) {
         synchronized ((ConfigurationServiceImpl.this)) {
           current = ar.result();
-          lastRetrieval = System.currentTimeMillis();
         }
       }
       completionHandler.handle(ar);
@@ -115,7 +105,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     for (ConfigurationProvider provider : providers) {
-      provider.close(v -> {});
+      provider.close(v -> {
+      });
     }
   }
 
@@ -139,21 +130,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         synchronized (ConfigurationServiceImpl.this) {
           // Check for changes
           if (!current.equals(ar.result())) {
-            lastRetrieval = System.currentTimeMillis();
             current = ar.result();
             listeners.forEach(l -> l.handle(current));
-            broadcast(current, lastRetrieval);
           }
         }
       }
     });
-  }
-
-  private void broadcast(JsonObject config, long time) {
-    if (broadcast != null) {
-      vertx.eventBus().publish(broadcast, config,
-          new DeliveryOptions().addHeader("timestamp", Long.toString(time)));
-    }
   }
 
   private void compute(Handler<AsyncResult<JsonObject>> completionHandler) {

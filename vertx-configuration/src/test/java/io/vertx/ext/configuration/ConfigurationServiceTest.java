@@ -64,7 +64,8 @@ public class ConfigurationServiceTest {
 
   @Test
   public void testLoading(TestContext tc) {
-    service = ConfigurationService.create(vertx, addStores(new ConfigurationServiceOptions()));
+    service = ConfigurationService.create(vertx,
+        addStores(new ConfigurationServiceOptions()));
     Async async = tc.async();
 
     service.getConfiguration(ar -> {
@@ -115,7 +116,8 @@ public class ConfigurationServiceTest {
   @Test
   public void testOverloading(TestContext tc) {
     System.setProperty("key", "new-value");
-    service = ConfigurationService.create(vertx, addStores(new ConfigurationServiceOptions()));
+    service = ConfigurationService.create(vertx,
+        addStores(new ConfigurationServiceOptions()));
     Async async = tc.async();
 
     service.getConfiguration(ar -> {
