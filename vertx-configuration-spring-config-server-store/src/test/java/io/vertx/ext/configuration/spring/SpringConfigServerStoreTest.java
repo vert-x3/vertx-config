@@ -66,13 +66,13 @@ public class SpringConfigServerStoreTest {
 
 
     service.getConfiguration(json -> {
+      System.out.println(json.result().encodePrettily());
       assertThat(json.succeeded()).isTrue();
       JsonObject config = json.result();
 
       assertThat(config.getString("bar")).isEqualToIgnoringCase("spam");
-      assertThat(config.getString("foo")).isEqualToIgnoringCase("barcelona");
-      assertThat(config.getString("eureka.client.serviceUrl.defaultZone"))
-          .isEqualToIgnoringCase("http://localhost:8761/eureka/");
+      assertThat(config.getString("foo")).isEqualToIgnoringCase("from-default");
+      assertThat(config.getString("info.description")).isEqualToIgnoringCase("Spring Cloud Samples");
 
       async.complete();
     });
