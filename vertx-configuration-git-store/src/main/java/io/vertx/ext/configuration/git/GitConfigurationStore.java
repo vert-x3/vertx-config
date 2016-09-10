@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -157,8 +158,13 @@ public class GitConfigurationStore implements ConfigurationStore {
           if (call.isSuccessful()) {
             future.complete();
           } else {
-            future.fail("Unable to merge repository - Conflicts: "
-                + call.getMergeResult().getCheckoutConflicts());
+            if (call.getMergeResult() != null) {
+              future.fail("Unable to merge repository - Conflicts: "
+                  + call.getMergeResult().getCheckoutConflicts());
+            } else {
+              future.fail("Unable to rebase repository - Conflicts: "
+                  + call.getRebaseResult().getConflicts());
+            }
           }
         },
         result.completer()
@@ -171,7 +177,7 @@ public class GitConfigurationStore implements ConfigurationStore {
     vertx.executeBlocking(
         fut -> {
           try {
-            fut.complete(FileSet.traverse(path));
+            fut.complete(FileSet.traverse(path).stream().sorted().collect(Collectors.toList()));
           } catch (Throwable e) {
             fut.fail(e);
           }
