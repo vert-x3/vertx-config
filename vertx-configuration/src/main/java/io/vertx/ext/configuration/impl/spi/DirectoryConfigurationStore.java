@@ -9,6 +9,7 @@ import io.vertx.ext.configuration.utils.FileSet;
 
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A configuration store loading a set of files from a directory.
@@ -53,7 +54,7 @@ public class DirectoryConfigurationStore implements ConfigurationStore {
     vertx.<List<File>>executeBlocking(
         fut -> {
           try {
-            fut.complete(FileSet.traverse(path));
+            fut.complete(FileSet.traverse(path).stream().sorted().collect(Collectors.toList()));
           } catch (Throwable e) {
             fut.fail(e);
           }
