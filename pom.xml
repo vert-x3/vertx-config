@@ -28,6 +28,7 @@
     <module>vertx-configuration-kubernetes-configmap</module>
     <module>vertx-configuration-redis-store</module>
     <module>vertx-configuration-git-store</module>
+    <module>vertx-configuration-zookeeper-store</module>
   </modules>
 
   <build>

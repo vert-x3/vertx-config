@@ -1,0 +1,71 @@
+= Zookeeper Configuration Store
+
+The Zookeeper Configuration Store extends the Vert.x Configuration Service and provides the
+way to retrieve configuration from a Zookeeper server.
+
+It uses Apache Curator as client.
+
+== Using the Zookeeper Configuration Store
+
+To use the Redis Configuration Store, add the following dependency to the
+_dependencies_ section of your build descriptor:
+
+* Maven (in your `pom.xml`):
+
+[source,xml,subs="+attributes"]
+----
+<dependency>
+  <groupId>me.escoffier.vertx</groupId>
+  <artifactId>vertx-configuration-zookeeper-store</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+</dependency>
+<dependency>
+  <groupId>me.escoffier.vertx</groupId>
+  <artifactId>vertx-configuration</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+</dependency>
+----
+
+* Gradle (in your `build.gradle` file):
+
+[source,groovy,subs="+attributes"]
+----
+compile 'me.escoffier.vertx:vertx-configuration:1.0.0-SNAPSHOT'
+compile 'me.escoffier.vertx:vertx-configuration-zookeeper-store:1.0.0-SNAPSHOT'
+----
+
+== Configuring the store
+
+Once added to your classpath or dependencies, you need to configure the
+`link:../../jsdoc/module-vertx-configuration-js_configuration_service-ConfigurationService.html[ConfigurationService]` to use this store:
+
+[source, js]
+----
+var ConfigurationService = require("vertx-configuration-js/configuration_service");
+var store = {
+  "type" : "zookeeper",
+  "config" : {
+    "connection" : "localhost:2181",
+    "path" : "/path/to/my/conf"
+  }
+};
+
+var svc = ConfigurationService.create(vertx, {
+  "stores" : [
+    store
+  ]
+});
+
+----
+
+The store configuration is used to configure the Apache Curator client and the _path_ of the Zookeeper node
+containing the configuration. Notice that the format of the configuration can be JSON, or any supported format.
+
+The configuration requires the `configuration` attribute indicating the connection _string_ of the Zookeeper
+server, and the `path` attribute indicating the path of the node containing the configuration.
+
+In addition you can configure:
+
+* `maxRetries`: the number of connection attempt, 3 by default
+* `baseSleepTimeBetweenRetries`: the amount of milliseconds to wait between retries (exponential backoff strategy).
+1000 ms by default.
