@@ -516,7 +516,7 @@ public class GitConfigurationStoreTest {
     Async async = tc.async();
     service.getConfiguration(ar -> {
       assertThat(ar.succeeded()).isFalse();
-      assertThat(ar.cause().getMessage()).contains("Conflicts");
+      assertThat(ar.cause().getMessage()).contains("conflict");
       async.complete();
     });
   }
@@ -562,7 +562,7 @@ public class GitConfigurationStoreTest {
     Async async = tc.async();
     service.getConfiguration(ar -> {
       assertThat(ar.succeeded()).isFalse();
-      assertThat(ar.cause().getMessage()).contains("Conflicts");
+      assertThat(ar.cause().getMessage()).contains("conflict");
       async.complete();
     });
   }
