@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class ConfigMapStore implements ConfigurationStore {
 	private final Vertx vertx;
 	private final JsonObject configuration;
-	private final String namespace;
+	private String namespace;
 	private final String name;
 	private final String key;
 	private KubernetesClient client;
@@ -30,7 +30,7 @@ public class ConfigMapStore implements ConfigurationStore {
 	public ConfigMapStore(Vertx vertx, JsonObject configuration) {
 		this.vertx = vertx;
 		this.configuration = configuration;
-		this.namespace = configuration.getString("namespace", "default");
+		this.namespace = configuration.getString("namespace");
 		this.name = configuration.getString("name");
 		this.key = configuration.getString("key");
 		Objects.requireNonNull(this.name);
@@ -46,7 +46,7 @@ public class ConfigMapStore implements ConfigurationStore {
 
 	private Future<KubernetesClient> getClient() {
 		Future<KubernetesClient> result = Future.future();
-
+		namespace = System.getenv().get("KUBERNETES_NAMESPACE") != null ? System.getenv().get("KUBERNETES_NAMESPACE") : "default";
 		String master = configuration.getString("master", KubernetesUtils.getDefaultKubernetesMasterUrl());
 		vertx.<KubernetesClient>executeBlocking(future -> {
 			String accountToken = configuration.getString("token");
