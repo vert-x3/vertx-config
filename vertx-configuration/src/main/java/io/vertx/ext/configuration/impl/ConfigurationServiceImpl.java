@@ -131,7 +131,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
           // Check for changes
           if (!current.equals(ar.result())) {
             current = ar.result();
-            listeners.forEach(l -> l.handle(current));
+            // Copy the configuration to avoid side effects
+            listeners.forEach(l -> l.handle(current.copy()));
           }
         }
       }
