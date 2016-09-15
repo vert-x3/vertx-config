@@ -57,7 +57,7 @@ public class ConfigMapStore implements ConfigurationStore {
 			Config config = new ConfigBuilder().withOauthToken(accountToken).withMasterUrl(master).withTrustCerts(true)
 					.build();
 
-			DefaultKubernetesClient kubernetesClient = null;
+			DefaultKubernetesClient kubernetesClient;
 			try {
 				kubernetesClient = new DefaultKubernetesClient(config);
 				future.complete(kubernetesClient);
