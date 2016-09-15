@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
  * An implementation of configuration store reading config map from Kubernetes.
  */
 public class ConfigMapStore implements ConfigurationStore {
+  private static final String KUBERNETES_NAMESPACE = System.getenv("KUBERNETES_NAMESPACE");
   private final Vertx vertx;
   private final JsonObject configuration;
   private final String namespace;
@@ -28,10 +29,19 @@ public class ConfigMapStore implements ConfigurationStore {
   private final String key;
   private KubernetesClient client;
 
+
   public ConfigMapStore(Vertx vertx, JsonObject configuration) {
     this.vertx = vertx;
     this.configuration = configuration;
-    this.namespace = configuration.getString("namespace", "default");
+    String ns = configuration.getString("namespace");
+    if (ns == null) {
+      if (KUBERNETES_NAMESPACE != null) {
+        ns = KUBERNETES_NAMESPACE;
+      } else {
+        ns = "default";
+      }
+    }
+    this.namespace = ns;
     this.name = configuration.getString("name");
     this.key = configuration.getString("key");
     Objects.requireNonNull(this.name);
@@ -56,7 +66,6 @@ public class ConfigMapStore implements ConfigurationStore {
 
   private Future<KubernetesClient> getClient() {
     Future<KubernetesClient> result = Future.future();
-
     String master = configuration.getString("master", KubernetesUtils.getDefaultKubernetesMasterUrl());
     vertx.<KubernetesClient>executeBlocking(future -> {
       String accountToken = configuration.getString("token");

@@ -54,8 +54,14 @@ public class ConfigMapStoreTest {
         .withData(data)
         .build();
 
+    ConfigMap map3 = new ConfigMapBuilder().withMetadata(new ObjectMetaBuilder().withName("my-config-map-x").build())
+        .addToData("my-app-json", SOME_JSON)
+        .build();
+
     KubernetesMockClient client = new KubernetesMockClient();
     client.configMaps().inNamespace("default").list().andReturn(new ConfigMapListBuilder().addToItems(map1, map2)
+        .build());
+    client.configMaps().inNamespace("my-project").list().andReturn(new ConfigMapListBuilder().addToItems(map3)
         .build());
     this.client = client.replay();
   }
@@ -72,10 +78,11 @@ public class ConfigMapStoreTest {
     store = new ConfigMapStore(vertx, new JsonObject()
         .put("name", "my-config-map").put("key", "my-app-json"));
     store.setClient(client);
+    checkJsonConfig(tc, async);
+  }
+
+  private void checkJsonConfig(TestContext tc, Async async) {
     store.get(ar -> {
-      if (ar.failed()) {
-        ar.cause().printStackTrace();
-      }
       tc.assertTrue(ar.succeeded());
       JsonObject json = ar.result().toJsonObject();
       tc.assertEquals(json.getString("foo"), "bar");
@@ -83,6 +90,17 @@ public class ConfigMapStoreTest {
       tc.assertTrue(json.getBoolean("debug"));
       async.complete();
     });
+  }
+
+  @Test
+  public void testWithJsonInAnotherNamespace(TestContext tc) {
+    Async async = tc.async();
+    store = new ConfigMapStore(vertx, new JsonObject()
+        .put("name", "my-config-map-x")
+        .put("namespace", "my-project")
+        .put("key", "my-app-json"));
+    store.setClient(client);
+    checkJsonConfig(tc, async);
   }
 
   @Test
@@ -116,9 +134,6 @@ public class ConfigMapStoreTest {
         .put("name", "my-config-map").put("key", "my-app-props"));
     store.setClient(client);
     store.get(ar -> {
-      if (ar.failed()) {
-        ar.cause().printStackTrace();
-      }
       tc.assertTrue(ar.succeeded());
       Properties properties = new Properties();
       try {
@@ -140,9 +155,6 @@ public class ConfigMapStoreTest {
         .put("name", "my-config-map-2"));
     store.setClient(client);
     store.get(ar -> {
-      if (ar.failed()) {
-        ar.cause().printStackTrace();
-      }
       tc.assertTrue(ar.succeeded());
 
       JsonObject json = ar.result().toJsonObject();
