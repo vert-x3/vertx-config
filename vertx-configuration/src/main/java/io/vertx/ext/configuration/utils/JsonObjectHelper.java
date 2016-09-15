@@ -1,4 +1,4 @@
-package io.vertx.ext.configuration.impl.spi;
+package io.vertx.ext.configuration.utils;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
@@ -12,13 +12,13 @@ import java.util.Properties;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-class JsonObjectHelper {
+public class JsonObjectHelper {
 
-  static Buffer toBuffer(JsonObject json) {
+  public static Buffer toBuffer(JsonObject json) {
     return Buffer.buffer(json.encode());
   }
 
-  static void put(JsonObject json, String name, String value) {
+  public static void put(JsonObject json, String name, String value) {
     Objects.requireNonNull(value);
 
     Boolean bool = asBoolean(value);
@@ -46,6 +46,32 @@ class JsonObjectHelper {
     }
 
     json.put(name, value);
+  }
+
+  public  static Object convert(String value) {
+    Objects.requireNonNull(value);
+
+    Boolean bool = asBoolean(value);
+    if (bool != null) {
+      return bool;
+    }
+
+    Double integer = asNumber(value);
+    if (integer != null) {
+      return integer;
+    }
+
+    JsonObject obj = asJsonObject(value);
+    if (obj != null) {
+      return obj;
+    }
+
+    JsonArray arr = asJsonArray(value);
+    if (arr != null) {
+      return arr;
+    }
+
+    return value;
   }
 
   private static Double asNumber(String s) {
@@ -88,7 +114,7 @@ class JsonObjectHelper {
     return null;
   }
 
-  static JsonObject from(Properties props) {
+  public static JsonObject from(Properties props) {
     JsonObject json = new JsonObject();
     props.stringPropertyNames()
       .forEach(name -> put(json, name, props.getProperty(name)));

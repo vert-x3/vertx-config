@@ -6,10 +6,10 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.configuration.spi.ConfigurationProcessor;
+import io.vertx.ext.configuration.utils.JsonObjectHelper;
 
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.Properties;
 
 /**

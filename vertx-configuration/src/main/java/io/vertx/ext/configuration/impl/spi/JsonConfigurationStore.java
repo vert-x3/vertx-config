@@ -7,7 +7,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.configuration.spi.ConfigurationStore;
 
-import static io.vertx.ext.configuration.impl.spi.JsonObjectHelper.toBuffer;
+import static io.vertx.ext.configuration.utils.JsonObjectHelper.toBuffer;
 
 /**
  * An implementation of configuration store just retrieving the passed json object.

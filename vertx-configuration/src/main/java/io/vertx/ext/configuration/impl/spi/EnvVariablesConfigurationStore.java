@@ -8,6 +8,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.configuration.spi.ConfigurationStore;
 import io.vertx.ext.configuration.spi.ConfigurationStoreFactory;
+import io.vertx.ext.configuration.utils.JsonObjectHelper;
 
 import java.util.Map;
 

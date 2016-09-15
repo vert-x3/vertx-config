@@ -8,6 +8,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.configuration.spi.ConfigurationStore;
 import io.vertx.ext.configuration.spi.ConfigurationStoreFactory;
+import io.vertx.ext.configuration.utils.JsonObjectHelper;
 
 /**
  * An implementation of configuration store loading the content from the system properties.
