@@ -5,9 +5,7 @@ import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.configuration.ConfigurationService;
-import io.vertx.ext.configuration.ConfigurationServiceOptions;
-import io.vertx.ext.configuration.ConfigurationStoreOptions;
+import io.vertx.ext.configuration.*;
 import io.vertx.ext.configuration.spi.ConfigurationProcessor;
 import io.vertx.ext.configuration.spi.ConfigurationStore;
 import io.vertx.ext.configuration.spi.ConfigurationStoreFactory;
@@ -27,7 +25,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
   private final Vertx vertx;
   private final List<ConfigurationProvider> providers;
   private final long scan;
-  private final List<Handler<JsonObject>> listeners = new ArrayList<>();
+  private final List<Handler<ConfigurationChange>> listeners = new ArrayList<>();
+  private final ConfigStreamImpl streamOfConfigurationChanges = new ConfigStreamImpl();
 
   private JsonObject current = new JsonObject();
 
@@ -99,10 +98,19 @@ public class ConfigurationServiceImpl implements ConfigurationService {
   }
 
   @Override
+  public Future<JsonObject> getConfiguration() {
+    Future<JsonObject> future = Future.future();
+    getConfiguration(future.completer());
+    return future;
+  }
+
+  @Override
   public void close() {
     if (scan != -1) {
       vertx.cancelTimer(scan);
     }
+
+    streamOfConfigurationChanges.close();
 
     for (ConfigurationProvider provider : providers) {
       provider.close(v -> {
@@ -116,23 +124,29 @@ public class ConfigurationServiceImpl implements ConfigurationService {
   }
 
   @Override
-  public synchronized void listen(Handler<JsonObject> listener) {
+  public void listen(Handler<ConfigurationChange> listener) {
     Objects.requireNonNull(listener);
     listeners.add(listener);
   }
 
+  @Override
+  public ConfigurationStream configurationStream() {
+    return streamOfConfigurationChanges;
+  }
 
   private void scan() {
     compute(ar -> {
       if (ar.failed()) {
+        streamOfConfigurationChanges.fail(ar.cause());
         LOGGER.error("Error while scanning configuration", ar.cause());
       } else {
         synchronized (ConfigurationServiceImpl.this) {
           // Check for changes
           if (!current.equals(ar.result())) {
+            JsonObject prev = current;
             current = ar.result();
-            // Copy the configuration to avoid side effects
-            listeners.forEach(l -> l.handle(current.copy()));
+            listeners.forEach(l -> l.handle(new ConfigurationChange(prev, current)));
+            streamOfConfigurationChanges.handle(current);
           }
         }
       }
@@ -164,5 +178,86 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         completionHandler.handle(Future.succeededFuture(json));
       }
     });
+  }
+
+  class ConfigStreamImpl implements ConfigurationStream {
+
+    private Handler<JsonObject> handler;
+    private Handler<Throwable> exceptionHandler;
+    private Handler<Void> endHandler;
+
+    @Override
+    public synchronized ConfigurationStream exceptionHandler(Handler<Throwable> handler) {
+      Objects.requireNonNull(handler);
+      this.exceptionHandler = handler;
+      return this;
+    }
+
+    @Override
+    public ConfigurationStream handler(Handler<JsonObject> handler) {
+      Objects.requireNonNull(handler);
+      synchronized (this) {
+        this.handler = handler;
+      }
+
+      if (current != null && !current.isEmpty()) {
+        this.handler.handle(current);
+      }
+
+      return this;
+    }
+
+    @Override
+    public ConfigurationStream pause() {
+      // Does nothing back-pressure not supported
+      return this;
+    }
+
+    @Override
+    public ConfigurationStream resume() {
+      // Does nothing back-pressure not supported
+      return this;
+    }
+
+    @Override
+    public synchronized ConfigurationStream endHandler(Handler<Void> endHandler) {
+      Objects.requireNonNull(endHandler);
+      this.endHandler = endHandler;
+      return this;
+    }
+
+    void handle(JsonObject conf) {
+      Handler<JsonObject> succ;
+      synchronized (this) {
+        succ = handler;
+      }
+
+      if (succ != null) {
+        succ.handle(conf);
+      }
+
+    }
+
+    void fail(Throwable cause) {
+      Handler<Throwable> err;
+      synchronized (this) {
+        err = exceptionHandler;
+      }
+
+      if (err != null) {
+        err.handle(cause);
+      }
+
+    }
+
+    void close() {
+      Handler<Void> handler;
+      synchronized (this) {
+        handler = endHandler;
+      }
+      if (handler != null) {
+        handler.handle(null);
+      }
+    }
   }
 }

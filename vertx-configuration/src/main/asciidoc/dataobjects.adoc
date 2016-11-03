@@ -1,5 +1,21 @@
 = Cheatsheets
 
+[[ConfigurationChange]]
+== ConfigurationChange
+
+++++
+ A structure representing a configuration change.
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[newConfiguration]]`newConfiguration`|`Json object`|-
+|[[previousConfiguration]]`previousConfiguration`|`Json object`|-
+|===
+
 [[ConfigurationServiceOptions]]
 == ConfigurationServiceOptions
 

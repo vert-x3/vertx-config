@@ -23,6 +23,7 @@ import io.vertx.groovy.core.Vertx
 import io.vertx.core.json.JsonObject
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
+import io.vertx.ext.configuration.ConfigurationChange
 /**
  * Defines a configuration service that read configuration from {@link io.vertx.groovy.ext.configuration.spi.ConfigurationStore}
  * and tracks changes periodically.
@@ -86,10 +87,23 @@ public class ConfigurationService {
    * @param listener the listener
    */
   public void listen(Handler<Map<String, Object>> listener) {
-    delegate.listen(listener != null ? new Handler<io.vertx.core.json.JsonObject>(){
-      public void handle(io.vertx.core.json.JsonObject event) {
-        listener.handle((Map<String, Object>)InternalHelper.wrapObject(event));
+    delegate.listen(listener != null ? new Handler<io.vertx.ext.configuration.ConfigurationChange>(){
+      public void handle(io.vertx.ext.configuration.ConfigurationChange event) {
+        listener.handle((Map<String, Object>)InternalHelper.wrapObject(event?.toJson()));
       }
     } : null);
   }
+  /**
+   * @return the stream of configurations.
+   * @return 
+   */
+  public ConfigurationStream configurationStream() {
+    if (cached_0 != null) {
+      return cached_0;
+    }
+    def ret = InternalHelper.safeCreate(delegate.configurationStream(), io.vertx.groovy.ext.configuration.ConfigurationStream.class);
+    cached_0 = ret;
+    return ret;
+  }
+  private ConfigurationStream cached_0;
 }

@@ -119,9 +119,32 @@ public class Examples {
       // Initial retrieval of the configuration
     });
 
-    svc.listen(updatedConfig -> {
-      // Configuration changes
+    svc.listen(change -> {
+      // Previous configuration
+      JsonObject previous = change.getPreviousConfiguration();
+      // New configuration
+      JsonObject conf = change.getNewConfiguration();
     });
+  }
+
+  public void stream(ConfigurationStoreOptions store1, ConfigurationStoreOptions store2) {
+    ConfigurationServiceOptions options = new ConfigurationServiceOptions()
+        .setScanPeriod(2000)
+        .addStore(store1)
+        .addStore(store2);
+
+    ConfigurationService svc = ConfigurationService.create(Vertx.vertx(), options);
+    svc.configurationStream()
+        .endHandler(v -> {
+          // Service closed
+        })
+        .exceptionHandler(t -> {
+          // an error has been caught while retrieving the configuration
+        })
+        .handler(conf -> {
+          // the configuration
+        });
+
   }
 
   public void cache(ConfigurationService svc) {

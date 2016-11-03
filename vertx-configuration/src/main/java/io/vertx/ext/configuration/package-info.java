@@ -229,6 +229,22 @@
  * {@link examples.Examples#cache(io.vertx.ext.configuration.ConfigurationService)}
  * ----
  *
+ * === Reading configuration as a stream
+ *
+ * The {@link io.vertx.ext.configuration.ConfigurationService} provide a way to access the stream of configuration.
+ * It's a {@link io.vertx.core.streams.ReadStream} of {@link io.vertx.core.json.JsonObject}. By registering the right
+ * set of handlers you are notified:
+ *
+ * * when a new configuration is retrieved
+ * * when an error occur while retrieving a configuration
+ * * when the configuraiton service is close (the
+ * {@link io.vertx.ext.configuration.ConfigurationStream#endHandler(io.vertx.core.Handler)} is called).
+ *
+ * [source, $lang]
+ * ----
+ * {@link examples.Examples#stream(io.vertx.ext.configuration.ConfigurationStoreOptions, io.vertx.ext.configuration.ConfigurationStoreOptions)}
+ * ----
+ *
  * === Extending the configuration service
  *
  * You can extend the configuration by implementing:

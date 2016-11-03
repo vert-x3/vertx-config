@@ -331,8 +331,11 @@ svc.getConfiguration(function (json, json_err) {
   // Initial retrieval of the configuration
 });
 
-svc.listen(function (updatedConfig) {
-  // Configuration changes
+svc.listen(function (change) {
+  // Previous configuration
+  var previous = change.previousConfiguration;
+  // New configuration
+  var conf = change.newConfiguration;
 });
 
 ----
@@ -345,6 +348,41 @@ using:
 [source, js]
 ----
 var last = svc.getCachedConfiguration();
+
+----
+
+=== Reading configuration as a stream
+
+The `link:../../jsdoc/module-vertx-configuration-js_configuration_service-ConfigurationService.html[ConfigurationService]` provide a way to access the stream of configuration.
+It's a `link:../../jsdoc/module-vertx-js_read_stream-ReadStream.html[ReadStream]` of `JsonObject`. By registering the right
+set of handlers you are notified:
+
+* when a new configuration is retrieved
+* when an error occur while retrieving a configuration
+* when the configuraiton service is close (the
+`link:../../jsdoc/module-vertx-configuration-js_configuration_stream-ConfigurationStream.html#endHandler[endHandler]` is called).
+
+[source, js]
+----
+var Vertx = require("vertx-js/vertx");
+var ConfigurationService = require("vertx-configuration-js/configuration_service");
+var options = {
+  "scanPeriod" : 2000,
+  "stores" : [
+    store1,
+    store2
+  ]
+};
+
+var svc = ConfigurationService.create(Vertx.vertx(), options);
+svc.configurationStream().endHandler(function (v) {
+  // Service closed
+}).exceptionHandler(function (t) {
+  // an error has been caught while retrieving the configuration
+}).handler(function (conf) {
+  // the configuration
+});
+
 
 ----
 

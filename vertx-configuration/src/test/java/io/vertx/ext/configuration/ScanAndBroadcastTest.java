@@ -50,9 +50,7 @@ public class ScanAndBroadcastTest {
             request.response().end(http.encodePrettily());
           }
         })
-        .listen(8080, s -> {
-          done.set(true);
-        });
+        .listen(8080, s -> done.set(true));
 
     await().untilAtomic(done, is(true));
   }
@@ -91,7 +89,12 @@ public class ScanAndBroadcastTest {
 
       AtomicReference<JsonObject> current = new AtomicReference<>();
       service.getConfiguration(json -> {
-        service.listen(current::set);
+        service.listen(change -> {
+          if (current.get() != null  && ! current.get().equals(change.getPreviousConfiguration())) {
+            throw new IllegalStateException("Previous configuration not correct");
+          }
+          current.set(change.getNewConfiguration());
+        });
         current.set(json.result());
       });
 
@@ -140,7 +143,12 @@ public class ScanAndBroadcastTest {
 
       AtomicReference<JsonObject> current = new AtomicReference<>();
       service.getConfiguration(json -> {
-        service.listen(current::set);
+        service.listen(change -> {
+          if (current.get() != null  && ! current.get().equals(change.getPreviousConfiguration())) {
+            throw new IllegalStateException("Previous configuration not correct");
+          }
+          current.set(change.getNewConfiguration());
+        });
         http.put("some-key", "some-value-2");
       });
 

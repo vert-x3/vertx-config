@@ -331,8 +331,11 @@ svc.getConfiguration({ json ->
   // Initial retrieval of the configuration
 })
 
-svc.listen({ updatedConfig ->
-  // Configuration changes
+svc.listen({ change ->
+  // Previous configuration
+  def previous = change.previousConfiguration
+  // New configuration
+  def conf = change.newConfiguration
 })
 
 ----
@@ -345,6 +348,41 @@ using:
 [source, groovy]
 ----
 def last = svc.getCachedConfiguration()
+
+----
+
+=== Reading configuration as a stream
+
+The `link:../../groovydoc/io/vertx/groovy/ext/configuration/ConfigurationService.html[ConfigurationService]` provide a way to access the stream of configuration.
+It's a `link:../../groovydoc/io/vertx/groovy/core/streams/ReadStream.html[ReadStream]` of `JsonObject`. By registering the right
+set of handlers you are notified:
+
+* when a new configuration is retrieved
+* when an error occur while retrieving a configuration
+* when the configuraiton service is close (the
+`link:../../groovydoc/io/vertx/groovy/ext/configuration/ConfigurationStream.html#endHandler(io.vertx.core.Handler)[endHandler]` is called).
+
+[source, groovy]
+----
+import io.vertx.groovy.core.Vertx
+import io.vertx.groovy.ext.configuration.ConfigurationService
+def options = [
+  scanPeriod:2000,
+  stores:[
+    store1,
+    store2
+  ]
+]
+
+def svc = ConfigurationService.create(Vertx.vertx(), options)
+svc.configurationStream().endHandler({ v ->
+  // Service closed
+}).exceptionHandler({ t ->
+  // an error has been caught while retrieving the configuration
+}).handler({ conf ->
+  // the configuration
+})
+
 
 ----
 

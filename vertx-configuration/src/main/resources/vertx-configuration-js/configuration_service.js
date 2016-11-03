@@ -17,11 +17,13 @@
 /** @module vertx-configuration-js/configuration_service */
 var utils = require('vertx-js/util/utils');
 var Vertx = require('vertx-js/vertx');
+var ConfigurationStream = require('vertx-configuration-js/configuration_stream');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
 var JConfigurationService = io.vertx.ext.configuration.ConfigurationService;
 var ConfigurationServiceOptions = io.vertx.ext.configuration.ConfigurationServiceOptions;
+var ConfigurationChange = io.vertx.ext.configuration.ConfigurationChange;
 
 /**
 
@@ -90,8 +92,25 @@ var ConfigurationService = function(j_val) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'function') {
       j_configurationService["listen(io.vertx.core.Handler)"](function(jVal) {
-      listener(utils.convReturnJson(jVal));
+      listener(utils.convReturnDataObject(jVal));
     });
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+   @return the stream of configurations.
+
+   @public
+
+   @return {ConfigurationStream}
+   */
+  this.configurationStream = function() {
+    var __args = arguments;
+    if (__args.length === 0) {
+      if (that.cachedconfigurationStream == null) {
+        that.cachedconfigurationStream = utils.convReturnVertxGen(j_configurationService["configurationStream()"](), ConfigurationStream);
+      }
+      return that.cachedconfigurationStream;
     } else throw new TypeError('function invoked with invalid arguments');
   };
 

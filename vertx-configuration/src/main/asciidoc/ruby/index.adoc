@@ -331,8 +331,11 @@ svc.get_configuration() { |json_err,json|
   # Initial retrieval of the configuration
 }
 
-svc.listen() { |updatedConfig|
-  # Configuration changes
+svc.listen() { |change|
+  # Previous configuration
+  previous = change['previousConfiguration']
+  # New configuration
+  conf = change['newConfiguration']
 }
 
 ----
@@ -345,6 +348,41 @@ using:
 [source, ruby]
 ----
 last = svc.get_cached_configuration()
+
+----
+
+=== Reading configuration as a stream
+
+The `link:../../yardoc/VertxConfiguration/ConfigurationService.html[ConfigurationService]` provide a way to access the stream of configuration.
+It's a `link:../../yardoc/Vertx/ReadStream.html[ReadStream]` of `link:unavailable[JsonObject]`. By registering the right
+set of handlers you are notified:
+
+* when a new configuration is retrieved
+* when an error occur while retrieving a configuration
+* when the configuraiton service is close (the
+`link:../../yardoc/VertxConfiguration/ConfigurationStream.html#end_handler-instance_method[endHandler]` is called).
+
+[source, ruby]
+----
+require 'vertx/vertx'
+require 'vertx-configuration/configuration_service'
+options = {
+  'scanPeriod' => 2000,
+  'stores' => [
+    store1,
+    store2
+  ]
+}
+
+svc = VertxConfiguration::ConfigurationService.create(Vertx::Vertx.vertx(), options)
+svc.configuration_stream().end_handler() { |v|
+  # Service closed
+}.exception_handler() { |t|
+  # an error has been caught while retrieving the configuration
+}.handler() { |conf|
+  # the configuration
+}
+
 
 ----
 

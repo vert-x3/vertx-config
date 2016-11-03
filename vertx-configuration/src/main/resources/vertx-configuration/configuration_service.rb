@@ -1,4 +1,5 @@
 require 'vertx/vertx'
+require 'vertx-configuration/configuration_stream'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.ext.configuration.ConfigurationService
 module VertxConfiguration
@@ -59,9 +60,20 @@ module VertxConfiguration
     # @return [void]
     def listen
       if block_given?
-        return @j_del.java_method(:listen, [Java::IoVertxCore::Handler.java_class]).call((Proc.new { |event| yield(event != nil ? JSON.parse(event.encode) : nil) }))
+        return @j_del.java_method(:listen, [Java::IoVertxCore::Handler.java_class]).call((Proc.new { |event| yield(event != nil ? JSON.parse(event.toJson.encode) : nil) }))
       end
       raise ArgumentError, "Invalid arguments when calling listen()"
+    end
+    #  @return the stream of configurations.
+    # @return [::VertxConfiguration::ConfigurationStream]
+    def configuration_stream
+      if !block_given?
+        if @cached_configuration_stream != nil
+          return @cached_configuration_stream
+        end
+        return @cached_configuration_stream = ::Vertx::Util::Utils.safe_create(@j_del.java_method(:configurationStream, []).call(),::VertxConfiguration::ConfigurationStream)
+      end
+      raise ArgumentError, "Invalid arguments when calling configuration_stream()"
     end
   end
 end

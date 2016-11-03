@@ -18,7 +18,6 @@ public class MyMainVerticle extends AbstractVerticle {
 
   @Override
   public void start(Future<Void> future) throws Exception {
-
     configService = ConfigurationService.create(vertx,
         new ConfigurationServiceOptions()
             .setScanPeriod(500)
@@ -32,7 +31,7 @@ public class MyMainVerticle extends AbstractVerticle {
     configService.listen(conf -> {
       if (deploymentId != null) {
         vertx.undeploy(deploymentId);
-        deployMyVerticle(conf, null);
+        deployMyVerticle(conf.getNewConfiguration(), null);
       }
     });
 

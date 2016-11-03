@@ -23,6 +23,7 @@ import io.vertx.rxjava.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
+import io.vertx.ext.configuration.ConfigurationChange;
 
 /**
  * Defines a configuration service that read configuration from {@link io.vertx.rxjava.ext.configuration.spi.ConfigurationStore}
@@ -101,10 +102,24 @@ public class ConfigurationService {
    * the configuration is broadcasted.
    * @param listener the listener
    */
-  public void listen(Handler<JsonObject> listener) { 
+  public void listen(Handler<ConfigurationChange> listener) { 
     delegate.listen(listener);
   }
 
+  /**
+   * @return the stream of configurations.
+   * @return 
+   */
+  public ConfigurationStream configurationStream() { 
+    if (cached_0 != null) {
+      return cached_0;
+    }
+    ConfigurationStream ret = ConfigurationStream.newInstance(delegate.configurationStream());
+    cached_0 = ret;
+    return ret;
+  }
+
+  private ConfigurationStream cached_0;
 
   public static ConfigurationService newInstance(io.vertx.ext.configuration.ConfigurationService arg) {
     return arg != null ? new ConfigurationService(arg) : null;

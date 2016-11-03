@@ -277,8 +277,11 @@ svc.getConfiguration(json -> {
   // Initial retrieval of the configuration
 });
 
-svc.listen(updatedConfig -> {
-  // Configuration changes
+svc.listen(change -> {
+  // Previous configuration
+  JsonObject previous = change.getPreviousConfiguration();
+  // New configuration
+  JsonObject conf = change.getNewConfiguration();
 });
 ----
 
@@ -290,6 +293,37 @@ using:
 [source, java]
 ----
 JsonObject last = svc.getCachedConfiguration();
+----
+
+=== Reading configuration as a stream
+
+The `link:../../apidocs/io/vertx/ext/configuration/ConfigurationService.html[ConfigurationService]` provide a way to access the stream of configuration.
+It's a `link:../../apidocs/io/vertx/core/streams/ReadStream.html[ReadStream]` of `link:../../apidocs/io/vertx/core/json/JsonObject.html[JsonObject]`. By registering the right
+set of handlers you are notified:
+
+* when a new configuration is retrieved
+* when an error occur while retrieving a configuration
+* when the configuraiton service is close (the
+`link:../../apidocs/io/vertx/ext/configuration/ConfigurationStream.html#endHandler-io.vertx.core.Handler-[endHandler]` is called).
+
+[source, java]
+----
+ConfigurationServiceOptions options = new ConfigurationServiceOptions()
+    .setScanPeriod(2000)
+    .addStore(store1)
+    .addStore(store2);
+
+ConfigurationService svc = ConfigurationService.create(Vertx.vertx(), options);
+svc.configurationStream()
+    .endHandler(v -> {
+      // Service closed
+    })
+    .exceptionHandler(t -> {
+      // an error has been caught while retrieving the configuration
+    })
+    .handler(conf -> {
+      // the configuration
+    });
 ----
 
 === Extending the configuration service

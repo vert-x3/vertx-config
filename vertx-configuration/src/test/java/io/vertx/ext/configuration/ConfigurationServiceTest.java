@@ -74,7 +74,20 @@ public class ConfigurationServiceTest {
       ConfigurationChecker.check(service.getCachedConfiguration());
       async.complete();
     });
+  }
 
+  @Test
+  public void testLoadingWithFuture(TestContext tc) {
+    service = ConfigurationService.create(vertx,
+        addStores(new ConfigurationServiceOptions()));
+    Async async = tc.async();
+
+    service.getConfiguration().setHandler(ar -> {
+      ConfigurationChecker.check(ar);
+      assertThat(ar.result().getString("foo")).isEqualToIgnoringCase("bar");
+      ConfigurationChecker.check(service.getCachedConfiguration());
+      async.complete();
+    });
   }
 
   @Test

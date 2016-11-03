@@ -1,7 +1,10 @@
 package io.vertx.ext.configuration;
 
+import io.vertx.codegen.annotations.CacheReturn;
+import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -51,6 +54,12 @@ public interface ConfigurationService {
   void getConfiguration(Handler<AsyncResult<JsonObject>> completionHandler);
 
   /**
+   * Same as {@link #getConfiguration(Handler)}, but returning a {@link Future} object.
+   */
+  @GenIgnore
+  Future<JsonObject> getConfiguration();
+
+  /**
    * Closes the service.
    */
   void close();
@@ -68,6 +77,12 @@ public interface ConfigurationService {
    *
    * @param listener the listener
    */
-  void listen(Handler<JsonObject> listener);
+  void listen(Handler<ConfigurationChange> listener);
+
+  /**
+   * @return the stream of configurations.
+   */
+  @CacheReturn
+  ConfigurationStream configurationStream();
 
 }
