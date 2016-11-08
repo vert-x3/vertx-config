@@ -11,6 +11,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -76,6 +78,27 @@ public class ConfigurationStreamTest {
           assertThat(conf.getString("foo")).isEqualToIgnoringCase("bar");
           ConfigurationChecker.check(service.getCachedConfiguration());
           service.close();
+        });
+  }
+
+  @Test
+  public void testPauseResumeCycles(TestContext tc) {
+    service = ConfigurationService.create(vertx,
+        addStores(new ConfigurationServiceOptions()));
+    Async async = tc.async();
+    AtomicInteger steps = new AtomicInteger();
+    service.configurationStream()
+        .handler(conf -> {
+          if (steps.get() == 0) {
+            assertThat(conf.getString("foo")).isEqualToIgnoringCase("bar");
+            service.configurationStream().pause();
+            System.setProperty("foo", "bar2");
+            service.configurationStream().resume();
+            steps.incrementAndGet();
+          } else if (steps.get() == 1) {
+            assertThat(conf.getString("foo")).isEqualToIgnoringCase("bar2");
+            async.complete();
+          }
         });
   }
 

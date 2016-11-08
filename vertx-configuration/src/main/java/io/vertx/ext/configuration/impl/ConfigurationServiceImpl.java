@@ -186,6 +186,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private Handler<Throwable> exceptionHandler;
     private Handler<Void> endHandler;
 
+    private JsonObject last;
+    private boolean paused = false;
+
     @Override
     public synchronized ConfigurationStream exceptionHandler(Handler<Throwable> handler) {
       Objects.requireNonNull(handler);
@@ -208,14 +211,28 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    public ConfigurationStream pause() {
-      // Does nothing back-pressure not supported
+    public synchronized ConfigurationStream pause() {
+      paused = true;
       return this;
     }
 
     @Override
     public ConfigurationStream resume() {
-      // Does nothing back-pressure not supported
+      JsonObject conf = null;
+      Handler<JsonObject> succ;
+      synchronized (this) {
+        paused = false;
+        if (last != null) {
+          conf = last;
+          last = null;
+        }
+        succ = this.handler;
+      }
+
+      if (conf != null  && succ != null) {
+        succ.handle(conf);
+      }
+
       return this;
     }
 
@@ -228,11 +245,16 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     void handle(JsonObject conf) {
       Handler<JsonObject> succ;
+      boolean isPaused;
       synchronized (this) {
         succ = handler;
+        isPaused = paused;
+        if (paused) {
+          last = conf;
+        }
       }
 
-      if (succ != null) {
+      if (! isPaused  && succ != null) {
         succ.handle(conf);
       }
 
