@@ -54,10 +54,18 @@ public interface ConfigurationService {
   void getConfiguration(Handler<AsyncResult<JsonObject>> completionHandler);
 
   /**
-   * Same as {@link #getConfiguration(Handler)}, but returning a {@link Future} object.
+   * Same as {@link #getConfiguration(Handler)}, but returning a {@link Future} object. The result is a
+   * {@link JsonObject}. In Java, you can use {@link #getConfiguration()}.
+   */
+  <T> Future<T> getConfigurationFuture();
+
+  /**
+   * Same as {@link #getConfiguration(Handler)}, but returning a {@link Future} object. In other language (not Java),
+   * you can use {@link #getConfigurationFuture()}.
    */
   @GenIgnore
   Future<JsonObject> getConfiguration();
+
 
   /**
    * Closes the service.

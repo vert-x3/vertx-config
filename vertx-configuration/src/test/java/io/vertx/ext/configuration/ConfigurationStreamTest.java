@@ -5,9 +5,12 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.configuration.impl.spi.ConfigurationChecker;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.Repeat;
+import io.vertx.ext.unit.junit.RepeatRule;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -23,6 +26,9 @@ public class ConfigurationStreamTest {
 
   private Vertx vertx;
   private ConfigurationService service;
+
+  @Rule
+  public RepeatRule repeatRule = new RepeatRule();
 
   @Before
   public void setUp(TestContext tc) {
@@ -67,6 +73,7 @@ public class ConfigurationStreamTest {
   }
 
   @Test
+  @Repeat(10)
   public void testRetrievingTheConfigurationAndClose(TestContext tc) {
     service = ConfigurationService.create(vertx,
         addStores(new ConfigurationServiceOptions()));

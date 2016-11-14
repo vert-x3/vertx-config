@@ -26,7 +26,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
   private final List<ConfigurationProvider> providers;
   private final long scan;
   private final List<Handler<ConfigurationChange>> listeners = new ArrayList<>();
-  private final ConfigStreamImpl streamOfConfigurationChanges = new ConfigStreamImpl();
+  private final ConfigStreamImpl streamOfConfiguration = new ConfigStreamImpl();
 
   private JsonObject current = new JsonObject();
 
@@ -91,6 +91,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
       if (ar.succeeded()) {
         synchronized ((ConfigurationServiceImpl.this)) {
           current = ar.result();
+          streamOfConfiguration.handle(current);
         }
       }
       completionHandler.handle(ar);
@@ -99,6 +100,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
   @Override
   public Future<JsonObject> getConfiguration() {
+    return getConfigurationFuture();
+  }
+
+  @Override
+  public Future<JsonObject> getConfigurationFuture() {
     Future<JsonObject> future = Future.future();
     getConfiguration(future.completer());
     return future;
@@ -110,7 +116,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
       vertx.cancelTimer(scan);
     }
 
-    streamOfConfigurationChanges.close();
+    streamOfConfiguration.close();
 
     for (ConfigurationProvider provider : providers) {
       provider.close(v -> {
@@ -131,13 +137,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
   @Override
   public ConfigurationStream configurationStream() {
-    return streamOfConfigurationChanges;
+    return streamOfConfiguration;
   }
 
   private void scan() {
     compute(ar -> {
       if (ar.failed()) {
-        streamOfConfigurationChanges.fail(ar.cause());
+        streamOfConfiguration.fail(ar.cause());
         LOGGER.error("Error while scanning configuration", ar.cause());
       } else {
         synchronized (ConfigurationServiceImpl.this) {
@@ -146,7 +152,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             JsonObject prev = current;
             current = ar.result();
             listeners.forEach(l -> l.handle(new ConfigurationChange(prev, current)));
-            streamOfConfigurationChanges.handle(current);
+            streamOfConfiguration.handle(current);
           }
         }
       }
@@ -199,12 +205,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @Override
     public ConfigurationStream handler(Handler<JsonObject> handler) {
       Objects.requireNonNull(handler);
+      JsonObject conf;
       synchronized (this) {
         this.handler = handler;
+        conf = getCachedConfiguration();
       }
 
-      if (current != null && !current.isEmpty()) {
-        this.handler.handle(current);
+      if (conf != null && !conf.isEmpty()) {
+        this.handler.handle(conf);
       }
 
       return this;
@@ -229,7 +237,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         succ = this.handler;
       }
 
-      if (conf != null  && succ != null) {
+      if (conf != null && succ != null) {
         succ.handle(conf);
       }
 
@@ -254,7 +262,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
       }
 
-      if (! isPaused  && succ != null) {
+      if (!isPaused && succ != null) {
         succ.handle(conf);
       }
 
