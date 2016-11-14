@@ -17,6 +17,7 @@
 /** @module vertx-configuration-js/configuration_service */
 var utils = require('vertx-js/util/utils');
 var Vertx = require('vertx-js/vertx');
+var Future = require('vertx-js/future');
 var ConfigurationStream = require('vertx-configuration-js/configuration_stream');
 
 var io = Packages.io;
@@ -51,6 +52,21 @@ var ConfigurationService = function(j_val) {
         completionHandler(null, ar.cause());
       }
     });
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+   Same as {@link ConfigurationService#getConfiguration}, but returning a  object. The result is a
+   . In Java, you can use {@link ConfigurationService#getConfiguration}.
+
+   @public
+
+   @return {Future}
+   */
+  this.getConfigurationFuture = function() {
+    var __args = arguments;
+    if (__args.length === 0) {
+      return utils.convReturnVertxGen(j_configurationService["getConfigurationFuture()"](), Future);
     } else throw new TypeError('function invoked with invalid arguments');
   };
 

@@ -23,6 +23,7 @@ import io.vertx.groovy.core.Vertx
 import io.vertx.core.json.JsonObject
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
+import io.vertx.groovy.core.Future
 import io.vertx.ext.configuration.ConfigurationChange
 /**
  * Defines a configuration service that read configuration from {@link io.vertx.groovy.ext.configuration.spi.ConfigurationStore}
@@ -66,6 +67,15 @@ public class ConfigurationService {
         }
       }
     } : null);
+  }
+  /**
+   * Same as {@link io.vertx.groovy.ext.configuration.ConfigurationService#getConfiguration}, but returning a  object. The result is a
+   * . In Java, you can use {@link io.vertx.groovy.ext.configuration.ConfigurationService#getConfiguration}.
+   * @return 
+   */
+  public <T> Future<T> getConfigurationFuture() {
+    def ret = InternalHelper.safeCreate(delegate.getConfigurationFuture(), io.vertx.groovy.core.Future.class);
+    return ret;
   }
   /**
    * Closes the service.

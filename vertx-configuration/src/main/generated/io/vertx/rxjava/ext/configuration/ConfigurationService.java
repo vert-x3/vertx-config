@@ -23,6 +23,7 @@ import io.vertx.rxjava.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
+import io.vertx.rxjava.core.Future;
 import io.vertx.ext.configuration.ConfigurationChange;
 
 /**
@@ -79,6 +80,16 @@ public class ConfigurationService {
     io.vertx.rx.java.ObservableFuture<JsonObject> completionHandler = io.vertx.rx.java.RxHelper.observableFuture();
     getConfiguration(completionHandler.toHandler());
     return completionHandler;
+  }
+
+  /**
+   * Same as {@link io.vertx.rxjava.ext.configuration.ConfigurationService#getConfiguration}, but returning a  object. The result is a
+   * . In Java, you can use {@link io.vertx.rxjava.ext.configuration.ConfigurationService#getConfiguration}.
+   * @return 
+   */
+  public <T> Future<T> getConfigurationFuture() { 
+    Future<T> ret = Future.newInstance(delegate.getConfigurationFuture());
+    return ret;
   }
 
   /**

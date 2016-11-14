@@ -1,4 +1,5 @@
 require 'vertx/vertx'
+require 'vertx/future'
 require 'vertx-configuration/configuration_stream'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.ext.configuration.ConfigurationService
@@ -37,6 +38,15 @@ module VertxConfiguration
         return @j_del.java_method(:getConfiguration, [Java::IoVertxCore::Handler.java_class]).call((Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result != nil ? JSON.parse(ar.result.encode) : nil : nil) }))
       end
       raise ArgumentError, "Invalid arguments when calling get_configuration()"
+    end
+    #  Same as {::VertxConfiguration::ConfigurationService#get_configuration}, but returning a  object. The result is a
+    #  . In Java, you can use {::VertxConfiguration::ConfigurationService#get_configuration}.
+    # @return [::Vertx::Future]
+    def get_configuration_future
+      if !block_given?
+        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:getConfigurationFuture, []).call(),::Vertx::Future)
+      end
+      raise ArgumentError, "Invalid arguments when calling get_configuration_future()"
     end
     #  Closes the service.
     # @return [void]
