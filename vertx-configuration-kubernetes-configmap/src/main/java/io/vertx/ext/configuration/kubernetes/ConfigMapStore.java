@@ -12,6 +12,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.configuration.spi.ConfigurationStore;
 import io.vertx.ext.configuration.utils.JsonObjectHelper;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -137,6 +138,9 @@ public class ConfigMapStore implements ConfigurationStore {
   }
 
   private static Map<String, Object> asObjectMap(Map<String, String> source) {
+    if (source == null) {
+      return new HashMap<>();
+    }
     return source.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
         entry -> JsonObjectHelper.convert(entry.getValue())));
   }
