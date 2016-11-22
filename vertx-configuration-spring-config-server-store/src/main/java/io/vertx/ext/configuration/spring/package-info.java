@@ -1,7 +1,7 @@
 /**
  * = Spring Config Server Store
  *
- * The Spring Config Server Store extends the Vert.x Configuration Service and provides the
+ * The Spring Config Server Store extends the Vert.x Configuration Retriever and provides the
  * a way to retrieve configuration from a Spring Server.
  *
  * == Using the Spring Config Server Store
@@ -36,7 +36,7 @@
  * == Configuring the store
  *
  * Once added to your classpath or dependencies, you need to configure the
- * {@link io.vertx.ext.configuration.ConfigurationService} to use this store:
+ * {@link io.vertx.ext.configuration.ConfigurationRetriever} to use this store:
  *
  * [source, $lang]
  * ----

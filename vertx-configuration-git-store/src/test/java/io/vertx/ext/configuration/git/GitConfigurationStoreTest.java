@@ -4,8 +4,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.configuration.ConfigurationService;
-import io.vertx.ext.configuration.ConfigurationServiceOptions;
+import io.vertx.ext.configuration.ConfigurationRetriever;
+import io.vertx.ext.configuration.ConfigurationRetrieverOptions;
 import io.vertx.ext.configuration.ConfigurationStoreOptions;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -36,7 +36,7 @@ import static org.hamcrest.CoreMatchers.is;
 public class GitConfigurationStoreTest {
 
   private Vertx vertx;
-  private ConfigurationService service;
+  private ConfigurationRetriever retriever;
   private Git git;
   private Git bare;
   private File bareRoot;
@@ -61,8 +61,8 @@ public class GitConfigurationStoreTest {
   @After
   public void tearDown() {
     AtomicBoolean done = new AtomicBoolean();
-    if (service != null) {
-      service.close();
+    if (retriever != null) {
+      retriever.close();
     }
 
     if (git != null) {
@@ -83,13 +83,13 @@ public class GitConfigurationStoreTest {
     add(git, root, new File("src/test/resources/files/some-text.txt"), null);
     push(git);
 
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions().addStore(new
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions().addStore(new
         ConfigurationStoreOptions().setType("git").setConfig(new JsonObject()
         .put("url", bareRoot.getAbsolutePath())
         .put("path", "target/junk/work")
         .put("filesets", new JsonArray().add(new JsonObject().put("pattern", "**/*.json"))))));
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result()).isEmpty();
       async.complete();
@@ -104,13 +104,13 @@ public class GitConfigurationStoreTest {
     add(git, root, new File("src/test/resources/files/regular.json"), null);
     push(git);
 
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions().addStore(new
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions().addStore(new
         ConfigurationStoreOptions().setType("git").setConfig(new JsonObject()
         .put("url", bareRoot.getAbsolutePath())
         .put("path", "target/junk/work")
         .put("filesets", new JsonArray().add(new JsonObject().put("pattern", "*.json"))))));
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result()).isNotEmpty();
       JsonObject json = ar.result();
@@ -145,14 +145,14 @@ public class GitConfigurationStoreTest {
     add(git, root, new File("src/test/resources/files/regular.json"), null);
     push(git);
 
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions().addStore(new
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions().addStore(new
         ConfigurationStoreOptions().setType("git").setConfig(new JsonObject()
         .put("url", bareRoot.getAbsolutePath())
         .put("path", "target/junk/work")
         .put("branch", branch)
         .put("filesets", new JsonArray().add(new JsonObject().put("pattern", "*.json"))))));
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result()).isNotEmpty();
       JsonObject json = ar.result();
@@ -175,7 +175,7 @@ public class GitConfigurationStoreTest {
     add(git, root, new File("src/test/resources/files/regular.json"), null);
     push(git);
 
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions().addStore(new
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions().addStore(new
         ConfigurationStoreOptions().setType("git").setConfig(new JsonObject()
         .put("url", bareRoot.getAbsolutePath())
         .put("path", "target/junk/work")
@@ -183,7 +183,7 @@ public class GitConfigurationStoreTest {
         .put("remote", remote)
         .put("filesets", new JsonArray().add(new JsonObject().put("pattern", "*.json"))))));
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       if (ar.failed()) {
         ar.cause().printStackTrace();
       }
@@ -205,14 +205,14 @@ public class GitConfigurationStoreTest {
     add(git, root, new File("src/test/resources/files/regular.properties"), null);
     push(git);
 
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions().addStore(new
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions().addStore(new
         ConfigurationStoreOptions().setType("git").setConfig(new JsonObject()
         .put("url", bareRoot.getAbsolutePath())
         .put("path", "target/junk/work")
         .put("filesets", new JsonArray().add(new JsonObject().put("pattern", "*.properties")
             .put("format", "properties"))))));
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       if (ar.failed()) {
         ar.cause().printStackTrace();
       }
@@ -275,12 +275,12 @@ public class GitConfigurationStoreTest {
 
     Async async = tc.async();
 
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions().addStore(new
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions().addStore(new
         ConfigurationStoreOptions().setType("git").setConfig(new JsonObject()
         .put("url", bareRoot.getAbsolutePath())
         .put("path", "target/junk/do-not-exist")
         .put("filesets", new JsonArray().add(new JsonObject().put("pattern", "*.json"))))));
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result()).isNotEmpty();
       async.complete();
@@ -307,12 +307,12 @@ public class GitConfigurationStoreTest {
   public void testWithoutAnExistingRepo(TestContext tc) throws IOException, GitAPIException {
     Async async = tc.async();
 
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions().addStore(new
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions().addStore(new
         ConfigurationStoreOptions().setType("git").setConfig(new JsonObject()
         .put("url", bareRoot.getAbsolutePath())
         .put("path", "target/junk/do-not-exist")
         .put("filesets", new JsonArray().add(new JsonObject().put("pattern", "*.json"))))));
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.failed()).isTrue();
       assertThat(ar.cause().getMessage()).contains("origin", "master");
       async.complete();
@@ -326,7 +326,7 @@ public class GitConfigurationStoreTest {
     add(git, root, new File("src/test/resources/files/a.json"), "dir");
     push(git);
 
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions().addStore(new
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions().addStore(new
         ConfigurationStoreOptions().setType("git").setConfig(new JsonObject()
         .put("url", bareRoot.getAbsolutePath())
         .put("path", "target/junk/work")
@@ -335,7 +335,7 @@ public class GitConfigurationStoreTest {
             .add(new JsonObject().put("pattern", "dir/a.*son"))
         ))));
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.result().getString("key")).isEqualTo("value");
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       async.complete();
@@ -350,7 +350,7 @@ public class GitConfigurationStoreTest {
     add(git, root, new File("src/test/resources/files/a.json"), "dir");
     push(git);
 
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions().addStore(new
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions().addStore(new
         ConfigurationStoreOptions().setType("git").setConfig(new JsonObject()
         .put("url", bareRoot.getAbsolutePath())
         .put("path", "target/junk/work")
@@ -359,7 +359,7 @@ public class GitConfigurationStoreTest {
             .add(new JsonObject().put("pattern", "dir/a.*son"))
         ))));
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       assertThat(ar.result().getString("b.name")).isEqualTo("B");
       assertThat(ar.result().getString("conflict")).isEqualTo("A");
@@ -375,7 +375,7 @@ public class GitConfigurationStoreTest {
     add(git, root, new File("src/test/resources/files/a.json"), "dir");
     push(git);
 
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions().addStore(new
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions().addStore(new
         ConfigurationStoreOptions().setType("git").setConfig(new JsonObject()
         .put("url", bareRoot.getAbsolutePath())
         .put("path", "target/junk/work")
@@ -384,7 +384,7 @@ public class GitConfigurationStoreTest {
             .add(new JsonObject().put("pattern", "dir/b.json"))
         ))));
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.result().getString("conflict")).isEqualTo("B");
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       assertThat(ar.result().getString("b.name")).isEqualTo("B");
@@ -400,7 +400,7 @@ public class GitConfigurationStoreTest {
     add(git, root, new File("src/test/resources/files/a.json"), "dir");
     push(git);
 
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions().addStore(new
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions().addStore(new
         ConfigurationStoreOptions().setType("git").setConfig(new JsonObject()
         .put("url", bareRoot.getAbsolutePath())
         .put("path", "target/junk/work")
@@ -408,7 +408,7 @@ public class GitConfigurationStoreTest {
             .add(new JsonObject().put("pattern", "dir/?.*son"))
         ))));
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.result().getString("b.name")).isEqualTo("B");
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       // Alphabetical order, so B is last.
@@ -425,7 +425,7 @@ public class GitConfigurationStoreTest {
     add(git, root, new File("src/test/resources/files/a.json"), "dir");
     push(git);
 
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions().addStore(new
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions().addStore(new
         ConfigurationStoreOptions().setType("git").setConfig(new JsonObject()
         .put("url", bareRoot.getAbsolutePath())
         .put("path", "target/junk/work")
@@ -433,7 +433,7 @@ public class GitConfigurationStoreTest {
             .add(new JsonObject().put("pattern", "dir/a?*.*son"))
         ))));
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.failed());
       assertThat(ar.cause()).isInstanceOf(DecodeException.class);
       async.complete();
@@ -446,7 +446,7 @@ public class GitConfigurationStoreTest {
     add(git, root, new File("src/test/resources/files/a.json"), "dir");
     push(git);
 
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions()
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions()
         .setScanPeriod(1000)
         .addStore(new ConfigurationStoreOptions().setType("git").setConfig(new JsonObject()
             .put("url", bareRoot.getAbsolutePath())
@@ -456,7 +456,7 @@ public class GitConfigurationStoreTest {
             ))));
 
     AtomicBoolean done = new AtomicBoolean();
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       done.set(true);
@@ -466,8 +466,8 @@ public class GitConfigurationStoreTest {
     updateA();
 
     await().until(() ->
-        "A2".equals(service.getCachedConfiguration().getString("a.name"))
-            && "B".equalsIgnoreCase(service.getCachedConfiguration().getString("b.name")));
+        "A2".equals(retriever.getCachedConfiguration().getString("a.name"))
+            && "B".equalsIgnoreCase(retriever.getCachedConfiguration().getString("b.name")));
   }
 
   @Test
@@ -475,7 +475,7 @@ public class GitConfigurationStoreTest {
     add(git, root, new File("src/test/resources/files/a.json"), "dir");
     push(git);
 
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions()
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions()
         .setScanPeriod(1000)
         .addStore(new ConfigurationStoreOptions().setType("git").setConfig(new JsonObject()
             .put("url", bareRoot.getAbsolutePath())
@@ -485,7 +485,7 @@ public class GitConfigurationStoreTest {
             ))));
 
     AtomicBoolean done = new AtomicBoolean();
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       done.set(true);
@@ -503,7 +503,7 @@ public class GitConfigurationStoreTest {
         .setCommitter("clement", "clement@apache.org").call();
 
     done.set(false);
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       assertThat(ar.result().getString("added")).isEqualTo("added");
@@ -514,7 +514,7 @@ public class GitConfigurationStoreTest {
     updateA();
 
     Async async = tc.async();
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.succeeded()).isFalse();
       assertThat(ar.cause().getMessage()).contains("conflict");
       async.complete();
@@ -526,7 +526,7 @@ public class GitConfigurationStoreTest {
     add(git, root, new File("src/test/resources/files/a.json"), "dir");
     push(git);
 
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions()
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions()
         .setScanPeriod(1000)
         .addStore(new ConfigurationStoreOptions().setType("git").setConfig(new JsonObject()
             .put("url", bareRoot.getAbsolutePath())
@@ -536,7 +536,7 @@ public class GitConfigurationStoreTest {
             ))));
 
     AtomicBoolean done = new AtomicBoolean();
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       done.set(true);
@@ -550,7 +550,7 @@ public class GitConfigurationStoreTest {
     FileUtils.write(a, new JsonObject().put("a.name", "A-modified").put("conflict", "A").encodePrettily(), Charsets.UTF_8);
 
     done.set(false);
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result().getString("a.name")).isEqualTo("A-modified");
       done.set(true);
@@ -560,7 +560,7 @@ public class GitConfigurationStoreTest {
     updateA();
 
     Async async = tc.async();
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.succeeded()).isFalse();
       assertThat(ar.cause().getMessage()).contains("conflict");
       async.complete();
@@ -575,7 +575,7 @@ public class GitConfigurationStoreTest {
     add(git, root, new File("src/test/resources/files/a.json"), "dir");
     push(git);
 
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions()
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions()
         .setScanPeriod(1000)
         .addStore(new ConfigurationStoreOptions().setType("git").setConfig(new JsonObject()
             .put("url", bareRoot.getAbsolutePath())
@@ -585,7 +585,7 @@ public class GitConfigurationStoreTest {
             ))));
 
     AtomicBoolean done = new AtomicBoolean();
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       done.set(true);
@@ -595,8 +595,8 @@ public class GitConfigurationStoreTest {
     updateA();
 
     await().until(() ->
-        "A2".equals(service.getCachedConfiguration().getString("a.name"))
-            && "B".equalsIgnoreCase(service.getCachedConfiguration().getString("b.name")));
+        "A2".equals(retriever.getCachedConfiguration().getString("a.name"))
+            && "B".equalsIgnoreCase(retriever.getCachedConfiguration().getString("b.name")));
   }
 
   @Test
@@ -610,7 +610,7 @@ public class GitConfigurationStoreTest {
     add(git, root, new File("src/test/resources/files/b.json"), "dir");
     push(git);
 
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions()
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions()
         .setScanPeriod(1000)
         .addStore(new ConfigurationStoreOptions().setType("git").setConfig(new JsonObject()
             .put("url", bareRoot.getAbsolutePath())
@@ -620,7 +620,7 @@ public class GitConfigurationStoreTest {
             ))));
 
     AtomicBoolean done = new AtomicBoolean();
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       done.set(true);
@@ -630,8 +630,8 @@ public class GitConfigurationStoreTest {
     updateA();
 
     await().until(() ->
-        "A2".equals(service.getCachedConfiguration().getString("a.name"))
-            && "B".equalsIgnoreCase(service.getCachedConfiguration().getString("b.name")));
+        "A2".equals(retriever.getCachedConfiguration().getString("a.name"))
+            && "B".equalsIgnoreCase(retriever.getCachedConfiguration().getString("b.name")));
   }
 
   private void updateA() {

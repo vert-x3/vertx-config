@@ -1,20 +1,17 @@
 package io.vertx.ext.configuration.git;
 
 import io.vertx.core.Vertx;
-import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.configuration.ConfigurationService;
-import io.vertx.ext.configuration.ConfigurationServiceOptions;
+import io.vertx.ext.configuration.ConfigurationRetriever;
+import io.vertx.ext.configuration.ConfigurationRetrieverOptions;
 import io.vertx.ext.configuration.ConfigurationStoreOptions;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.Ref;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,7 +35,7 @@ public class GitConfigurationStoreWithGithubTest {
   private static final String REPO = "https://github.com/cescoffier/vertx-config-test.git";
 
   private Vertx vertx;
-  private ConfigurationService service;
+  private ConfigurationRetriever retriever;
   private Git git;
 
   private File root = new File("target/junk/repo");
@@ -58,8 +55,8 @@ public class GitConfigurationStoreWithGithubTest {
   @After
   public void tearDown() {
     AtomicBoolean done = new AtomicBoolean();
-    if (service != null) {
-      service.close();
+    if (retriever != null) {
+      retriever.close();
     }
 
     if (git != null) {
@@ -75,13 +72,13 @@ public class GitConfigurationStoreWithGithubTest {
   public void testOnMasterWithASingleFile(TestContext tc) throws GitAPIException, IOException {
     Async async = tc.async();
 
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions().addStore(new
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions().addStore(new
         ConfigurationStoreOptions().setType("git").setConfig(new JsonObject()
         .put("url", REPO)
         .put("path", "target/junk/work")
         .put("filesets", new JsonArray().add(new JsonObject().put("pattern", "a.json"))))));
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result()).isNotEmpty();
       JsonObject json = ar.result();
@@ -97,14 +94,14 @@ public class GitConfigurationStoreWithGithubTest {
   public void testOnDevWithATwoFiles(TestContext tc) throws GitAPIException, IOException {
     Async async = tc.async();
 
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions().addStore(new
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions().addStore(new
         ConfigurationStoreOptions().setType("git").setConfig(new JsonObject()
         .put("url", REPO)
         .put("path", "target/junk/work")
         .put("branch", "dev")
         .put("filesets", new JsonArray().add(new JsonObject().put("pattern", "*.json"))))));
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result()).isNotEmpty();
       JsonObject json = ar.result();

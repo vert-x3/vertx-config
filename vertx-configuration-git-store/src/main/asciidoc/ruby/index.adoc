@@ -1,6 +1,6 @@
 = Git Configuration Store
 
-The Git Configuration Store is an extension to the Vert.x Configuration Service to
+The Git Configuration Store is an extension to the Vert.x Configuration Retriever to
 retrieve configuration from a Git repository.
 
 == Using the Git Configuration Store
@@ -35,11 +35,11 @@ compile 'me.escoffier.vertx:vertx-configuration-git-store:1.0.0-SNAPSHOT'
 == Configuring the store
 
 Once added to your classpath or dependencies, you need to configure the
-`link:../../yardoc/VertxConfiguration/ConfigurationService.html[ConfigurationService]` to use this store:
+`link:../../yardoc/VertxConfiguration/ConfigurationRetriever.html[ConfigurationRetriever]` to use this store:
 
 [source, ruby]
 ----
-require 'vertx-configuration/configuration_service'
+require 'vertx-configuration/configuration_retriever'
 
 git = {
   'type' => "git",
@@ -54,7 +54,7 @@ git = {
   }
 }
 
-svc = VertxConfiguration::ConfigurationService.create(vertx, {
+retriever = VertxConfiguration::ConfigurationRetriever.create(vertx, {
   'stores' => [
     git
   ]

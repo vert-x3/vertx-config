@@ -1,7 +1,7 @@
 /**
  * = Redis Configuration Store
  *
- * The Redis Configuration Store extends the Vert.x Configuration Service and provides the
+ * The Redis Configuration Store extends the Vert.x Configuration Retriever and provides the
  * way to retrieve configuration from a Redis server.
  *
  * == Using the Redis Configuration Store
@@ -36,7 +36,7 @@
  * == Configuring the store
  *
  * Once added to your classpath or dependencies, you need to configure the
- * {@link io.vertx.ext.configuration.ConfigurationService} to use this store:
+ * {@link io.vertx.ext.configuration.ConfigurationRetriever} to use this store:
  *
  * [source, $lang]
  * ----

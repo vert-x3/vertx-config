@@ -1,10 +1,9 @@
 package io.vertx.ext.configuration.impl.spi;
 
 import io.vertx.core.Vertx;
-import io.vertx.core.file.FileSystemException;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.configuration.ConfigurationService;
-import io.vertx.ext.configuration.ConfigurationServiceOptions;
+import io.vertx.ext.configuration.ConfigurationRetriever;
+import io.vertx.ext.configuration.ConfigurationRetrieverOptions;
 import io.vertx.ext.configuration.ConfigurationStoreOptions;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -22,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(VertxUnitRunner.class)
 public class RawProcessorTest {
 
-  ConfigurationService service;
+  ConfigurationRetriever retriever;
   private Vertx vertx;
 
   @Before
@@ -34,15 +33,15 @@ public class RawProcessorTest {
 
   @After
   public void tearDown() {
-    service.close();
+    retriever.close();
     vertx.close();
   }
 
   @Test
   public void testWithFiles(TestContext tc) {
     Async async = tc.async();
-    service = ConfigurationService.create(vertx,
-        new ConfigurationServiceOptions()
+    retriever = ConfigurationRetriever.create(vertx,
+        new ConfigurationRetrieverOptions()
             .addStore(
                 new ConfigurationStoreOptions()
                     .setType("file")
@@ -62,7 +61,7 @@ public class RawProcessorTest {
             )
     );
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.result()).isNotNull().isNotEmpty();
       assertThat(ar.result().getString("username")).isEqualTo("admin");
       assertThat(ar.result().getString("pwd")).isEqualTo("c2VjcmV0");
@@ -73,8 +72,8 @@ public class RawProcessorTest {
   @Test
   public void testWithJson(TestContext tc) {
     Async async = tc.async();
-    service = ConfigurationService.create(vertx,
-        new ConfigurationServiceOptions()
+    retriever = ConfigurationRetriever.create(vertx,
+        new ConfigurationRetrieverOptions()
             .addStore(
                 new ConfigurationStoreOptions()
                     .setType("file")
@@ -86,7 +85,7 @@ public class RawProcessorTest {
                             .put("raw.key", "some-json")))
     );
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.result()).isNotNull().isNotEmpty();
       assertThat(ar.result().getJsonObject("some-json").encode()).contains("foo", "bar", "num", "1");
       async.complete();
@@ -96,8 +95,8 @@ public class RawProcessorTest {
   @Test
   public void testWithJsonArray(TestContext tc) {
     Async async = tc.async();
-    service = ConfigurationService.create(vertx,
-        new ConfigurationServiceOptions()
+    retriever = ConfigurationRetriever.create(vertx,
+        new ConfigurationRetrieverOptions()
             .addStore(
                 new ConfigurationStoreOptions()
                     .setType("file")
@@ -109,7 +108,7 @@ public class RawProcessorTest {
                             .put("raw.key", "some-json")))
     );
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.result()).isNotNull().isNotEmpty();
       assertThat(ar.result().getJsonArray("some-json").encode()).contains("1", "2", "3");
       async.complete();
@@ -119,8 +118,8 @@ public class RawProcessorTest {
   @Test
   public void testWithBinary(TestContext tc) {
     Async async = tc.async();
-    service = ConfigurationService.create(vertx,
-        new ConfigurationServiceOptions()
+    retriever = ConfigurationRetriever.create(vertx,
+        new ConfigurationRetrieverOptions()
             .addStore(
                 new ConfigurationStoreOptions()
                     .setType("file")
@@ -132,7 +131,7 @@ public class RawProcessorTest {
                             .put("raw.key", "logo")))
     );
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.result()).isNotNull().isNotEmpty();
       assertThat(ar.result().getBinary("logo")).isNotEmpty();
       async.complete();
@@ -142,8 +141,8 @@ public class RawProcessorTest {
   @Test
   public void testWithMissingKey(TestContext tc) {
     Async async = tc.async();
-    service = ConfigurationService.create(vertx,
-        new ConfigurationServiceOptions()
+    retriever = ConfigurationRetriever.create(vertx,
+        new ConfigurationRetrieverOptions()
             .addStore(
                 new ConfigurationStoreOptions()
                     .setType("file")
@@ -154,7 +153,7 @@ public class RawProcessorTest {
                             .put("raw.type", "binary")))
     );
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.failed());
       assertThat(ar.cause().getMessage()).contains("raw.key");
       async.complete();
@@ -164,8 +163,8 @@ public class RawProcessorTest {
   @Test
   public void testWithUnrecognizedType(TestContext tc) {
     Async async = tc.async();
-    service = ConfigurationService.create(vertx,
-        new ConfigurationServiceOptions()
+    retriever = ConfigurationRetriever.create(vertx,
+        new ConfigurationRetrieverOptions()
             .addStore(
                 new ConfigurationStoreOptions()
                     .setType("file")
@@ -177,7 +176,7 @@ public class RawProcessorTest {
                             .put("raw.type", "not a valid type")))
     );
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.failed());
       assertThat(ar.cause().getMessage()).contains("raw.type");
       async.complete();
@@ -187,8 +186,8 @@ public class RawProcessorTest {
   @Test
   public void testWithBrokenJson(TestContext tc) {
     Async async = tc.async();
-    service = ConfigurationService.create(vertx,
-        new ConfigurationServiceOptions()
+    retriever = ConfigurationRetriever.create(vertx,
+        new ConfigurationRetrieverOptions()
             .addStore(
                 new ConfigurationStoreOptions()
                     .setType("file")
@@ -200,7 +199,7 @@ public class RawProcessorTest {
                             .put("raw.key", "some-json")))
     );
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.failed());
       assertThat(ar.cause().getMessage()).contains("'admin'");
       async.complete();

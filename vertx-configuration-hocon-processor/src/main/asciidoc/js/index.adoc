@@ -1,6 +1,6 @@
 = Hocon Configuration Format
 
-The Hocon Configuration Format extends the Vert.x Configuration Service and provides the
+The Hocon Configuration Format extends the Vert.x Configuration Retriever and provides the
 support for the HOCON(https://github.com/typesafehub/config/blob/master/HOCON.md) format.
 
 It supports includes, json, properties, macros...
@@ -37,11 +37,11 @@ compile 'me.escoffier.vertx:vertx-configuration-hocon-processor:1.0.0-SNAPSHOT'
 == Configuring the store to use HOCON
 
 Once added to your classpath or dependencies, you need to configure the
-`link:../../jsdoc/module-vertx-configuration-js_configuration_service-ConfigurationService.html[ConfigurationService]` to use this format:
+`link:../../jsdoc/module-vertx-configuration-js_configuration_retriever-ConfigurationRetriever.html[ConfigurationRetriever]` to use this format:
 
 [source, js]
 ----
-var ConfigurationService = require("vertx-configuration-js/configuration_service");
+var ConfigurationRetriever = require("vertx-configuration-js/configuration_retriever");
 var store = {
   "type" : "file",
   "config" : {
@@ -50,7 +50,7 @@ var store = {
   }
 };
 
-var svc = ConfigurationService.create(vertx, {
+var retriever = ConfigurationRetriever.create(vertx, {
   "stores" : [
     store
   ]

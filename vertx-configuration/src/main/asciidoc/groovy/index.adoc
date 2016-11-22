@@ -1,6 +1,6 @@
-= Vert.x Configuration Service
+= Vert.x Configuration Retriever
 
-The Vert.x Configuration service provides a way to configure your Vert.x application.
+The Vert.x Configuration retriever provides a way to configure your Vert.x application.
 
 It:
 
@@ -13,18 +13,18 @@ It:
 
 == Concepts
 
-The configuration service is structured around:
+The configuration retriever is structured around:
 
-* a **configuration service** instantiated and used by the Vert.x application. It
+* a **Configuration Retriever** instantiated and used by the Vert.x application. It
 configures a set of configuration store
 * **configuration store** defines a location from where the configuration data is read
 and and a syntax (json by default)
 
 The configuration is retrieved as a JSON Object.
 
-== Using the Vert.x Configuration Service
+== Using the Vert.x Configuration Retriever
 
-To use the Vert.x Configuration Service, add the following dependency to the
+To use the Vert.x Configuration Retriever, add the following dependency to the
 _dependencies_ section of your build descriptor:
 
 * Maven (in your `pom.xml`):
@@ -45,16 +45,16 @@ _dependencies_ section of your build descriptor:
 compile 'me.escoffier.vertx:vertx-configuration:1.0.0-SNAPSHOT'
 ----
 
-Once done, you first need to instantiate the `link:../../apidocs/io/vertx/ext/configuration/ConfigurationService.html[ConfigurationService]`:
+Once done, you first need to instantiate the `link:../../apidocs/io/vertx/ext/configuration/ConfigurationRetriever.html[ConfigurationRetriever]`:
 
 [source]
 ----
-import io.vertx.ext.configuration.ConfigurationService
-def svc = ConfigurationService.create(vertx)
+import io.vertx.ext.configuration.ConfigurationRetriever
+def retriever = ConfigurationRetriever.create(vertx)
 
 ----
 
-By default the Vert.x Configuration Service is configured with the following stores (in
+By default the Vert.x Configuration Retriever is configured with the following stores (in
 this order):
 
 * The Vert.x verticle `config()`
@@ -66,7 +66,7 @@ You can configure your own stores:
 
 [source]
 ----
-import io.vertx.ext.configuration.ConfigurationService
+import io.vertx.ext.configuration.ConfigurationRetriever
 def httpStore = [
   type:"http",
   config:[
@@ -96,18 +96,18 @@ def options = [
   ]
 ]
 
-def svc = ConfigurationService.create(vertx, options)
+def retriever = ConfigurationRetriever.create(vertx, options)
 
 ----
 
 More details about the overloading rules and available stores are available below.
 
-Once you have the instance of the Vert.x Configuration Service, retrieve the configuration
+Once you have the instance of the Vert.x Configuration Retriever, _retrieve_ the configuration
 as follows:
 
 [source]
 ----
-svc.getConfiguration({ ar ->
+retriever.getConfiguration({ ar ->
   if (ar.failed()) {
     // Failed to retrieve the configuration
   } else {
@@ -134,7 +134,7 @@ If you declare them in the reverse order (B, A), you would get: * `{a:value, b:1
 
 === Available configuration stores
 
-The Vert.x Configuration Service provides a set of configuration store and format.
+The Vert.x Configuration Retriever provides a set of configuration store and format.
 Some more are available as extension and you can implement your own.
 
 ==== Structure of the configuration
@@ -310,14 +310,14 @@ def dir = [
 
 === Listening for configuration changes
 
-The configuration service periodically retrieve the configuration and if the outcome
+The Configuration Retriever periodically retrieve the configuration and if the outcome
 is different from the current one, your application can be reconfigured. By default the
 configuration is reloaded every 5 seconds.
 
 [source, groovy]
 ----
 import io.vertx.core.Vertx
-import io.vertx.ext.configuration.ConfigurationService
+import io.vertx.ext.configuration.ConfigurationRetriever
 def options = [
   scanPeriod:2000,
   stores:[
@@ -326,12 +326,12 @@ def options = [
   ]
 ]
 
-def svc = ConfigurationService.create(Vertx.vertx(), options)
-svc.getConfiguration({ json ->
+def retriever = ConfigurationRetriever.create(Vertx.vertx(), options)
+retriever.getConfiguration({ json ->
   // Initial retrieval of the configuration
 })
 
-svc.listen({ change ->
+retriever.listen({ change ->
   // Previous configuration
   def previous = change.previousConfiguration
   // New configuration
@@ -347,25 +347,25 @@ using:
 
 [source, groovy]
 ----
-def last = svc.getCachedConfiguration()
+def last = retriever.getCachedConfiguration()
 
 ----
 
 === Reading configuration as a stream
 
-The `link:../../apidocs/io/vertx/ext/configuration/ConfigurationService.html[ConfigurationService]` provide a way to access the stream of configuration.
+The `link:../../apidocs/io/vertx/ext/configuration/ConfigurationRetriever.html[ConfigurationRetriever]` provide a way to access the stream of configuration.
 It's a `link:../../apidocs/io/vertx/core/streams/ReadStream.html[ReadStream]` of `link:../../apidocs/io/vertx/core/json/JsonObject.html[JsonObject]`. By registering the right
 set of handlers you are notified:
 
 * when a new configuration is retrieved
 * when an error occur while retrieving a configuration
-* when the configuraiton service is close (the
+* when the configuration retriever is closed (the
 `link:../../apidocs/io/vertx/ext/configuration/ConfigurationStream.html#endHandler-io.vertx.core.Handler-[endHandler]` is called).
 
 [source, groovy]
 ----
 import io.vertx.core.Vertx
-import io.vertx.ext.configuration.ConfigurationService
+import io.vertx.ext.configuration.ConfigurationRetriever
 def options = [
   scanPeriod:2000,
   stores:[
@@ -374,9 +374,9 @@ def options = [
   ]
 ]
 
-def svc = ConfigurationService.create(Vertx.vertx(), options)
-svc.configurationStream().endHandler({ v ->
-  // Service closed
+def retriever = ConfigurationRetriever.create(Vertx.vertx(), options)
+retriever.configurationStream().endHandler({ v ->
+  // retriever closed
 }).exceptionHandler({ t ->
   // an error has been caught while retrieving the configuration
 }).handler({ conf ->
@@ -386,7 +386,7 @@ svc.configurationStream().endHandler({ v ->
 
 ----
 
-=== Extending the configuration service
+=== Extending the Configuration Retriever
 
 You can extend the configuration by implementing:
 

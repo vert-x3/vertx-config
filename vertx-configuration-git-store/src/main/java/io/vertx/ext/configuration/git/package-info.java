@@ -1,7 +1,7 @@
 /**
  * = Git Configuration Store
  *
- * The Git Configuration Store is an extension to the Vert.x Configuration Service to
+ * The Git Configuration Store is an extension to the Vert.x Configuration Retriever to
  * retrieve configuration from a Git repository.
  *
  * == Using the Git Configuration Store
@@ -36,7 +36,7 @@
  * == Configuring the store
  *
  * Once added to your classpath or dependencies, you need to configure the
- * {@link io.vertx.ext.configuration.ConfigurationService} to use this store:
+ * {@link io.vertx.ext.configuration.ConfigurationRetriever} to use this store:
  *
  * [source, $lang]
  * ----

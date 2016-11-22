@@ -1,6 +1,6 @@
 = Spring Config Server Store
 
-The Spring Config Server Store extends the Vert.x Configuration Service and provides the
+The Spring Config Server Store extends the Vert.x Configuration Retriever and provides the
 a way to retrieve configuration from a Spring Server.
 
 == Using the Spring Config Server Store
@@ -35,11 +35,11 @@ compile 'me.escoffier.vertx:vertx-configuration-spring-config-server-store:1.0.0
 == Configuring the store
 
 Once added to your classpath or dependencies, you need to configure the
-`link:../../apidocs/io/vertx/ext/configuration/ConfigurationService.html[ConfigurationService]` to use this store:
+`link:../../apidocs/io/vertx/ext/configuration/ConfigurationRetriever.html[ConfigurationRetriever]` to use this store:
 
 [source, groovy]
 ----
-import io.vertx.ext.configuration.ConfigurationService
+import io.vertx.ext.configuration.ConfigurationRetriever
 def store = [
   type:"spring-config-server",
   config:[
@@ -47,7 +47,7 @@ def store = [
   ]
 ]
 
-def svc = ConfigurationService.create(vertx, [
+def retriever = ConfigurationRetriever.create(vertx, [
   stores:[
     store
   ]

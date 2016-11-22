@@ -1,6 +1,6 @@
 = Redis Configuration Store
 
-The Redis Configuration Store extends the Vert.x Configuration Service and provides the
+The Redis Configuration Store extends the Vert.x Configuration Retriever and provides the
 way to retrieve configuration from a Redis server.
 
 == Using the Redis Configuration Store
@@ -35,7 +35,7 @@ compile 'me.escoffier.vertx:vertx-configuration-redis-store:1.0.0-SNAPSHOT'
 == Configuring the store
 
 Once added to your classpath or dependencies, you need to configure the
-`link:../../apidocs/io/vertx/ext/configuration/ConfigurationService.html[ConfigurationService]` to use this store:
+`link:../../apidocs/io/vertx/ext/configuration/ConfigurationRetriever.html[ConfigurationRetriever]` to use this store:
 
 [source, java]
 ----
@@ -47,8 +47,8 @@ ConfigurationStoreOptions store = new ConfigurationStoreOptions()
         .put("key", "my-configuration")
     );
 
-ConfigurationService svc = ConfigurationService.create(vertx,
-    new ConfigurationServiceOptions().addStore(store));
+ConfigurationRetriever retriever = ConfigurationRetriever.create(vertx,
+    new ConfigurationRetrieverOptions().addStore(store));
 ----
 
 The store configuration is used to create an instance of

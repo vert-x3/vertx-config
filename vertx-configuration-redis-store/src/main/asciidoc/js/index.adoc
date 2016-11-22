@@ -1,6 +1,6 @@
 = Redis Configuration Store
 
-The Redis Configuration Store extends the Vert.x Configuration Service and provides the
+The Redis Configuration Store extends the Vert.x Configuration Retriever and provides the
 way to retrieve configuration from a Redis server.
 
 == Using the Redis Configuration Store
@@ -35,11 +35,11 @@ compile 'me.escoffier.vertx:vertx-configuration-redis-store:1.0.0-SNAPSHOT'
 == Configuring the store
 
 Once added to your classpath or dependencies, you need to configure the
-`link:../../jsdoc/module-vertx-configuration-js_configuration_service-ConfigurationService.html[ConfigurationService]` to use this store:
+`link:../../jsdoc/module-vertx-configuration-js_configuration_retriever-ConfigurationRetriever.html[ConfigurationRetriever]` to use this store:
 
 [source, js]
 ----
-var ConfigurationService = require("vertx-configuration-js/configuration_service");
+var ConfigurationRetriever = require("vertx-configuration-js/configuration_retriever");
 var store = {
   "type" : "redis",
   "config" : {
@@ -49,7 +49,7 @@ var store = {
   }
 };
 
-var svc = ConfigurationService.create(vertx, {
+var retriever = ConfigurationRetriever.create(vertx, {
   "stores" : [
     store
   ]

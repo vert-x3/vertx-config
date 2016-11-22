@@ -2,8 +2,8 @@ package io.vertx.ext.configuration.spring;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.configuration.ConfigurationService;
-import io.vertx.ext.configuration.ConfigurationServiceOptions;
+import io.vertx.ext.configuration.ConfigurationRetriever;
+import io.vertx.ext.configuration.ConfigurationRetrieverOptions;
 import io.vertx.ext.configuration.ConfigurationStoreOptions;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -25,7 +25,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 @RunWith(VertxUnitRunner.class)
 public class SpringConfigServerStoreTest {
 
-  private ConfigurationService service;
+  private ConfigurationRetriever retriever;
   private Vertx vertx;
   private static ConfigurableApplicationContext springConfigServer;
 
@@ -51,21 +51,21 @@ public class SpringConfigServerStoreTest {
 
   @After
   public void tearDown() {
-    service.close();
+    retriever.close();
     vertx.close();
   }
 
   @Test
   public void testWithFooDev(TestContext tc) {
     Async async = tc.async();
-    service = ConfigurationService.create(vertx,
-        new ConfigurationServiceOptions().addStore(
+    retriever = ConfigurationRetriever.create(vertx,
+        new ConfigurationRetrieverOptions().addStore(
             new ConfigurationStoreOptions()
                 .setType("spring-config-server")
                 .setConfig(new JsonObject().put("url", "http://localhost:8888/foo/development"))));
 
 
-    service.getConfiguration(json -> {
+    retriever.getConfiguration(json -> {
       System.out.println(json.result().encodePrettily());
       assertThat(json.succeeded()).isTrue();
       JsonObject config = json.result();
@@ -82,8 +82,8 @@ public class SpringConfigServerStoreTest {
   @Test
   public void testWithStoresCloud(TestContext tc) {
     Async async = tc.async();
-    service = ConfigurationService.create(vertx,
-        new ConfigurationServiceOptions().addStore(
+    retriever = ConfigurationRetriever.create(vertx,
+        new ConfigurationRetrieverOptions().addStore(
             new ConfigurationStoreOptions()
                 .setType("spring-config-server")
                 .setConfig(new JsonObject()
@@ -91,7 +91,7 @@ public class SpringConfigServerStoreTest {
                     .put("timeout", 10000))));
 
 
-    service.getConfiguration(json -> {
+    retriever.getConfiguration(json -> {
       assertThat(json.succeeded()).isTrue();
       JsonObject config = json.result();
 
@@ -110,8 +110,8 @@ public class SpringConfigServerStoreTest {
   @Test
   public void testWithUnknownConfiguration(TestContext tc) {
     Async async = tc.async();
-    service = ConfigurationService.create(vertx,
-        new ConfigurationServiceOptions().addStore(
+    retriever = ConfigurationRetriever.create(vertx,
+        new ConfigurationRetrieverOptions().addStore(
             new ConfigurationStoreOptions()
                 .setType("spring-config-server")
                 .setConfig(new JsonObject()
@@ -119,7 +119,7 @@ public class SpringConfigServerStoreTest {
                     .put("timeout", 10000))));
 
 
-    service.getConfiguration(json -> {
+    retriever.getConfiguration(json -> {
       assertThat(json.succeeded()).isTrue();
       JsonObject config = json.result();
       assertThat(config.getString("eureka.client.serviceUrl.defaultZone"))
@@ -131,8 +131,8 @@ public class SpringConfigServerStoreTest {
   @Test
   public void testWithErrorConfiguration(TestContext tc) {
     Async async = tc.async();
-    service = ConfigurationService.create(vertx,
-        new ConfigurationServiceOptions().addStore(
+    retriever = ConfigurationRetriever.create(vertx,
+        new ConfigurationRetrieverOptions().addStore(
             new ConfigurationStoreOptions()
                 .setType("spring-config-server")
                 .setConfig(new JsonObject()
@@ -140,7 +140,7 @@ public class SpringConfigServerStoreTest {
                     .put("timeout", 10000))));
 
 
-    service.getConfiguration(json -> {
+    retriever.getConfiguration(json -> {
       assertThat(json.succeeded()).isFalse();
       async.complete();
     });
@@ -149,8 +149,8 @@ public class SpringConfigServerStoreTest {
   @Test
   public void testWithWrongServerConfiguration(TestContext tc) {
     Async async = tc.async();
-    service = ConfigurationService.create(vertx,
-        new ConfigurationServiceOptions().addStore(
+    retriever = ConfigurationRetriever.create(vertx,
+        new ConfigurationRetrieverOptions().addStore(
             new ConfigurationStoreOptions()
                 .setType("spring-config-server")
                 .setConfig(new JsonObject()
@@ -158,7 +158,7 @@ public class SpringConfigServerStoreTest {
                     .put("timeout", 10000))));
 
 
-    service.getConfiguration(json -> {
+    retriever.getConfiguration(json -> {
       assertThat(json.succeeded()).isFalse();
       async.complete();
     });

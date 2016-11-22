@@ -5,8 +5,8 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.configuration.ConfigurationService;
-import io.vertx.ext.configuration.ConfigurationServiceOptions;
+import io.vertx.ext.configuration.ConfigurationRetriever;
+import io.vertx.ext.configuration.ConfigurationRetrieverOptions;
 import io.vertx.ext.configuration.ConfigurationStoreOptions;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -31,7 +31,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @RunWith(VertxUnitRunner.class)
 public class RedisConfigurationStoreTest {
 
-  private ConfigurationService service;
+  private ConfigurationRetriever retriever;
   private Vertx vertx;
   private RedisServer redisServer;
   private RedisClient testRedisClient;
@@ -52,7 +52,7 @@ public class RedisConfigurationStoreTest {
 
   @After
   public void tearDown(TestContext tc) {
-    service.close();
+    retriever.close();
     testRedisClient.close(tc.asyncAssertSuccess());
     vertx.close(tc.asyncAssertSuccess());
     redisServer.stop();
@@ -61,8 +61,8 @@ public class RedisConfigurationStoreTest {
   @Test
   public void getWithDefaultKey(TestContext tc) throws Exception {
     Async async = tc.async();
-    service = ConfigurationService.create(vertx,
-        new ConfigurationServiceOptions().addStore(
+    retriever = ConfigurationRetriever.create(vertx,
+        new ConfigurationRetrieverOptions().addStore(
             new ConfigurationStoreOptions()
                 .setType("redis")
                 .setConfig(new JsonObject()
@@ -70,7 +70,7 @@ public class RedisConfigurationStoreTest {
                     .put("port", 6379))));
 
 
-    service.getConfiguration(json -> {
+    retriever.getConfiguration(json -> {
       assertThat(json.succeeded()).isTrue();
       JsonObject config = json.result();
       tc.assertTrue(config.isEmpty());
@@ -78,7 +78,7 @@ public class RedisConfigurationStoreTest {
       writeSomeConf("configuration", ar -> {
         tc.assertTrue(ar.succeeded());
 
-        service.getConfiguration(json2 -> {
+        retriever.getConfiguration(json2 -> {
           assertThat(json2.succeeded()).isTrue();
           JsonObject config2 = json2.result();
           tc.assertTrue(!config2.isEmpty());
@@ -93,8 +93,8 @@ public class RedisConfigurationStoreTest {
   @Test
   public void getWithConfiguredKey(TestContext tc) throws Exception {
     Async async = tc.async();
-    service = ConfigurationService.create(vertx,
-        new ConfigurationServiceOptions().addStore(
+    retriever = ConfigurationRetriever.create(vertx,
+        new ConfigurationRetrieverOptions().addStore(
             new ConfigurationStoreOptions()
                 .setType("redis")
                 .setConfig(new JsonObject()
@@ -103,7 +103,7 @@ public class RedisConfigurationStoreTest {
                     .put("port", 6379))));
 
 
-    service.getConfiguration(json -> {
+    retriever.getConfiguration(json -> {
       assertThat(json.succeeded()).isTrue();
       JsonObject config = json.result();
       tc.assertTrue(config.isEmpty());
@@ -111,7 +111,7 @@ public class RedisConfigurationStoreTest {
       writeSomeConf("my-config", ar -> {
         tc.assertTrue(ar.succeeded());
 
-        service.getConfiguration(json2 -> {
+        retriever.getConfiguration(json2 -> {
           assertThat(json2.succeeded()).isTrue();
           JsonObject config2 = json2.result();
           tc.assertTrue(!config2.isEmpty());

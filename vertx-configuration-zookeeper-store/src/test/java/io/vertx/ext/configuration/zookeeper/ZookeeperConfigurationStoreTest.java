@@ -2,8 +2,8 @@ package io.vertx.ext.configuration.zookeeper;
 
 import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.configuration.ConfigurationService;
-import io.vertx.ext.configuration.ConfigurationServiceOptions;
+import io.vertx.ext.configuration.ConfigurationRetriever;
+import io.vertx.ext.configuration.ConfigurationRetrieverOptions;
 import io.vertx.ext.configuration.ConfigurationStoreOptions;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -31,7 +31,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @RunWith(VertxUnitRunner.class)
 public class ZookeeperConfigurationStoreTest {
 
-  private ConfigurationService service;
+  private ConfigurationRetriever retriever;
   private Vertx vertx;
   private TestingServer server;
   private CuratorFramework client;
@@ -50,7 +50,7 @@ public class ZookeeperConfigurationStoreTest {
 
   @After
   public void tearDown(TestContext tc) throws IOException {
-    service.close();
+    retriever.close();
     client.close();
     vertx.close(tc.asyncAssertSuccess());
     server.close();
@@ -59,8 +59,8 @@ public class ZookeeperConfigurationStoreTest {
   @Test
   public void getConfigurationFromZookeeper(TestContext tc) throws Exception {
     Async async = tc.async();
-    service = ConfigurationService.create(vertx,
-        new ConfigurationServiceOptions().addStore(
+    retriever = ConfigurationRetriever.create(vertx,
+        new ConfigurationRetrieverOptions().addStore(
             new ConfigurationStoreOptions()
                 .setType("zookeeper")
                 .setConfig(new JsonObject()
@@ -68,7 +68,7 @@ public class ZookeeperConfigurationStoreTest {
                     .put("path", "/config/A"))));
 
 
-    service.getConfiguration(json -> {
+    retriever.getConfiguration(json -> {
       assertThat(json.succeeded()).isTrue();
       JsonObject config = json.result();
       tc.assertTrue(config.isEmpty());
@@ -76,7 +76,7 @@ public class ZookeeperConfigurationStoreTest {
       writeSomeConf("/config/A", true, ar -> {
         tc.assertTrue(ar.succeeded());
 
-        service.getConfiguration(json2 -> {
+        retriever.getConfiguration(json2 -> {
           assertThat(json2.succeeded()).isTrue();
           JsonObject config2 = json2.result();
           tc.assertTrue(!config2.isEmpty());
@@ -93,15 +93,15 @@ public class ZookeeperConfigurationStoreTest {
     Async async = tc.async();
 
     writeSomeConf("/config/A", true, ar -> {
-      service = ConfigurationService.create(vertx,
-          new ConfigurationServiceOptions().addStore(
+      retriever = ConfigurationRetriever.create(vertx,
+          new ConfigurationRetrieverOptions().addStore(
               new ConfigurationStoreOptions()
                   .setType("zookeeper")
                   .setConfig(new JsonObject()
                       .put("connection", server.getConnectString())
                       .put("path", "/config/A"))));
 
-      service.getConfiguration(json2 -> {
+      retriever.getConfiguration(json2 -> {
         assertThat(json2.succeeded()).isTrue();
         JsonObject config2 = json2.result();
         tc.assertTrue(!config2.isEmpty());
@@ -109,7 +109,7 @@ public class ZookeeperConfigurationStoreTest {
 
         // Update the conf
         writeSomeConf("/config/A", false, update -> {
-          service.getConfiguration(json3 -> {
+          retriever.getConfiguration(json3 -> {
             assertThat(json3.succeeded()).isTrue();
             JsonObject config3 = json3.result();
             tc.assertTrue(!config3.isEmpty());
@@ -117,7 +117,7 @@ public class ZookeeperConfigurationStoreTest {
 
             // Delete
             delete("/config/A", deletion -> {
-              service.getConfiguration(json4 -> {
+              retriever.getConfiguration(json4 -> {
                 assertThat(json4.succeeded()).isTrue();
                 JsonObject config4 = json4.result();
                 tc.assertTrue(config4.isEmpty());

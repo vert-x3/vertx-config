@@ -10,7 +10,7 @@ import java.util.List;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 @DataObject(generateConverter = true)
-public class ConfigurationServiceOptions {
+public class ConfigurationRetrieverOptions {
 
   private static final long SCAN_PERIOD_DEFAULT = 5000L;
 
@@ -18,22 +18,22 @@ public class ConfigurationServiceOptions {
 
   private List<ConfigurationStoreOptions> stores = new ArrayList<>();
 
-  public ConfigurationServiceOptions() {
+  public ConfigurationRetrieverOptions() {
     // Empty constructor
   }
 
-  public ConfigurationServiceOptions(ConfigurationServiceOptions other) {
+  public ConfigurationRetrieverOptions(ConfigurationRetrieverOptions other) {
     this.scanPeriod = other.scanPeriod;
     this.stores = other.stores;
   }
 
-  public ConfigurationServiceOptions(JsonObject json) {
-    ConfigurationServiceOptionsConverter.fromJson(json, this);
+  public ConfigurationRetrieverOptions(JsonObject json) {
+    ConfigurationRetrieverOptionsConverter.fromJson(json, this);
   }
 
   public JsonObject toJson() {
     JsonObject json = new JsonObject();
-    ConfigurationServiceOptionsConverter.toJson(this, json);
+    ConfigurationRetrieverOptionsConverter.toJson(this, json);
     return json;
   }
 
@@ -41,7 +41,7 @@ public class ConfigurationServiceOptions {
     return scanPeriod;
   }
 
-  public ConfigurationServiceOptions setScanPeriod(long scanPeriod) {
+  public ConfigurationRetrieverOptions setScanPeriod(long scanPeriod) {
     this.scanPeriod = scanPeriod;
     return this;
   }
@@ -50,7 +50,7 @@ public class ConfigurationServiceOptions {
     return stores;
   }
 
-  public ConfigurationServiceOptions setStores(List<ConfigurationStoreOptions> stores) {
+  public ConfigurationRetrieverOptions setStores(List<ConfigurationStoreOptions> stores) {
     if (stores == null) {
       this.stores = new ArrayList<>();
     } else {
@@ -59,7 +59,7 @@ public class ConfigurationServiceOptions {
     return this;
   }
 
-  public ConfigurationServiceOptions addStore(ConfigurationStoreOptions options) {
+  public ConfigurationRetrieverOptions addStore(ConfigurationStoreOptions options) {
     getStores().add(options);
     return this;
   }

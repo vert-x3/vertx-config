@@ -1,6 +1,6 @@
 = Redis Configuration Store
 
-The Redis Configuration Store extends the Vert.x Configuration Service and provides the
+The Redis Configuration Store extends the Vert.x Configuration Retriever and provides the
 way to retrieve configuration from a Redis server.
 
 == Using the Redis Configuration Store
@@ -35,11 +35,11 @@ compile 'me.escoffier.vertx:vertx-configuration-redis-store:1.0.0-SNAPSHOT'
 == Configuring the store
 
 Once added to your classpath or dependencies, you need to configure the
-`link:../../yardoc/VertxConfiguration/ConfigurationService.html[ConfigurationService]` to use this store:
+`link:../../yardoc/VertxConfiguration/ConfigurationRetriever.html[ConfigurationRetriever]` to use this store:
 
 [source, ruby]
 ----
-require 'vertx-configuration/configuration_service'
+require 'vertx-configuration/configuration_retriever'
 store = {
   'type' => "redis",
   'config' => {
@@ -49,7 +49,7 @@ store = {
   }
 }
 
-svc = VertxConfiguration::ConfigurationService.create(vertx, {
+retriever = VertxConfiguration::ConfigurationRetriever.create(vertx, {
   'stores' => [
     store
   ]

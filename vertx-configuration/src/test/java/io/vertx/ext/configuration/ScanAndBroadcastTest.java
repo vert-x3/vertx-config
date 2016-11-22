@@ -34,7 +34,7 @@ public class ScanAndBroadcastTest {
   private Vertx vertx;
   private JsonObject http;
   private HttpServer server;
-  private ConfigurationService service;
+  private ConfigurationRetriever retriever;
 
   @Before
   public void setUp(TestContext tc) {
@@ -57,7 +57,7 @@ public class ScanAndBroadcastTest {
 
   @After
   public void tearDown() {
-    service.close();
+    retriever.close();
     AtomicBoolean done = new AtomicBoolean();
     server.close(x -> done.set(true));
     await().untilAtomic(done, is(true));
@@ -84,12 +84,12 @@ public class ScanAndBroadcastTest {
   public void testScanning() {
     AtomicBoolean done = new AtomicBoolean();
     vertx.runOnContext(v -> {
-      service = ConfigurationService.create(vertx,
-          new ConfigurationServiceOptions().setScanPeriod(1000).setStores(stores()));
+      retriever = ConfigurationRetriever.create(vertx,
+          new ConfigurationRetrieverOptions().setScanPeriod(1000).setStores(stores()));
 
       AtomicReference<JsonObject> current = new AtomicReference<>();
-      service.getConfiguration(json -> {
-        service.listen(change -> {
+      retriever.getConfiguration(json -> {
+        retriever.listen(change -> {
           if (current.get() != null  && ! current.get().equals(change.getPreviousConfiguration())) {
             throw new IllegalStateException("Previous configuration not correct");
           }
@@ -138,12 +138,12 @@ public class ScanAndBroadcastTest {
   public void testScanningWhenNoChanges(TestContext tc) {
     Async async = tc.async();
     vertx.runOnContext(v -> {
-      service = ConfigurationService.create(vertx,
-          new ConfigurationServiceOptions().setScanPeriod(500).setStores(stores()));
+      retriever = ConfigurationRetriever.create(vertx,
+          new ConfigurationRetrieverOptions().setScanPeriod(500).setStores(stores()));
 
       AtomicReference<JsonObject> current = new AtomicReference<>();
-      service.getConfiguration(json -> {
-        service.listen(change -> {
+      retriever.getConfiguration(json -> {
+        retriever.listen(change -> {
           if (current.get() != null  && ! current.get().equals(change.getPreviousConfiguration())) {
             throw new IllegalStateException("Previous configuration not correct");
           }

@@ -1,37 +1,44 @@
 package io.vertx.ext.configuration;
 
 import io.vertx.codegen.annotations.CacheReturn;
-import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.configuration.impl.ConfigurationServiceImpl;
+import io.vertx.ext.configuration.impl.ConfigurationRetrieverImpl;
 
 /**
- * Defines a configuration service that read configuration from {@link io.vertx.ext.configuration.spi.ConfigurationStore}
+ * Defines a configuration retriever that read configuration from
+ * {@link io.vertx.ext.configuration.spi.ConfigurationStore}
  * and tracks changes periodically.
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 @VertxGen
-public interface ConfigurationService {
+public interface ConfigurationRetriever {
 
   /**
-   * Creates an instance of the default implementation of the {@link ConfigurationService}.
+   * Creates an instance of the default implementation of the {@link ConfigurationRetriever}.
    *
    * @param vertx   the vert.x instance
    * @param options the options, must not be {@code null}, must contain the list of configured store.
    * @return the created instance.
    */
-  static ConfigurationService create(Vertx vertx, ConfigurationServiceOptions options) {
-    return new ConfigurationServiceImpl(vertx, options);
+  static ConfigurationRetriever create(Vertx vertx, ConfigurationRetrieverOptions options) {
+    return new ConfigurationRetrieverImpl(vertx, options);
   }
 
-  static ConfigurationService create(Vertx vertx) {
-    ConfigurationServiceOptions options = new ConfigurationServiceOptions();
+  /**
+   * Creates an instance of the default implementation of the {@link ConfigurationRetriever}, using the default
+   * settings (json file, system properties and environment variables).
+   *
+   * @param vertx   the vert.x instance
+   * @return the created instance.
+   */
+  static ConfigurationRetriever create(Vertx vertx) {
+    ConfigurationRetrieverOptions options = new ConfigurationRetrieverOptions();
     options
         .addStore(
             new ConfigurationStoreOptions().setType("json")
@@ -61,7 +68,7 @@ public interface ConfigurationService {
 
 
   /**
-   * Closes the service.
+   * Closes the retriever.
    */
   void close();
 

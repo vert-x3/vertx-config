@@ -1,6 +1,6 @@
 = Kubernetes ConfigMap Store
 
-The Kubernetes ConfigMap Store extends the Vert.x Configuration Service and provide the
+The Kubernetes ConfigMap Store extends the Vert.x Configuration Retriever and provides the
 support Kubernetes Config Map.
 
 So, configuration is retrieved by reading the config map.
@@ -37,7 +37,7 @@ compile 'me.escoffier.vertx:vertx-configuration-kubernetes-configmap:1.0.0-SNAPS
 == Configuring the store
 
 Once added to your classpath or dependencies, you need to configure the
-`link:../../apidocs/io/vertx/ext/configuration/ConfigurationService.html[ConfigurationService]` to use this store:
+`link:../../apidocs/io/vertx/ext/configuration/ConfigurationRetriever.html[ConfigurationRetriever]` to use this store:
 
 [source, java]
 ----
@@ -48,8 +48,8 @@ ConfigurationStoreOptions store = new ConfigurationStoreOptions()
         .put("name", "configmap-name")
     );
 
-ConfigurationService svc = ConfigurationService.create(vertx,
-    new ConfigurationServiceOptions().addStore(store));
+ConfigurationRetriever retriever = ConfigurationRetriever.create(vertx,
+    new ConfigurationRetrieverOptions().addStore(store));
 ----
 
 You need to configure the store to find the right configmap. this is done with:

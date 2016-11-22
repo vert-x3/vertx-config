@@ -15,12 +15,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Implementation of the {@link ConfigurationService}.
+ * Implementation of the {@link ConfigurationRetriever}.
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class ConfigurationServiceImpl implements ConfigurationService {
-  private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationServiceImpl.class);
+public class ConfigurationRetrieverImpl implements ConfigurationRetriever {
+  private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationRetrieverImpl.class);
 
   private final Vertx vertx;
   private final List<ConfigurationProvider> providers;
@@ -30,7 +30,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
   private JsonObject current = new JsonObject();
 
-  public ConfigurationServiceImpl(Vertx vertx, ConfigurationServiceOptions options) {
+  public ConfigurationRetrieverImpl(Vertx vertx, ConfigurationRetrieverOptions options) {
     this.vertx = vertx;
 
     ServiceLoader<ConfigurationStoreFactory> storeImpl =
@@ -89,7 +89,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     Objects.requireNonNull(completionHandler);
     compute(ar -> {
       if (ar.succeeded()) {
-        synchronized ((ConfigurationServiceImpl.this)) {
+        synchronized ((ConfigurationRetrieverImpl.this)) {
           current = ar.result();
           streamOfConfiguration.handle(current);
         }
@@ -141,7 +141,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         streamOfConfiguration.fail(ar.cause());
         LOGGER.error("Error while scanning configuration", ar.cause());
       } else {
-        synchronized (ConfigurationServiceImpl.this) {
+        synchronized (ConfigurationRetrieverImpl.this) {
           // Check for changes
           if (!current.equals(ar.result())) {
             JsonObject prev = current;

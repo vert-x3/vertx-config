@@ -2,8 +2,8 @@ package examples;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.configuration.ConfigurationService;
-import io.vertx.ext.configuration.ConfigurationServiceOptions;
+import io.vertx.ext.configuration.ConfigurationRetriever;
+import io.vertx.ext.configuration.ConfigurationRetrieverOptions;
 import io.vertx.ext.configuration.ConfigurationStoreOptions;
 
 /**
@@ -17,8 +17,8 @@ public class Examples {
         .setType("spring-config-server")
         .setConfig(new JsonObject().put("url", "http://localhost:8888/foo/development"));
 
-    ConfigurationService svc = ConfigurationService.create(vertx,
-        new ConfigurationServiceOptions().addStore(store));
+    ConfigurationRetriever retriever = ConfigurationRetriever.create(vertx,
+        new ConfigurationRetrieverOptions().addStore(store));
   }
 
 

@@ -17,10 +17,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 @RunWith(VertxUnitRunner.class)
-public class ConfigurationServiceTest {
+public class ConfigurationRetrieverTest {
 
   private Vertx vertx;
-  private ConfigurationService service;
+  private ConfigurationRetriever retriever;
 
   @Before
   public void setUp(TestContext tc) {
@@ -32,13 +32,13 @@ public class ConfigurationServiceTest {
 
   @After
   public void tearDown() {
-    service.close();
+    retriever.close();
     vertx.close();
     System.clearProperty("key");
     System.clearProperty("foo");
   }
 
-  private static ConfigurationServiceOptions addStores(ConfigurationServiceOptions options) {
+  private static ConfigurationRetrieverOptions addStores(ConfigurationRetrieverOptions options) {
     return options
         .addStore(
             new ConfigurationStoreOptions()
@@ -50,7 +50,7 @@ public class ConfigurationServiceTest {
                 .setConfig(new JsonObject().put("cache", false)));
   }
 
-  private static ConfigurationServiceOptions addReversedStores(ConfigurationServiceOptions options) {
+  private static ConfigurationRetrieverOptions addReversedStores(ConfigurationRetrieverOptions options) {
     return options
         .addStore(
             new ConfigurationStoreOptions()
@@ -64,42 +64,42 @@ public class ConfigurationServiceTest {
 
   @Test
   public void testLoading(TestContext tc) {
-    service = ConfigurationService.create(vertx,
-        addStores(new ConfigurationServiceOptions()));
+    retriever = ConfigurationRetriever.create(vertx,
+        addStores(new ConfigurationRetrieverOptions()));
     Async async = tc.async();
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       ConfigurationChecker.check(ar);
       assertThat(ar.result().getString("foo")).isEqualToIgnoringCase("bar");
-      ConfigurationChecker.check(service.getCachedConfiguration());
+      ConfigurationChecker.check(retriever.getCachedConfiguration());
       async.complete();
     });
   }
 
   @Test
   public void testLoadingWithFuturePolyglotVersion(TestContext tc) {
-    service = ConfigurationService.create(vertx,
-        addStores(new ConfigurationServiceOptions()));
+    retriever = ConfigurationRetriever.create(vertx,
+        addStores(new ConfigurationRetrieverOptions()));
     Async async = tc.async();
 
-    service.<JsonObject>getConfigurationFuture().setHandler(ar -> {
+    retriever.<JsonObject>getConfigurationFuture().setHandler(ar -> {
       ConfigurationChecker.check(ar);
       assertThat(ar.result().getString("foo")).isEqualToIgnoringCase("bar");
-      ConfigurationChecker.check(service.getCachedConfiguration());
+      ConfigurationChecker.check(retriever.getCachedConfiguration());
       async.complete();
     });
   }
 
   @Test
   public void testLoadingWithFutureJAvaVersion(TestContext tc) {
-    service = ConfigurationService.create(vertx,
-        addStores(new ConfigurationServiceOptions()));
+    retriever = ConfigurationRetriever.create(vertx,
+        addStores(new ConfigurationRetrieverOptions()));
     Async async = tc.async();
 
-    service.getConfigurationFuture().setHandler(ar -> {
+    retriever.getConfigurationFuture().setHandler(ar -> {
       ConfigurationChecker.check(ar);
       assertThat(ar.result().getString("foo")).isEqualToIgnoringCase("bar");
-      ConfigurationChecker.check(service.getCachedConfiguration());
+      ConfigurationChecker.check(retriever.getCachedConfiguration());
       async.complete();
     });
   }
@@ -110,9 +110,9 @@ public class ConfigurationServiceTest {
     vertx.runOnContext(v -> {
       vertx.getOrCreateContext().config().put("hello", "hello");
       System.setProperty("foo", "bar");
-      service = ConfigurationService.create(vertx);
+      retriever = ConfigurationRetriever.create(vertx);
 
-      service.getConfiguration(ar -> {
+      retriever.getConfiguration(ar -> {
         assertThat(ar.result().getString("foo")).isEqualToIgnoringCase("bar");
         assertThat(ar.result().getString("hello")).isEqualToIgnoringCase("hello");
         assertThat(ar.result().getString("PATH")).isNotNull();
@@ -129,9 +129,9 @@ public class ConfigurationServiceTest {
           .put("hello", "hello")
           .put("foo", "bar");
       System.setProperty("foo", "baz");
-      service = ConfigurationService.create(vertx);
+      retriever = ConfigurationRetriever.create(vertx);
 
-      service.getConfiguration(ar -> {
+      retriever.getConfiguration(ar -> {
         assertThat(ar.result().getString("foo")).isEqualToIgnoringCase("baz");
         assertThat(ar.result().getString("hello")).isEqualToIgnoringCase("hello");
         assertThat(ar.result().getString("PATH")).isNotNull();
@@ -143,11 +143,11 @@ public class ConfigurationServiceTest {
   @Test
   public void testOverloading(TestContext tc) {
     System.setProperty("key", "new-value");
-    service = ConfigurationService.create(vertx,
-        addStores(new ConfigurationServiceOptions()));
+    retriever = ConfigurationRetriever.create(vertx,
+        addStores(new ConfigurationRetrieverOptions()));
     Async async = tc.async();
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.result().getString("key")).isEqualToIgnoringCase("new-value");
       async.complete();
     });
@@ -156,9 +156,9 @@ public class ConfigurationServiceTest {
   @Test
   public void testReversedOverloading(TestContext tc) {
     System.setProperty("key", "new-value");
-    service = ConfigurationService.create(vertx, addReversedStores(new ConfigurationServiceOptions()));
+    retriever = ConfigurationRetriever.create(vertx, addReversedStores(new ConfigurationRetrieverOptions()));
     Async async = tc.async();
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.result().getString("key")).isEqualToIgnoringCase("value");
       async.complete();
     });

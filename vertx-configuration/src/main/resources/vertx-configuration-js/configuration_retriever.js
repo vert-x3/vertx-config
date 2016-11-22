@@ -14,7 +14,7 @@
  * under the License.
  */
 
-/** @module vertx-configuration-js/configuration_service */
+/** @module vertx-configuration-js/configuration_retriever */
 var utils = require('vertx-js/util/utils');
 var Vertx = require('vertx-js/vertx');
 var Future = require('vertx-js/future');
@@ -22,17 +22,17 @@ var ConfigurationStream = require('vertx-configuration-js/configuration_stream')
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var JConfigurationService = io.vertx.ext.configuration.ConfigurationService;
-var ConfigurationServiceOptions = io.vertx.ext.configuration.ConfigurationServiceOptions;
+var JConfigurationRetriever = io.vertx.ext.configuration.ConfigurationRetriever;
+var ConfigurationRetrieverOptions = io.vertx.ext.configuration.ConfigurationRetrieverOptions;
 var ConfigurationChange = io.vertx.ext.configuration.ConfigurationChange;
 
 /**
-
+ Defines a configuration retriever that read configuration from
  @class
 */
-var ConfigurationService = function(j_val) {
+var ConfigurationRetriever = function(j_val) {
 
-  var j_configurationService = j_val;
+  var j_configurationRetriever = j_val;
   var that = this;
 
   /**
@@ -45,7 +45,7 @@ var ConfigurationService = function(j_val) {
   this.getConfiguration = function(completionHandler) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'function') {
-      j_configurationService["getConfiguration(io.vertx.core.Handler)"](function(ar) {
+      j_configurationRetriever["getConfiguration(io.vertx.core.Handler)"](function(ar) {
       if (ar.succeeded()) {
         completionHandler(utils.convReturnJson(ar.result()), null);
       } else {
@@ -56,7 +56,7 @@ var ConfigurationService = function(j_val) {
   };
 
   /**
-   Same as {@link ConfigurationService#getConfiguration}, but returning a  object. The result is a
+   Same as {@link ConfigurationRetriever#getConfiguration}, but returning a  object. The result is a
    .
 
    @public
@@ -66,12 +66,12 @@ var ConfigurationService = function(j_val) {
   this.getConfigurationFuture = function() {
     var __args = arguments;
     if (__args.length === 0) {
-      return utils.convReturnVertxGen(Future, j_configurationService["getConfigurationFuture()"](), undefined);
+      return utils.convReturnVertxGen(Future, j_configurationRetriever["getConfigurationFuture()"](), undefined);
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
-   Closes the service.
+   Closes the retriever.
 
    @public
 
@@ -79,7 +79,7 @@ var ConfigurationService = function(j_val) {
   this.close = function() {
     var __args = arguments;
     if (__args.length === 0) {
-      j_configurationService["close()"]();
+      j_configurationRetriever["close()"]();
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -93,7 +93,7 @@ var ConfigurationService = function(j_val) {
   this.getCachedConfiguration = function() {
     var __args = arguments;
     if (__args.length === 0) {
-      return utils.convReturnJson(j_configurationService["getCachedConfiguration()"]());
+      return utils.convReturnJson(j_configurationRetriever["getCachedConfiguration()"]());
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -107,7 +107,7 @@ var ConfigurationService = function(j_val) {
   this.listen = function(listener) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'function') {
-      j_configurationService["listen(io.vertx.core.Handler)"](function(jVal) {
+      j_configurationRetriever["listen(io.vertx.core.Handler)"](function(jVal) {
       listener(utils.convReturnDataObject(jVal));
     });
     } else throw new TypeError('function invoked with invalid arguments');
@@ -123,7 +123,7 @@ var ConfigurationService = function(j_val) {
     var __args = arguments;
     if (__args.length === 0) {
       if (that.cachedconfigurationStream == null) {
-        that.cachedconfigurationStream = utils.convReturnVertxGen(ConfigurationStream, j_configurationService["configurationStream()"]());
+        that.cachedconfigurationStream = utils.convReturnVertxGen(ConfigurationStream, j_configurationRetriever["configurationStream()"]());
       }
       return that.cachedconfigurationStream;
     } else throw new TypeError('function invoked with invalid arguments');
@@ -132,43 +132,43 @@ var ConfigurationService = function(j_val) {
   // A reference to the underlying Java delegate
   // NOTE! This is an internal API and must not be used in user code.
   // If you rely on this property your code is likely to break if we change it / remove it without warning.
-  this._jdel = j_configurationService;
+  this._jdel = j_configurationRetriever;
 };
 
-ConfigurationService._jclass = utils.getJavaClass("io.vertx.ext.configuration.ConfigurationService");
-ConfigurationService._jtype = {
+ConfigurationRetriever._jclass = utils.getJavaClass("io.vertx.ext.configuration.ConfigurationRetriever");
+ConfigurationRetriever._jtype = {
   accept: function(obj) {
-    return ConfigurationService._jclass.isInstance(obj._jdel);
+    return ConfigurationRetriever._jclass.isInstance(obj._jdel);
   },
   wrap: function(jdel) {
-    var obj = Object.create(ConfigurationService.prototype, {});
-    ConfigurationService.apply(obj, arguments);
+    var obj = Object.create(ConfigurationRetriever.prototype, {});
+    ConfigurationRetriever.apply(obj, arguments);
     return obj;
   },
   unwrap: function(obj) {
     return obj._jdel;
   }
 };
-ConfigurationService._create = function(jdel) {
-  var obj = Object.create(ConfigurationService.prototype, {});
-  ConfigurationService.apply(obj, arguments);
+ConfigurationRetriever._create = function(jdel) {
+  var obj = Object.create(ConfigurationRetriever.prototype, {});
+  ConfigurationRetriever.apply(obj, arguments);
   return obj;
 }
 /**
- Creates an instance of the default implementation of the {@link ConfigurationService}.
+ Creates an instance of the default implementation of the {@link ConfigurationRetriever}.
 
- @memberof module:vertx-configuration-js/configuration_service
+ @memberof module:vertx-configuration-js/configuration_retriever
  @param vertx {Vertx} the vert.x instance 
  @param options {Object} the options, must not be <code>null</code>, must contain the list of configured store. 
- @return {ConfigurationService} the created instance.
+ @return {ConfigurationRetriever} the created instance.
  */
-ConfigurationService.create = function() {
+ConfigurationRetriever.create = function() {
   var __args = arguments;
   if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
-    return utils.convReturnVertxGen(ConfigurationService, JConfigurationService["create(io.vertx.core.Vertx)"](__args[0]._jdel));
+    return utils.convReturnVertxGen(ConfigurationRetriever, JConfigurationRetriever["create(io.vertx.core.Vertx)"](__args[0]._jdel));
   }else if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null)) {
-    return utils.convReturnVertxGen(ConfigurationService, JConfigurationService["create(io.vertx.core.Vertx,io.vertx.ext.configuration.ConfigurationServiceOptions)"](__args[0]._jdel, __args[1] != null ? new ConfigurationServiceOptions(new JsonObject(JSON.stringify(__args[1]))) : null));
+    return utils.convReturnVertxGen(ConfigurationRetriever, JConfigurationRetriever["create(io.vertx.core.Vertx,io.vertx.ext.configuration.ConfigurationRetrieverOptions)"](__args[0]._jdel, __args[1] != null ? new ConfigurationRetrieverOptions(new JsonObject(JSON.stringify(__args[1]))) : null));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
-module.exports = ConfigurationService;
+module.exports = ConfigurationRetriever;

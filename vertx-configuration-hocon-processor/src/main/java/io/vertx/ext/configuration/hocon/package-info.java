@@ -1,7 +1,7 @@
 /**
  * = Hocon Configuration Format
  *
- * The Hocon Configuration Format extends the Vert.x Configuration Service and provides the
+ * The Hocon Configuration Format extends the Vert.x Configuration Retriever and provides the
  * support for the HOCON(https://github.com/typesafehub/config/blob/master/HOCON.md) format.
  *
  * It supports includes, json, properties, macros...
@@ -38,7 +38,7 @@
  * == Configuring the store to use HOCON
  *
  * Once added to your classpath or dependencies, you need to configure the
- * {@link io.vertx.ext.configuration.ConfigurationService} to use this format:
+ * {@link io.vertx.ext.configuration.ConfigurationRetriever} to use this format:
  *
  * [source, $lang]
  * ----

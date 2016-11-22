@@ -20,13 +20,13 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 
 /**
- * Converter for {@link io.vertx.ext.configuration.ConfigurationServiceOptions}.
+ * Converter for {@link io.vertx.ext.configuration.ConfigurationRetrieverOptions}.
  *
- * NOTE: This class has been automatically generated from the {@link io.vertx.ext.configuration.ConfigurationServiceOptions} original class using Vert.x codegen.
+ * NOTE: This class has been automatically generated from the {@link io.vertx.ext.configuration.ConfigurationRetrieverOptions} original class using Vert.x codegen.
  */
-public class ConfigurationServiceOptionsConverter {
+public class ConfigurationRetrieverOptionsConverter {
 
-  public static void fromJson(JsonObject json, ConfigurationServiceOptions obj) {
+  public static void fromJson(JsonObject json, ConfigurationRetrieverOptions obj) {
     if (json.getValue("scanPeriod") instanceof Number) {
       obj.setScanPeriod(((Number)json.getValue("scanPeriod")).longValue());
     }
@@ -38,7 +38,7 @@ public class ConfigurationServiceOptionsConverter {
     }
   }
 
-  public static void toJson(ConfigurationServiceOptions obj, JsonObject json) {
+  public static void toJson(ConfigurationRetrieverOptions obj, JsonObject json) {
     json.put("scanPeriod", obj.getScanPeriod());
     if (obj.getStores() != null) {
       json.put("stores", new JsonArray(

@@ -3,8 +3,8 @@ package examples;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.configuration.ConfigurationService;
-import io.vertx.ext.configuration.ConfigurationServiceOptions;
+import io.vertx.ext.configuration.ConfigurationRetriever;
+import io.vertx.ext.configuration.ConfigurationRetrieverOptions;
 import io.vertx.ext.configuration.ConfigurationStoreOptions;
 
 /**
@@ -14,7 +14,7 @@ public class Examples {
 
 
   public void example1(Vertx vertx) {
-    ConfigurationService svc = ConfigurationService.create(vertx);
+    ConfigurationRetriever retriever = ConfigurationRetriever.create(vertx);
   }
 
   public void example2(Vertx vertx) {
@@ -30,14 +30,14 @@ public class Examples {
     ConfigurationStoreOptions sysPropsStore = new ConfigurationStoreOptions().setType("sys");
 
 
-    ConfigurationServiceOptions options = new ConfigurationServiceOptions()
+    ConfigurationRetrieverOptions options = new ConfigurationRetrieverOptions()
         .addStore(httpStore).addStore(fileStore).addStore(sysPropsStore);
 
-    ConfigurationService svc = ConfigurationService.create(vertx, options);
+    ConfigurationRetriever retriever = ConfigurationRetriever.create(vertx, options);
   }
 
-  public void example3(ConfigurationService svc) {
-    svc.getConfiguration(ar -> {
+  public void example3(ConfigurationRetriever retriever) {
+    retriever.getConfiguration(ar -> {
       if (ar.failed()) {
         // Failed to retrieve the configuration
       } else {
@@ -109,17 +109,17 @@ public class Examples {
   }
 
   public void period(ConfigurationStoreOptions store1, ConfigurationStoreOptions store2) {
-    ConfigurationServiceOptions options = new ConfigurationServiceOptions()
+    ConfigurationRetrieverOptions options = new ConfigurationRetrieverOptions()
         .setScanPeriod(2000)
         .addStore(store1)
         .addStore(store2);
 
-    ConfigurationService svc = ConfigurationService.create(Vertx.vertx(), options);
-    svc.getConfiguration(json -> {
+    ConfigurationRetriever retriever = ConfigurationRetriever.create(Vertx.vertx(), options);
+    retriever.getConfiguration(json -> {
       // Initial retrieval of the configuration
     });
 
-    svc.listen(change -> {
+    retriever.listen(change -> {
       // Previous configuration
       JsonObject previous = change.getPreviousConfiguration();
       // New configuration
@@ -128,15 +128,15 @@ public class Examples {
   }
 
   public void stream(ConfigurationStoreOptions store1, ConfigurationStoreOptions store2) {
-    ConfigurationServiceOptions options = new ConfigurationServiceOptions()
+    ConfigurationRetrieverOptions options = new ConfigurationRetrieverOptions()
         .setScanPeriod(2000)
         .addStore(store1)
         .addStore(store2);
 
-    ConfigurationService svc = ConfigurationService.create(Vertx.vertx(), options);
-    svc.configurationStream()
+    ConfigurationRetriever retriever = ConfigurationRetriever.create(Vertx.vertx(), options);
+    retriever.configurationStream()
         .endHandler(v -> {
-          // Service closed
+          // retriever closed
         })
         .exceptionHandler(t -> {
           // an error has been caught while retrieving the configuration
@@ -147,8 +147,8 @@ public class Examples {
 
   }
 
-  public void cache(ConfigurationService svc) {
-    JsonObject last = svc.getCachedConfiguration();
+  public void cache(ConfigurationRetriever retriever) {
+    JsonObject last = retriever.getCachedConfiguration();
   }
 
 }

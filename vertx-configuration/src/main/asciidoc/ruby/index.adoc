@@ -1,6 +1,6 @@
-= Vert.x Configuration Service
+= Vert.x Configuration Retriever
 
-The Vert.x Configuration service provides a way to configure your Vert.x application.
+The Vert.x Configuration retriever provides a way to configure your Vert.x application.
 
 It:
 
@@ -13,18 +13,18 @@ It:
 
 == Concepts
 
-The configuration service is structured around:
+The configuration retriever is structured around:
 
-* a **configuration service** instantiated and used by the Vert.x application. It
+* a **Configuration Retriever** instantiated and used by the Vert.x application. It
 configures a set of configuration store
 * **configuration store** defines a location from where the configuration data is read
 and and a syntax (json by default)
 
 The configuration is retrieved as a JSON Object.
 
-== Using the Vert.x Configuration Service
+== Using the Vert.x Configuration Retriever
 
-To use the Vert.x Configuration Service, add the following dependency to the
+To use the Vert.x Configuration Retriever, add the following dependency to the
 _dependencies_ section of your build descriptor:
 
 * Maven (in your `pom.xml`):
@@ -45,16 +45,16 @@ _dependencies_ section of your build descriptor:
 compile 'me.escoffier.vertx:vertx-configuration:1.0.0-SNAPSHOT'
 ----
 
-Once done, you first need to instantiate the `link:../../yardoc/VertxConfiguration/ConfigurationService.html[ConfigurationService]`:
+Once done, you first need to instantiate the `link:../../yardoc/VertxConfiguration/ConfigurationRetriever.html[ConfigurationRetriever]`:
 
 [source]
 ----
-require 'vertx-configuration/configuration_service'
-svc = VertxConfiguration::ConfigurationService.create(vertx)
+require 'vertx-configuration/configuration_retriever'
+retriever = VertxConfiguration::ConfigurationRetriever.create(vertx)
 
 ----
 
-By default the Vert.x Configuration Service is configured with the following stores (in
+By default the Vert.x Configuration Retriever is configured with the following stores (in
 this order):
 
 * The Vert.x verticle `config()`
@@ -66,7 +66,7 @@ You can configure your own stores:
 
 [source]
 ----
-require 'vertx-configuration/configuration_service'
+require 'vertx-configuration/configuration_retriever'
 httpStore = {
   'type' => "http",
   'config' => {
@@ -96,18 +96,18 @@ options = {
   ]
 }
 
-svc = VertxConfiguration::ConfigurationService.create(vertx, options)
+retriever = VertxConfiguration::ConfigurationRetriever.create(vertx, options)
 
 ----
 
 More details about the overloading rules and available stores are available below.
 
-Once you have the instance of the Vert.x Configuration Service, retrieve the configuration
+Once you have the instance of the Vert.x Configuration Retriever, _retrieve_ the configuration
 as follows:
 
 [source]
 ----
-svc.get_configuration() { |ar_err,ar|
+retriever.get_configuration() { |ar_err,ar|
   if (ar_err != nil)
     # Failed to retrieve the configuration
   else
@@ -134,7 +134,7 @@ If you declare them in the reverse order (B, A), you would get: * `{a:value, b:1
 
 === Available configuration stores
 
-The Vert.x Configuration Service provides a set of configuration store and format.
+The Vert.x Configuration Retriever provides a set of configuration store and format.
 Some more are available as extension and you can implement your own.
 
 ==== Structure of the configuration
@@ -310,14 +310,14 @@ dir = {
 
 === Listening for configuration changes
 
-The configuration service periodically retrieve the configuration and if the outcome
+The Configuration Retriever periodically retrieve the configuration and if the outcome
 is different from the current one, your application can be reconfigured. By default the
 configuration is reloaded every 5 seconds.
 
 [source, ruby]
 ----
 require 'vertx/vertx'
-require 'vertx-configuration/configuration_service'
+require 'vertx-configuration/configuration_retriever'
 options = {
   'scanPeriod' => 2000,
   'stores' => [
@@ -326,12 +326,12 @@ options = {
   ]
 }
 
-svc = VertxConfiguration::ConfigurationService.create(Vertx::Vertx.vertx(), options)
-svc.get_configuration() { |json_err,json|
+retriever = VertxConfiguration::ConfigurationRetriever.create(Vertx::Vertx.vertx(), options)
+retriever.get_configuration() { |json_err,json|
   # Initial retrieval of the configuration
 }
 
-svc.listen() { |change|
+retriever.listen() { |change|
   # Previous configuration
   previous = change['previousConfiguration']
   # New configuration
@@ -347,25 +347,25 @@ using:
 
 [source, ruby]
 ----
-last = svc.get_cached_configuration()
+last = retriever.get_cached_configuration()
 
 ----
 
 === Reading configuration as a stream
 
-The `link:../../yardoc/VertxConfiguration/ConfigurationService.html[ConfigurationService]` provide a way to access the stream of configuration.
+The `link:../../yardoc/VertxConfiguration/ConfigurationRetriever.html[ConfigurationRetriever]` provide a way to access the stream of configuration.
 It's a `link:../../yardoc/Vertx/ReadStream.html[ReadStream]` of `link:unavailable[JsonObject]`. By registering the right
 set of handlers you are notified:
 
 * when a new configuration is retrieved
 * when an error occur while retrieving a configuration
-* when the configuraiton service is close (the
+* when the configuration retriever is closed (the
 `link:../../yardoc/VertxConfiguration/ConfigurationStream.html#end_handler-instance_method[endHandler]` is called).
 
 [source, ruby]
 ----
 require 'vertx/vertx'
-require 'vertx-configuration/configuration_service'
+require 'vertx-configuration/configuration_retriever'
 options = {
   'scanPeriod' => 2000,
   'stores' => [
@@ -374,9 +374,9 @@ options = {
   ]
 }
 
-svc = VertxConfiguration::ConfigurationService.create(Vertx::Vertx.vertx(), options)
-svc.configuration_stream().end_handler() { |v|
-  # Service closed
+retriever = VertxConfiguration::ConfigurationRetriever.create(Vertx::Vertx.vertx(), options)
+retriever.configuration_stream().end_handler() { |v|
+  # retriever closed
 }.exception_handler() { |t|
   # an error has been caught while retrieving the configuration
 }.handler() { |conf|
@@ -386,7 +386,7 @@ svc.configuration_stream().end_handler() { |v|
 
 ----
 
-=== Extending the configuration service
+=== Extending the Configuration Retriever
 
 You can extend the configuration by implementing:
 

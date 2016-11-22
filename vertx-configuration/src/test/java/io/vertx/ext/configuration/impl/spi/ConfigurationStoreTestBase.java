@@ -5,7 +5,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.configuration.ConfigurationService;
+import io.vertx.ext.configuration.ConfigurationRetriever;
 import io.vertx.ext.configuration.spi.ConfigurationProcessor;
 import io.vertx.ext.configuration.spi.ConfigurationStore;
 import io.vertx.ext.configuration.spi.ConfigurationStoreFactory;
@@ -32,7 +32,7 @@ public abstract class ConfigurationStoreTestBase {
   protected Vertx vertx;
   protected ConfigurationStoreFactory factory;
   protected ConfigurationStore store;
-  protected ConfigurationService service;
+  protected ConfigurationRetriever retriever;
 
   @Before
   public void setUp(TestContext context) {
@@ -49,8 +49,8 @@ public abstract class ConfigurationStoreTestBase {
       done.set(false);
     }
 
-    if (service != null) {
-      service.close();
+    if (retriever != null) {
+      retriever.close();
     }
 
     vertx.close(v -> done.set(true));

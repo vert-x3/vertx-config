@@ -1,7 +1,7 @@
 /**
- * = Vert.x Configuration Service
+ * = Vert.x Configuration Retriever
  *
- * The Vert.x Configuration service provides a way to configure your Vert.x application.
+ * The Vert.x Configuration retriever provides a way to configure your Vert.x application.
  * It:
  *
  * * offer multiple configuration syntaxes (json, properties, yaml (extension), hocon
@@ -13,18 +13,18 @@
  *
  * == Concepts
  *
- * The configuration service is structured around:
+ * The configuration retriever is structured around:
  *
- * * a **configuration service** instantiated and used by the Vert.x application. It
+ * * a **Configuration Retriever** instantiated and used by the Vert.x application. It
  * configures a set of configuration store
  * * **configuration store** defines a location from where the configuration data is read
  * and and a syntax (json by default)
  *
  * The configuration is retrieved as a JSON Object.
  *
- * == Using the Vert.x Configuration Service
+ * == Using the Vert.x Configuration Retriever
  *
- * To use the Vert.x Configuration Service, add the following dependency to the
+ * To use the Vert.x Configuration Retriever, add the following dependency to the
  * _dependencies_ section of your build descriptor:
  *
  * * Maven (in your `pom.xml`):
@@ -45,14 +45,14 @@
  * compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
  * ----
  *
- * Once done, you first need to instantiate the {@link io.vertx.ext.configuration.ConfigurationService}:
+ * Once done, you first need to instantiate the {@link io.vertx.ext.configuration.ConfigurationRetriever}:
  *
  * [source]
  * ----
  * {@link examples.Examples#example1(io.vertx.core.Vertx)}
  * ----
  *
- * By default the Vert.x Configuration Service is configured with the following stores (in
+ * By default the Vert.x Configuration Retriever is configured with the following stores (in
  * this order):
  *
  * * The Vert.x verticle `config()`
@@ -69,12 +69,12 @@
  *
  * More details about the overloading rules and available stores are available below.
  *
- * Once you have the instance of the Vert.x Configuration Service, retrieve the configuration
+ * Once you have the instance of the Vert.x Configuration Retriever, _retrieve_ the configuration
  * as follows:
  *
  * [source]
  * ----
- * {@link examples.Examples#example3(io.vertx.ext.configuration.ConfigurationService)}
+ * {@link examples.Examples#example3(ConfigurationRetriever)}
  * ----
  *
  * === Overloading rules
@@ -94,7 +94,7 @@
  *
  * === Available configuration stores
  *
- * The Vert.x Configuration Service provides a set of configuration store and format.
+ * The Vert.x Configuration Retriever provides a set of configuration store and format.
  * Some more are available as extension and you can implement your own.
  *
  * ==== Structure of the configuration
@@ -210,7 +210,7 @@
  *
  * === Listening for configuration changes
  *
- * The configuration service periodically retrieve the configuration and if the outcome
+ * The Configuration Retriever periodically retrieve the configuration and if the outcome
  * is different from the current one, your application can be reconfigured. By default the
  * configuration is reloaded every 5 seconds.
  *
@@ -226,18 +226,18 @@
  *
  * [source, $lang]
  * ----
- * {@link examples.Examples#cache(io.vertx.ext.configuration.ConfigurationService)}
+ * {@link examples.Examples#cache(ConfigurationRetriever)}
  * ----
  *
  * === Reading configuration as a stream
  *
- * The {@link io.vertx.ext.configuration.ConfigurationService} provide a way to access the stream of configuration.
+ * The {@link io.vertx.ext.configuration.ConfigurationRetriever} provide a way to access the stream of configuration.
  * It's a {@link io.vertx.core.streams.ReadStream} of {@link io.vertx.core.json.JsonObject}. By registering the right
  * set of handlers you are notified:
  *
  * * when a new configuration is retrieved
  * * when an error occur while retrieving a configuration
- * * when the configuraiton service is close (the
+ * * when the configuration retriever is closed (the
  * {@link io.vertx.ext.configuration.ConfigurationStream#endHandler(io.vertx.core.Handler)} is called).
  *
  * [source, $lang]
@@ -245,7 +245,7 @@
  * {@link examples.Examples#stream(io.vertx.ext.configuration.ConfigurationStoreOptions, io.vertx.ext.configuration.ConfigurationStoreOptions)}
  * ----
  *
- * === Extending the configuration service
+ * === Extending the Configuration Retriever
  *
  * You can extend the configuration by implementing:
  *

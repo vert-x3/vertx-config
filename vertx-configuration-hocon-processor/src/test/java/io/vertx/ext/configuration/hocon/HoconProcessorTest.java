@@ -4,8 +4,8 @@ import com.typesafe.config.ConfigException;
 import io.vertx.core.Vertx;
 import io.vertx.core.file.FileSystemException;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.configuration.ConfigurationService;
-import io.vertx.ext.configuration.ConfigurationServiceOptions;
+import io.vertx.ext.configuration.ConfigurationRetriever;
+import io.vertx.ext.configuration.ConfigurationRetrieverOptions;
 import io.vertx.ext.configuration.ConfigurationStoreOptions;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(VertxUnitRunner.class)
 public class HoconProcessorTest {
 
-  ConfigurationService service;
+  ConfigurationRetriever retriever;
   private Vertx vertx;
 
   @Before
@@ -35,21 +35,21 @@ public class HoconProcessorTest {
 
   @After
   public void tearDown() {
-    service.close();
+    retriever.close();
     vertx.close();
   }
 
   @Test
   public void testEmptyHocon(TestContext tc) {
     Async async = tc.async();
-    service = ConfigurationService.create(vertx,
-        new ConfigurationServiceOptions().addStore(
+    retriever = ConfigurationRetriever.create(vertx,
+        new ConfigurationRetrieverOptions().addStore(
             new ConfigurationStoreOptions()
                 .setType("file")
                 .setFormat("hocon")
                 .setConfig(new JsonObject().put("path", "src/test/resources/empty.conf"))));
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.result()).isNotNull();
       assertThat(ar.result()).isEmpty();
       async.complete();
@@ -59,14 +59,14 @@ public class HoconProcessorTest {
   @Test
   public void testWithTextFile(TestContext tc) {
     Async async = tc.async();
-    service = ConfigurationService.create(vertx,
-        new ConfigurationServiceOptions().addStore(
+    retriever = ConfigurationRetriever.create(vertx,
+        new ConfigurationRetrieverOptions().addStore(
             new ConfigurationStoreOptions()
                 .setType("file")
                 .setFormat("hocon")
                 .setConfig(new JsonObject().put("path", "src/test/resources/some-text.txt"))));
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.failed()).isTrue();
       assertThat(ar.cause()).isNotNull().isInstanceOf(ConfigException.class);
       async.complete();
@@ -76,14 +76,14 @@ public class HoconProcessorTest {
   @Test
   public void testWithMissingFile(TestContext tc) {
     Async async = tc.async();
-    service = ConfigurationService.create(vertx,
-        new ConfigurationServiceOptions().addStore(
+    retriever = ConfigurationRetriever.create(vertx,
+        new ConfigurationRetrieverOptions().addStore(
             new ConfigurationStoreOptions()
                 .setType("file")
                 .setFormat("hocon")
                 .setConfig(new JsonObject().put("path", "src/test/resources/some-missing-file.conf"))));
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.failed()).isTrue();
       assertThat(ar.cause()).isNotNull().isInstanceOf(FileSystemException.class);
       async.complete();
@@ -93,14 +93,14 @@ public class HoconProcessorTest {
   @Test
   public void testSimpleHoconConfiguration(TestContext tc) {
     Async async = tc.async();
-    service = ConfigurationService.create(vertx,
-        new ConfigurationServiceOptions().addStore(
+    retriever = ConfigurationRetriever.create(vertx,
+        new ConfigurationRetrieverOptions().addStore(
             new ConfigurationStoreOptions()
                 .setType("file")
                 .setFormat("hocon")
                 .setConfig(new JsonObject().put("path", "src/test/resources/simple.conf"))));
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       if (ar.failed()) {
         ar.cause().printStackTrace();
       }
@@ -132,14 +132,14 @@ public class HoconProcessorTest {
   @Test
   public void testSimpleJsonConfiguration(TestContext tc) {
     Async async = tc.async();
-    service = ConfigurationService.create(vertx,
-        new ConfigurationServiceOptions().addStore(
+    retriever = ConfigurationRetriever.create(vertx,
+        new ConfigurationRetrieverOptions().addStore(
             new ConfigurationStoreOptions()
                 .setType("file")
                 .setFormat("hocon")
                 .setConfig(new JsonObject().put("path", "src/test/resources/regular.json"))));
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.succeeded()).isTrue();
       JsonObject json = ar.result();
       assertThat(json.getString("key")).isEqualTo("value");
@@ -166,14 +166,14 @@ public class HoconProcessorTest {
   @Test
   public void testSimplePropertiesConfiguration(TestContext tc) {
     Async async = tc.async();
-    service = ConfigurationService.create(vertx,
-        new ConfigurationServiceOptions().addStore(
+    retriever = ConfigurationRetriever.create(vertx,
+        new ConfigurationRetrieverOptions().addStore(
             new ConfigurationStoreOptions()
                 .setType("file")
                 .setFormat("hocon")
                 .setConfig(new JsonObject().put("path", "src/test/resources/regular.properties"))));
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.succeeded()).isTrue();
       JsonObject json = ar.result();
       assertThat(json.getString("key")).isEqualTo("value");
@@ -193,14 +193,14 @@ public class HoconProcessorTest {
   @Test
   public void testComplex(TestContext tc) {
     Async async = tc.async();
-    service = ConfigurationService.create(vertx,
-        new ConfigurationServiceOptions().addStore(
+    retriever = ConfigurationRetriever.create(vertx,
+        new ConfigurationRetrieverOptions().addStore(
             new ConfigurationStoreOptions()
                 .setType("file")
                 .setFormat("hocon")
                 .setConfig(new JsonObject().put("path", "src/test/resources/complex.conf"))));
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.succeeded()).isTrue();
       JsonObject json = ar.result();
       JsonObject complex = json.getJsonObject("complex");

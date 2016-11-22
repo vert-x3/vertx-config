@@ -1,6 +1,6 @@
 = Yaml Configuration Format
 
-The Yaml Configuration Format extends the Vert.x Configuration Service and provides the
+The Yaml Configuration Format extends the Vert.x Configuration Retriever and provides the
 support for the Yaml Configuration Format format.
 
 == Using the Yaml Configuration Format
@@ -35,7 +35,7 @@ compile 'me.escoffier.vertx:vertx-configuration-yaml-processor:1.0.0-SNAPSHOT'
 == Configuring the store to use YAML
 
 Once added to your classpath or dependencies, you need to configure the
-`link:../../apidocs/io/vertx/ext/configuration/ConfigurationService.html[ConfigurationService]` to use this format:
+`link:../../apidocs/io/vertx/ext/configuration/ConfigurationRetriever.html[ConfigurationRetriever]` to use this format:
 
 [source, java]
 ----
@@ -46,8 +46,8 @@ ConfigurationStoreOptions store = new ConfigurationStoreOptions()
         .put("format", "hocon")
     );
 
-ConfigurationService svc = ConfigurationService.create(vertx,
-    new ConfigurationServiceOptions().addStore(store));
+ConfigurationRetriever retriever = ConfigurationRetriever.create(vertx,
+    new ConfigurationRetrieverOptions().addStore(store));
 ----
 
 You just need to set `format` to `yaml`.

@@ -1,7 +1,7 @@
 /**
  * = Kubernetes ConfigMap Store
  *
- * The Kubernetes ConfigMap Store extends the Vert.x Configuration Service and provide the
+ * The Kubernetes ConfigMap Store extends the Vert.x Configuration Retriever and provides the
  * support Kubernetes Config Map. So, configuration is retrieved by reading the config map.
  *
  * == Using the Kubernetes ConfigMap Store
@@ -36,7 +36,7 @@
  * == Configuring the store
  *
  * Once added to your classpath or dependencies, you need to configure the
- * {@link io.vertx.ext.configuration.ConfigurationService} to use this store:
+ * {@link io.vertx.ext.configuration.ConfigurationRetriever} to use this store:
  *
  * [source, $lang]
  * ----

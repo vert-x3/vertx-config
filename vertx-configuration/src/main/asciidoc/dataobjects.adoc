@@ -16,8 +16,8 @@
 |[[previousConfiguration]]`previousConfiguration`|`Json object`|-
 |===
 
-[[ConfigurationServiceOptions]]
-== ConfigurationServiceOptions
+[[ConfigurationRetrieverOptions]]
+== ConfigurationRetrieverOptions
 
 ++++
 ++++

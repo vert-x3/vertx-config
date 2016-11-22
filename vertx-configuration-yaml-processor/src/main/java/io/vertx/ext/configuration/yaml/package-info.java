@@ -1,7 +1,7 @@
 /**
  * = Yaml Configuration Format
  *
- * The Yaml Configuration Format extends the Vert.x Configuration Service and provides the
+ * The Yaml Configuration Format extends the Vert.x Configuration Retriever and provides the
  * support for the Yaml Configuration Format format.
  *
  * == Using the Yaml Configuration Format
@@ -36,7 +36,7 @@
  * == Configuring the store to use YAML
  *
  * Once added to your classpath or dependencies, you need to configure the
- * {@link io.vertx.ext.configuration.ConfigurationService} to use this format:
+ * {@link io.vertx.ext.configuration.ConfigurationRetriever} to use this format:
  *
  * [source, $lang]
  * ----

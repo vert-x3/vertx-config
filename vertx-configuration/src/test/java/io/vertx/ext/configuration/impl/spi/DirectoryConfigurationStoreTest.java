@@ -4,8 +4,8 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.configuration.ConfigurationService;
-import io.vertx.ext.configuration.ConfigurationServiceOptions;
+import io.vertx.ext.configuration.ConfigurationRetriever;
+import io.vertx.ext.configuration.ConfigurationRetrieverOptions;
 import io.vertx.ext.configuration.ConfigurationStoreOptions;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -75,12 +75,12 @@ public class DirectoryConfigurationStoreTest extends ConfigurationStoreTestBase 
   @Test
   public void testLoadingASingleJsonFile(TestContext context) {
     Async async = context.async();
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions()
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions()
         .addStore(new ConfigurationStoreOptions()
             .setType("directory")
             .setConfig(new JsonObject().put("path", "src/test/resources")
                 .put("filesets", new JsonArray().add(new JsonObject().put("pattern", "file/reg*.json"))))));
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       ConfigurationChecker.check(ar);
       async.complete();
     });
@@ -89,7 +89,7 @@ public class DirectoryConfigurationStoreTest extends ConfigurationStoreTestBase 
   @Test
   public void testLoadingASinglePropertiesFile(TestContext context) {
     Async async = context.async();
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions()
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions()
         .addStore(new ConfigurationStoreOptions()
             .setType("directory")
             .setConfig(new JsonObject().put("path", "src/test/resources")
@@ -97,7 +97,7 @@ public class DirectoryConfigurationStoreTest extends ConfigurationStoreTestBase 
                     .put("format", "properties")
                     .put("pattern", "**/reg*.properties"))))));
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.succeeded()).isTrue();
       JsonObject json = ar.result();
       assertThat(json.getString("key")).isEqualTo("value");
@@ -114,7 +114,7 @@ public class DirectoryConfigurationStoreTest extends ConfigurationStoreTestBase 
   @Test
   public void testWhenNoFileMatch(TestContext context) {
     Async async = context.async();
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions()
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions()
         .addStore(new ConfigurationStoreOptions()
             .setType("directory")
             .setConfig(new JsonObject().put("path", "src/test/resources")
@@ -122,7 +122,7 @@ public class DirectoryConfigurationStoreTest extends ConfigurationStoreTestBase 
                     .put("format", "properties")
                     .put("pattern", "**/reg*.stuff"))))));
 
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.succeeded()).isTrue();
       JsonObject json = ar.result();
       assertThat(json.isEmpty());
@@ -133,7 +133,7 @@ public class DirectoryConfigurationStoreTest extends ConfigurationStoreTestBase 
   @Test
   public void testWith2FileSetsAndNoIntersection(TestContext context) {
     Async async = context.async();
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions()
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions()
         .addStore(new ConfigurationStoreOptions()
             .setType("directory")
             .setConfig(new JsonObject().put("path", "src/test/resources")
@@ -141,7 +141,7 @@ public class DirectoryConfigurationStoreTest extends ConfigurationStoreTestBase 
                     .add(new JsonObject().put("pattern", "file/reg*.json"))
                     .add(new JsonObject().put("pattern", "dir/a.*son"))
                 ))));
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       ConfigurationChecker.check(ar);
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       async.complete();
@@ -151,7 +151,7 @@ public class DirectoryConfigurationStoreTest extends ConfigurationStoreTestBase 
   @Test
   public void testWith2FileSetsAndWithIntersection(TestContext context) {
     Async async = context.async();
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions()
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions()
         .addStore(new ConfigurationStoreOptions()
             .setType("directory")
             .setConfig(new JsonObject().put("path", "src/test/resources")
@@ -159,7 +159,7 @@ public class DirectoryConfigurationStoreTest extends ConfigurationStoreTestBase 
                     .add(new JsonObject().put("pattern", "dir/b.json"))
                     .add(new JsonObject().put("pattern", "dir/a.*son"))
                 ))));
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       assertThat(ar.result().getString("b.name")).isEqualTo("B");
       assertThat(ar.result().getString("conflict")).isEqualTo("A");
@@ -170,7 +170,7 @@ public class DirectoryConfigurationStoreTest extends ConfigurationStoreTestBase 
   @Test
   public void testWith2FileSetsAndWithIntersectionReversed(TestContext context) {
     Async async = context.async();
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions()
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions()
         .addStore(new ConfigurationStoreOptions()
             .setType("directory")
             .setConfig(new JsonObject().put("path", "src/test/resources")
@@ -178,7 +178,7 @@ public class DirectoryConfigurationStoreTest extends ConfigurationStoreTestBase 
                     .add(new JsonObject().put("pattern", "dir/a.*son"))
                     .add(new JsonObject().put("pattern", "dir/b.json"))
                 ))));
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       assertThat(ar.result().getString("b.name")).isEqualTo("B");
       assertThat(ar.result().getString("conflict")).isEqualTo("B");
@@ -189,14 +189,14 @@ public class DirectoryConfigurationStoreTest extends ConfigurationStoreTestBase 
   @Test
   public void testWithAFileSetMatching2FilesWithConflict(TestContext context) {
     Async async = context.async();
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions()
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions()
         .addStore(new ConfigurationStoreOptions()
             .setType("directory")
             .setConfig(new JsonObject().put("path", "src/test/resources")
                 .put("filesets", new JsonArray()
                     .add(new JsonObject().put("pattern", "dir/?.json"))
                 ))));
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.result().getString("b.name")).isEqualTo("B");
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       // Alphabetical order, so B is last.
@@ -208,14 +208,14 @@ public class DirectoryConfigurationStoreTest extends ConfigurationStoreTestBase 
   @Test
   public void testWithAFileSetMatching2FilesWithoutConflict(TestContext context) {
     Async async = context.async();
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions()
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions()
         .addStore(new ConfigurationStoreOptions()
             .setType("directory")
             .setConfig(new JsonObject().put("path", "src/test/resources")
                 .put("filesets", new JsonArray()
                     .add(new JsonObject().put("pattern", "dir/a?.json"))
                 ))));
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.result().getString("b.name")).isNull();
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       assertThat(ar.result().getString("c.name")).isEqualTo("C");
@@ -227,14 +227,14 @@ public class DirectoryConfigurationStoreTest extends ConfigurationStoreTestBase 
   @Test
   public void testWithAFileSetMatching2FilesOneNotBeingAJsonFile(TestContext context) {
     Async async = context.async();
-    service = ConfigurationService.create(vertx, new ConfigurationServiceOptions()
+    retriever = ConfigurationRetriever.create(vertx, new ConfigurationRetrieverOptions()
         .addStore(new ConfigurationStoreOptions()
             .setType("directory")
             .setConfig(new JsonObject().put("path", "src/test/resources")
                 .put("filesets", new JsonArray()
                     .add(new JsonObject().put("pattern", "dir/a?*.json"))
                 ))));
-    service.getConfiguration(ar -> {
+    retriever.getConfiguration(ar -> {
       assertThat(ar.failed());
       assertThat(ar.cause()).isInstanceOf(DecodeException.class);
       async.complete();

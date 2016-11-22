@@ -4,8 +4,8 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.configuration.ConfigurationService;
-import io.vertx.ext.configuration.ConfigurationServiceOptions;
+import io.vertx.ext.configuration.ConfigurationRetriever;
+import io.vertx.ext.configuration.ConfigurationRetrieverOptions;
 import io.vertx.ext.configuration.ConfigurationStoreOptions;
 
 /**
@@ -14,12 +14,12 @@ import io.vertx.ext.configuration.ConfigurationStoreOptions;
 public class MyMainVerticle extends AbstractVerticle {
 
   private String deploymentId;
-  private ConfigurationService configService;
+  private ConfigurationRetriever configurationRetriever;
 
   @Override
   public void start(Future<Void> future) throws Exception {
-    configService = ConfigurationService.create(vertx,
-        new ConfigurationServiceOptions()
+    configurationRetriever = ConfigurationRetriever.create(vertx,
+        new ConfigurationRetrieverOptions()
             .setScanPeriod(500)
             .addStore(new ConfigurationStoreOptions()
                 .setType("http")
@@ -28,7 +28,7 @@ public class MyMainVerticle extends AbstractVerticle {
                     .put("port", 8080)
                     .put("path", "/conf"))));
 
-    configService.listen(conf -> {
+    configurationRetriever.listen(conf -> {
       if (deploymentId != null) {
         vertx.undeploy(deploymentId);
         deployMyVerticle(conf.getNewConfiguration(), null);
@@ -36,7 +36,7 @@ public class MyMainVerticle extends AbstractVerticle {
     });
 
     // Retrieve the current configuration.
-    configService.getConfiguration(ar -> {
+    configurationRetriever.getConfiguration(ar -> {
       JsonObject configuration = ar.result();
       deployMyVerticle(configuration, future);
     });
@@ -56,6 +56,6 @@ public class MyMainVerticle extends AbstractVerticle {
 
   @Override
   public void stop() throws Exception {
-    configService.close();
+    configurationRetriever.close();
   }
 }

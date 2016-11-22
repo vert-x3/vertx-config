@@ -3,8 +3,8 @@ package examples;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.configuration.ConfigurationService;
-import io.vertx.ext.configuration.ConfigurationServiceOptions;
+import io.vertx.ext.configuration.ConfigurationRetriever;
+import io.vertx.ext.configuration.ConfigurationRetrieverOptions;
 import io.vertx.ext.configuration.ConfigurationStoreOptions;
 
 /**
@@ -23,8 +23,8 @@ public class Examples {
             .put("filesets",
                 new JsonArray().add(new JsonObject().put("pattern", "*.json"))));
 
-    ConfigurationService svc = ConfigurationService.create(vertx,
-        new ConfigurationServiceOptions().addStore(git));
+    ConfigurationRetriever retriever = ConfigurationRetriever.create(vertx,
+        new ConfigurationRetrieverOptions().addStore(git));
   }
 
 
