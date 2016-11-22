@@ -35,11 +35,11 @@ compile 'me.escoffier.vertx:vertx-configuration-redis-store:1.0.0-SNAPSHOT'
 == Configuring the store
 
 Once added to your classpath or dependencies, you need to configure the
-`link:../../groovydoc/io/vertx/groovy/ext/configuration/ConfigurationService.html[ConfigurationService]` to use this store:
+`link:../../apidocs/io/vertx/ext/configuration/ConfigurationService.html[ConfigurationService]` to use this store:
 
 [source, groovy]
 ----
-import io.vertx.groovy.ext.configuration.ConfigurationService
+import io.vertx.ext.configuration.ConfigurationService
 def store = [
   type:"redis",
   config:[
@@ -58,7 +58,7 @@ def svc = ConfigurationService.create(vertx, [
 ----
 
 The store configuration is used to create an instance of
-`link:../../groovydoc/io/vertx/groovy/redis/RedisClient.html[RedisClient]`. check the documentation of the Vert.x Redis Client
+`link:../../apidocs/io/vertx/redis/RedisClient.html[RedisClient]`. check the documentation of the Vert.x Redis Client
 for further details.
 
 In addition, you can set the `key` instructing the store in which _field_ the configuration

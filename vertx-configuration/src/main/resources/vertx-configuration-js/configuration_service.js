@@ -57,7 +57,7 @@ var ConfigurationService = function(j_val) {
 
   /**
    Same as {@link ConfigurationService#getConfiguration}, but returning a  object. The result is a
-   . In Java, you can use {@link ConfigurationService#getConfiguration}.
+   .
 
    @public
 
@@ -66,7 +66,7 @@ var ConfigurationService = function(j_val) {
   this.getConfigurationFuture = function() {
     var __args = arguments;
     if (__args.length === 0) {
-      return utils.convReturnVertxGen(j_configurationService["getConfigurationFuture()"](), Future);
+      return utils.convReturnVertxGen(Future, j_configurationService["getConfigurationFuture()"](), undefined);
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -114,17 +114,16 @@ var ConfigurationService = function(j_val) {
   };
 
   /**
-   @return the stream of configurations.
 
    @public
 
-   @return {ConfigurationStream}
+   @return {ConfigurationStream} the stream of configurations.
    */
   this.configurationStream = function() {
     var __args = arguments;
     if (__args.length === 0) {
       if (that.cachedconfigurationStream == null) {
-        that.cachedconfigurationStream = utils.convReturnVertxGen(j_configurationService["configurationStream()"](), ConfigurationStream);
+        that.cachedconfigurationStream = utils.convReturnVertxGen(ConfigurationStream, j_configurationService["configurationStream()"]());
       }
       return that.cachedconfigurationStream;
     } else throw new TypeError('function invoked with invalid arguments');
@@ -136,6 +135,25 @@ var ConfigurationService = function(j_val) {
   this._jdel = j_configurationService;
 };
 
+ConfigurationService._jclass = utils.getJavaClass("io.vertx.ext.configuration.ConfigurationService");
+ConfigurationService._jtype = {
+  accept: function(obj) {
+    return ConfigurationService._jclass.isInstance(obj._jdel);
+  },
+  wrap: function(jdel) {
+    var obj = Object.create(ConfigurationService.prototype, {});
+    ConfigurationService.apply(obj, arguments);
+    return obj;
+  },
+  unwrap: function(obj) {
+    return obj._jdel;
+  }
+};
+ConfigurationService._create = function(jdel) {
+  var obj = Object.create(ConfigurationService.prototype, {});
+  ConfigurationService.apply(obj, arguments);
+  return obj;
+}
 /**
  Creates an instance of the default implementation of the {@link ConfigurationService}.
 
@@ -147,11 +165,10 @@ var ConfigurationService = function(j_val) {
 ConfigurationService.create = function() {
   var __args = arguments;
   if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
-    return utils.convReturnVertxGen(JConfigurationService["create(io.vertx.core.Vertx)"](__args[0]._jdel), ConfigurationService);
+    return utils.convReturnVertxGen(ConfigurationService, JConfigurationService["create(io.vertx.core.Vertx)"](__args[0]._jdel));
   }else if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null)) {
-    return utils.convReturnVertxGen(JConfigurationService["create(io.vertx.core.Vertx,io.vertx.ext.configuration.ConfigurationServiceOptions)"](__args[0]._jdel, __args[1] != null ? new ConfigurationServiceOptions(new JsonObject(JSON.stringify(__args[1]))) : null), ConfigurationService);
+    return utils.convReturnVertxGen(ConfigurationService, JConfigurationService["create(io.vertx.core.Vertx,io.vertx.ext.configuration.ConfigurationServiceOptions)"](__args[0]._jdel, __args[1] != null ? new ConfigurationServiceOptions(new JsonObject(JSON.stringify(__args[1]))) : null));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
-// We export the Constructor function
 module.exports = ConfigurationService;

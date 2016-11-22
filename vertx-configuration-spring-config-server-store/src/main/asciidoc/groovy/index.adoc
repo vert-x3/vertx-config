@@ -35,11 +35,11 @@ compile 'me.escoffier.vertx:vertx-configuration-spring-config-server-store:1.0.0
 == Configuring the store
 
 Once added to your classpath or dependencies, you need to configure the
-`link:../../groovydoc/io/vertx/groovy/ext/configuration/ConfigurationService.html[ConfigurationService]` to use this store:
+`link:../../apidocs/io/vertx/ext/configuration/ConfigurationService.html[ConfigurationService]` to use this store:
 
 [source, groovy]
 ----
-import io.vertx.groovy.ext.configuration.ConfigurationService
+import io.vertx.ext.configuration.ConfigurationService
 def store = [
   type:"spring-config-server",
   config:[

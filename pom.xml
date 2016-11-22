@@ -6,7 +6,7 @@
   <parent>
     <groupId>io.vertx</groupId>
     <artifactId>vertx-ext-parent</artifactId>
-    <version>20</version>
+    <version>23</version>
   </parent>
 
   <groupId>me.escoffier.vertx</groupId>
@@ -16,7 +16,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <vertx.version>3.3.0</vertx.version>
+    <vertx.version>3.4.0-SNAPSHOT</vertx.version>
     <doc.skip>true</doc.skip>
   </properties>
 
@@ -93,6 +93,11 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-rx-java</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-lang-kotlin</artifactId>
       <optional>true</optional>
     </dependency>
 

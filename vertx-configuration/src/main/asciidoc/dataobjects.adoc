@@ -20,7 +20,6 @@
 == ConfigurationServiceOptions
 
 ++++
- @author <a href="http://escoffier.me">Clement Escoffier</a>
 ++++
 '''
 
@@ -36,7 +35,6 @@
 == ConfigurationStoreOptions
 
 ++++
- @author <a href="http://escoffier.me">Clement Escoffier</a>
 ++++
 '''
 

@@ -2,7 +2,6 @@ require 'vertx/read_stream'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.ext.configuration.ConfigurationStream
 module VertxConfiguration
-  #  @author <a href="http://escoffier.me">Clement Escoffier</a>
   class ConfigurationStream
     include ::Vertx::ReadStream
     # @private
@@ -14,6 +13,22 @@ module VertxConfiguration
     # @return [::VertxConfiguration::ConfigurationStream] the underlying java delegate
     def j_del
       @j_del
+    end
+    @@j_api_type = Object.new
+    def @@j_api_type.accept?(obj)
+      obj.class == ConfigurationStream
+    end
+    def @@j_api_type.wrap(obj)
+      ConfigurationStream.new(obj)
+    end
+    def @@j_api_type.unwrap(obj)
+      obj.j_del
+    end
+    def self.j_api_type
+      @@j_api_type
+    end
+    def self.j_class
+      Java::IoVertxExtConfiguration::ConfigurationStream.java_class
     end
     # @return [self]
     def pause

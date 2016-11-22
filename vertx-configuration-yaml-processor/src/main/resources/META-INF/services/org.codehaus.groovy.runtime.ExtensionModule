@@ -1,0 +1,4 @@
+moduleName = vertx-configuration-module
+moduleVersion = 1.0
+extensionClasses = io.vertx.groovy.ext.configuration.yaml.GroovyExtension
+staticExtensionClasses = io.vertx.groovy.ext.configuration.yaml.GroovyStaticExtension

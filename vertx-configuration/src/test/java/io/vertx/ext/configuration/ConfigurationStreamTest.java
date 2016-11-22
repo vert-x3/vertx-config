@@ -26,6 +26,7 @@ public class ConfigurationStreamTest {
 
   private Vertx vertx;
   private ConfigurationService service;
+  private boolean doClose = true;
 
   @Rule
   public RepeatRule repeatRule = new RepeatRule();
@@ -40,7 +41,9 @@ public class ConfigurationStreamTest {
 
   @After
   public void tearDown() {
-    service.close();
+    if (doClose) {
+      service.close();
+    }
     vertx.close();
     System.clearProperty("key");
     System.clearProperty("foo");
@@ -73,11 +76,11 @@ public class ConfigurationStreamTest {
   }
 
   @Test
-  @Repeat(10)
   public void testRetrievingTheConfigurationAndClose(TestContext tc) {
     service = ConfigurationService.create(vertx,
         addStores(new ConfigurationServiceOptions()));
     Async async = tc.async();
+    doClose = false;
     service.configurationStream()
         .endHandler(v -> async.complete())
         .handler(conf -> {

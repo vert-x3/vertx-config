@@ -17,6 +17,22 @@ module VertxConfiguration
     def j_del
       @j_del
     end
+    @@j_api_type = Object.new
+    def @@j_api_type.accept?(obj)
+      obj.class == ConfigurationService
+    end
+    def @@j_api_type.wrap(obj)
+      ConfigurationService.new(obj)
+    end
+    def @@j_api_type.unwrap(obj)
+      obj.j_del
+    end
+    def self.j_api_type
+      @@j_api_type
+    end
+    def self.j_class
+      Java::IoVertxExtConfiguration::ConfigurationService.java_class
+    end
     #  Creates an instance of the default implementation of the {::VertxConfiguration::ConfigurationService}.
     # @param [::Vertx::Vertx] vertx the vert.x instance
     # @param [Hash] options the options, must not be <code>null</code>, must contain the list of configured store.
@@ -27,7 +43,7 @@ module VertxConfiguration
       elsif vertx.class.method_defined?(:j_del) && options.class == Hash && !block_given?
         return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtConfiguration::ConfigurationService.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtConfiguration::ConfigurationServiceOptions.java_class]).call(vertx.j_del,Java::IoVertxExtConfiguration::ConfigurationServiceOptions.new(::Vertx::Util::Utils.to_json_object(options))),::VertxConfiguration::ConfigurationService)
       end
-      raise ArgumentError, "Invalid arguments when calling create(vertx,options)"
+      raise ArgumentError, "Invalid arguments when calling create(#{vertx},#{options})"
     end
     #  Reads the configuration from the different {Nil}
     #  and computes the final configuration.
@@ -40,11 +56,11 @@ module VertxConfiguration
       raise ArgumentError, "Invalid arguments when calling get_configuration()"
     end
     #  Same as {::VertxConfiguration::ConfigurationService#get_configuration}, but returning a  object. The result is a
-    #  . In Java, you can use {::VertxConfiguration::ConfigurationService#get_configuration}.
+    #  .
     # @return [::Vertx::Future]
     def get_configuration_future
       if !block_given?
-        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:getConfigurationFuture, []).call(),::Vertx::Future)
+        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:getConfigurationFuture, []).call(),::Vertx::Future, nil)
       end
       raise ArgumentError, "Invalid arguments when calling get_configuration_future()"
     end
@@ -74,8 +90,7 @@ module VertxConfiguration
       end
       raise ArgumentError, "Invalid arguments when calling listen()"
     end
-    #  @return the stream of configurations.
-    # @return [::VertxConfiguration::ConfigurationStream]
+    # @return [::VertxConfiguration::ConfigurationStream] the stream of configurations.
     def configuration_stream
       if !block_given?
         if @cached_configuration_stream != nil

@@ -45,11 +45,11 @@ _dependencies_ section of your build descriptor:
 compile 'me.escoffier.vertx:vertx-configuration:1.0.0-SNAPSHOT'
 ----
 
-Once done, you first need to instantiate the `link:../../groovydoc/io/vertx/groovy/ext/configuration/ConfigurationService.html[ConfigurationService]`:
+Once done, you first need to instantiate the `link:../../apidocs/io/vertx/ext/configuration/ConfigurationService.html[ConfigurationService]`:
 
 [source]
 ----
-import io.vertx.groovy.ext.configuration.ConfigurationService
+import io.vertx.ext.configuration.ConfigurationService
 def svc = ConfigurationService.create(vertx)
 
 ----
@@ -66,7 +66,7 @@ You can configure your own stores:
 
 [source]
 ----
-import io.vertx.groovy.ext.configuration.ConfigurationService
+import io.vertx.ext.configuration.ConfigurationService
 def httpStore = [
   type:"http",
   config:[
@@ -143,7 +143,7 @@ Each declared data store must specify the `type`. It can also define the `format
 not set JSON is used.
 
 Some configurations tore requires additional configuration (such a path...). This
-configuration is passed as a Json Object using `link:../dataobjects.html#ConfigurationStoreOptions#setConfig(io.vertx.core.json.JsonObject)[config]`
+configuration is passed as a Json Object using `link:../../apidocs/io/vertx/ext/configuration/ConfigurationStoreOptions.html#setConfig-io.vertx.core.json.JsonObject-[setConfig]`
 
 ==== File
 
@@ -316,8 +316,8 @@ configuration is reloaded every 5 seconds.
 
 [source, groovy]
 ----
-import io.vertx.groovy.core.Vertx
-import io.vertx.groovy.ext.configuration.ConfigurationService
+import io.vertx.core.Vertx
+import io.vertx.ext.configuration.ConfigurationService
 def options = [
   scanPeriod:2000,
   stores:[
@@ -353,19 +353,19 @@ def last = svc.getCachedConfiguration()
 
 === Reading configuration as a stream
 
-The `link:../../groovydoc/io/vertx/groovy/ext/configuration/ConfigurationService.html[ConfigurationService]` provide a way to access the stream of configuration.
-It's a `link:../../groovydoc/io/vertx/groovy/core/streams/ReadStream.html[ReadStream]` of `JsonObject`. By registering the right
+The `link:../../apidocs/io/vertx/ext/configuration/ConfigurationService.html[ConfigurationService]` provide a way to access the stream of configuration.
+It's a `link:../../apidocs/io/vertx/core/streams/ReadStream.html[ReadStream]` of `link:../../apidocs/io/vertx/core/json/JsonObject.html[JsonObject]`. By registering the right
 set of handlers you are notified:
 
 * when a new configuration is retrieved
 * when an error occur while retrieving a configuration
 * when the configuraiton service is close (the
-`link:../../groovydoc/io/vertx/groovy/ext/configuration/ConfigurationStream.html#endHandler(io.vertx.core.Handler)[endHandler]` is called).
+`link:../../apidocs/io/vertx/ext/configuration/ConfigurationStream.html#endHandler-io.vertx.core.Handler-[endHandler]` is called).
 
 [source, groovy]
 ----
-import io.vertx.groovy.core.Vertx
-import io.vertx.groovy.ext.configuration.ConfigurationService
+import io.vertx.core.Vertx
+import io.vertx.ext.configuration.ConfigurationService
 def options = [
   scanPeriod:2000,
   stores:[

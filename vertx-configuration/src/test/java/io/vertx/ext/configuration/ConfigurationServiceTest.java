@@ -96,7 +96,7 @@ public class ConfigurationServiceTest {
         addStores(new ConfigurationServiceOptions()));
     Async async = tc.async();
 
-    service.getConfiguration().setHandler(ar -> {
+    service.getConfigurationFuture().setHandler(ar -> {
       ConfigurationChecker.check(ar);
       assertThat(ar.result().getString("foo")).isEqualToIgnoringCase("bar");
       ConfigurationChecker.check(service.getCachedConfiguration());

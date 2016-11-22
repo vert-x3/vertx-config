@@ -99,11 +99,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
   }
 
   @Override
-  public Future<JsonObject> getConfiguration() {
-    return getConfigurationFuture();
-  }
-
-  @Override
   public Future<JsonObject> getConfigurationFuture() {
     Future<JsonObject> future = Future.future();
     getConfiguration(future.completer());
@@ -186,7 +181,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     });
   }
 
-  class ConfigStreamImpl implements ConfigurationStream {
+  private class ConfigStreamImpl implements ConfigurationStream {
 
     private Handler<JsonObject> handler;
     private Handler<Throwable> exceptionHandler;

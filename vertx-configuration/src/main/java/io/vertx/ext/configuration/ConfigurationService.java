@@ -55,16 +55,9 @@ public interface ConfigurationService {
 
   /**
    * Same as {@link #getConfiguration(Handler)}, but returning a {@link Future} object. The result is a
-   * {@link JsonObject}. In Java, you can use {@link #getConfiguration()}.
+   * {@link JsonObject}.
    */
-  <T> Future<T> getConfigurationFuture();
-
-  /**
-   * Same as {@link #getConfiguration(Handler)}, but returning a {@link Future} object. In other language (not Java),
-   * you can use {@link #getConfigurationFuture()}.
-   */
-  @GenIgnore
-  Future<JsonObject> getConfiguration();
+  Future<JsonObject> getConfigurationFuture();
 
 
   /**
