@@ -54,7 +54,8 @@ ConfigurationRetriever retriever = ConfigurationRetriever.create(vertx,
 
 You need to configure the store to find the right configmap. this is done with:
 
-* `namespace` - the project namespace, `default` by default
+* `namespace` - the project namespace, `default` by default. If the `KUBERNETES_NAMESPACE` ENV variable is set, it
+uses this value.
 * `name` - the name of the config map
 
 If the config map is composed by several element, you can use the `key` parameter to tell
