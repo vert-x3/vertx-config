@@ -1,7 +1,7 @@
 package io.vertx.ext.configuration.kubernetes;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.ConfigMapList;
+import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.*;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -13,7 +13,6 @@ import io.vertx.ext.configuration.spi.ConfigurationStore;
 import io.vertx.ext.configuration.utils.JsonObjectHelper;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -28,6 +27,7 @@ public class ConfigMapStore implements ConfigurationStore {
   private final String namespace;
   private final String name;
   private final String key;
+  private final boolean secret;
   private KubernetesClient client;
 
 
@@ -45,6 +45,7 @@ public class ConfigMapStore implements ConfigurationStore {
     this.namespace = ns;
     this.name = configuration.getString("name");
     this.key = configuration.getString("key");
+    this.secret = configuration.getBoolean("secret", false);
     Objects.requireNonNull(this.name);
   }
 
@@ -106,27 +107,46 @@ public class ConfigMapStore implements ConfigurationStore {
 
     retrieveClient.compose(client -> {
       Future<Buffer> json = Future.future();
-      ConfigMapList list = client.configMaps().inNamespace(namespace).list();
-      List<ConfigMap> maps = list.getItems();
-      for (ConfigMap map : maps) {
-        String name = map.getMetadata().getName();
-        if (this.name.equalsIgnoreCase(name)) {
-          if (this.key == null) {
-            Map<String, Object> cm = asObjectMap(map.getData());
-            json.complete(Buffer.buffer(new JsonObject(cm).encode()));
-          } else {
-            String value = map.getData().get(this.key);
-            if (value == null) {
-              json.fail("cannot find key '" + this.key + "' in the config map '" + this.name + "'");
+      vertx.executeBlocking(
+          future -> {
+            if (secret) {
+              Secret secret = client.secrets().inNamespace(namespace).withName(name).get();
+              if (secret == null) {
+                future.fail("Cannot find the config map '" + name + "' in '" + namespace + "'");
+              } else {
+                if (this.key == null) {
+                  Map<String, Object> cm = asObjectMap(secret.getData());
+                  future.complete(Buffer.buffer(new JsonObject(cm).encode()));
+                } else {
+                  String value = secret.getData().get(this.key);
+                  if (value == null) {
+                    future.fail("cannot find key '" + this.key + "' in the secret '" + this.name + "'");
+                  } else {
+                    future.complete(Buffer.buffer(value));
+                  }
+                }
+              }
             } else {
-              json.complete(Buffer.buffer(value));
+              ConfigMap map = client.configMaps().inNamespace(namespace).withName(name).get();
+              if (map == null) {
+                future.fail("Cannot find the config map '" + name + "' in '" + namespace + "'");
+              } else {
+                if (this.key == null) {
+                  Map<String, Object> cm = asObjectMap(map.getData());
+                  future.complete(Buffer.buffer(new JsonObject(cm).encode()));
+                } else {
+                  String value = map.getData().get(this.key);
+                  if (value == null) {
+                    future.fail("cannot find key '" + this.key + "' in the config map '" + this.name + "'");
+                  } else {
+                    future.complete(Buffer.buffer(value));
+                  }
+                }
+              }
             }
-          }
-          return json;
-        }
-      }
-
-      json.fail("Cannot find the config map '" + name + "' in '" + namespace + "'");
+          },
+          json.completer()
+      );
       return json;
     }).setHandler(ar -> {
       if (ar.failed()) {

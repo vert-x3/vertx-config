@@ -2,7 +2,7 @@
  * = Kubernetes ConfigMap Store
  *
  * The Kubernetes ConfigMap Store extends the Vert.x Configuration Retriever and provides the
- * support Kubernetes Config Map. So, configuration is retrieved by reading the config map.
+ * support Kubernetes Config Map and Secrets. So, configuration is retrieved by reading the config map or the secrets.
  *
  * == Using the Kubernetes ConfigMap Store
  *
@@ -53,6 +53,13 @@
  * which `key` is read
  *
  * The application must have the permissions to read the config map.
+ *
+ * To read data from a secret, just configure the `secret` property to `true`:
+ *
+ * [source, $lang]
+ * ----
+ * {@link examples.Examples#example2(io.vertx.core.Vertx)}
+ * ----
  */
 @Document(fileName = "index.adoc")
 @ModuleGen(name = "vertx-configuration", groupPackage = "io.vertx")

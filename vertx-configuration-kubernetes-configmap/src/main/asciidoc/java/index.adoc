@@ -1,9 +1,9 @@
 = Kubernetes ConfigMap Store
 
 The Kubernetes ConfigMap Store extends the Vert.x Configuration Retriever and provides the
-support Kubernetes Config Map.
+support Kubernetes Config Map and Secrets.
 
-So, configuration is retrieved by reading the config map.
+So, configuration is retrieved by reading the config map or the secrets.
 
 == Using the Kubernetes ConfigMap Store
 
@@ -62,3 +62,19 @@ If the config map is composed by several element, you can use the `key` paramete
 which `key` is read
 
 The application must have the permissions to read the config map.
+
+To read data from a secret, just configure the `secret` property to `true`:
+
+[source, java]
+----
+ConfigurationStoreOptions store = new ConfigurationStoreOptions()
+    .setType("configmap")
+    .setConfig(new JsonObject()
+        .put("namespace", "my-project-namespace")
+        .put("name", "my-secret")
+        .put("secret", true)
+    );
+
+ConfigurationRetriever retriever = ConfigurationRetriever.create(vertx,
+    new ConfigurationRetrieverOptions().addStore(store));
+----

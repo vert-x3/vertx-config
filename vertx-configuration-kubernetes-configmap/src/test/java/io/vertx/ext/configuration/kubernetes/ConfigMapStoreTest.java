@@ -1,9 +1,6 @@
 package io.vertx.ext.configuration.kubernetes;
 
-import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
-import io.fabric8.kubernetes.api.model.ConfigMapListBuilder;
-import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
+import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.mock.KubernetesMockClient;
 import io.vertx.core.Vertx;
@@ -21,6 +18,8 @@ import java.io.StringReader;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -58,11 +57,21 @@ public class ConfigMapStoreTest {
         .addToData("my-app-json", SOME_JSON)
         .build();
 
+    Secret secret = new SecretBuilder().withMetadata(new ObjectMetaBuilder().withName("my-secret").build())
+        .addToData("password", "secret")
+        .build();
+
     KubernetesMockClient client = new KubernetesMockClient();
     client.configMaps().inNamespace("default").list().andReturn(new ConfigMapListBuilder().addToItems(map1, map2)
         .build());
+    client.configMaps().inNamespace("default").withName("my-config-map").get().andReturn(map1);
+    client.configMaps().inNamespace("default").withName("my-config-map-2").get().andReturn(map2);
+
     client.configMaps().inNamespace("my-project").list().andReturn(new ConfigMapListBuilder().addToItems(map3)
         .build());
+    client.configMaps().inNamespace("my-project").withName("my-config-map-x").get().andReturn(map3);
+
+    client.secrets().inNamespace("my-project").withName("my-secret").get().andReturn(secret);
     this.client = client.replay();
   }
 
@@ -81,8 +90,51 @@ public class ConfigMapStoreTest {
     checkJsonConfig(tc, async);
   }
 
+  @Test
+  public void testWithUnknownConfigMap(TestContext tc) {
+    Async async = tc.async();
+    store = new ConfigMapStore(vertx, new JsonObject()
+        .put("name", "my-unknown-config-map"));
+    store.setClient(client);
+    store.get(ar -> {
+      assertThat(ar.failed()).isTrue();
+      async.complete();
+    });
+  }
+
+  @Test
+  public void testWithUnknownSecrets(TestContext tc) {
+    Async async = tc.async();
+    store = new ConfigMapStore(vertx, new JsonObject()
+        .put("name", "my-unknown-secret").put("secret", true));
+    store.setClient(client);
+    store.get(ar -> {
+      assertThat(ar.failed()).isTrue();
+      async.complete();
+    });
+  }
+
+  @Test
+  public void testWithSecret(TestContext tc) {
+    Async async = tc.async();
+    store = new ConfigMapStore(vertx, new JsonObject()
+        .put("name", "my-secret")
+        .put("secret", true)
+        .put("namespace", "my-project"));
+    store.setClient(client);
+    store.get(ar -> {
+      tc.assertTrue(ar.succeeded());
+      JsonObject json = ar.result().toJsonObject();
+      assertThat(json.getString("password")).isEqualTo("secret");
+      async.complete();
+    });
+  }
+
   private void checkJsonConfig(TestContext tc, Async async) {
     store.get(ar -> {
+      if (ar.failed()) {
+        ar.cause().printStackTrace();
+      }
       tc.assertTrue(ar.succeeded());
       JsonObject json = ar.result().toJsonObject();
       tc.assertEquals(json.getString("foo"), "bar");

@@ -24,5 +24,18 @@ public class Examples {
         new ConfigurationRetrieverOptions().addStore(store));
   }
 
+  public void example2(Vertx vertx) {
+    ConfigurationStoreOptions store = new ConfigurationStoreOptions()
+        .setType("configmap")
+        .setConfig(new JsonObject()
+            .put("namespace", "my-project-namespace")
+            .put("name", "my-secret")
+            .put("secret", true)
+        );
+
+    ConfigurationRetriever retriever = ConfigurationRetriever.create(vertx,
+        new ConfigurationRetrieverOptions().addStore(store));
+  }
+
 
 }
