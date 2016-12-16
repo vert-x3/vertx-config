@@ -34,7 +34,7 @@ _dependencies_ section of your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-configuration</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>3.4.0-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -42,7 +42,7 @@ _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-configuration:1.0.0-SNAPSHOT'
+compile 'io.vertx:vertx-configuration:3.4.0-SNAPSHOT'
 ----
 
 Once done, you first need to instantiate the `link:../../apidocs/io/vertx/ext/configuration/ConfigurationRetriever.html[ConfigurationRetriever]`:
