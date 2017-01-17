@@ -1,7 +1,7 @@
 package io.vertx.config.utils;
 
-import io.vertx.config.spi.ConfigurationProcessor;
-import io.vertx.config.spi.ConfigurationStoreFactory;
+import io.vertx.config.spi.ConfigProcessor;
+import io.vertx.config.spi.ConfigStoreFactory;
 
 import java.util.HashMap;
 import java.util.ServiceLoader;
@@ -14,13 +14,13 @@ import java.util.Set;
  */
 public class Processors {
 
-  private static final HashMap<String, ConfigurationProcessor> PROCESSORS = new HashMap<>();
+  private static final HashMap<String, ConfigProcessor> PROCESSORS = new HashMap<>();
 
   static {
     synchronized (Processors.class) {
-      ServiceLoader<ConfigurationProcessor> processorImpl =
-          ServiceLoader.load(ConfigurationProcessor.class,
-              ConfigurationStoreFactory.class.getClassLoader());
+      ServiceLoader<ConfigProcessor> processorImpl =
+          ServiceLoader.load(ConfigProcessor.class,
+              ConfigStoreFactory.class.getClassLoader());
       processorImpl.iterator().forEachRemaining(processor -> PROCESSORS.put(processor.name(), processor));
     }
   }
@@ -31,7 +31,7 @@ public class Processors {
    * @param format the format, must not be {@code null}
    * @return the configuration processor or {@code null} if none matches
    */
-  public static ConfigurationProcessor get(String format) {
+  public static ConfigProcessor get(String format) {
     synchronized (Processors.class) {
       return PROCESSORS.get(format);
     }

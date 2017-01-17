@@ -45,12 +45,12 @@ _dependencies_ section of your build descriptor:
 compile 'io.vertx:vertx-config:3.4.0-SNAPSHOT'
 ----
 
-Once done, you first need to instantiate the `link:../../jsdoc/module-vertx-config-js_configuration_retriever-ConfigurationRetriever.html[ConfigurationRetriever]`:
+Once done, you first need to instantiate the `link:../../jsdoc/module-vertx-config-js_config_retriever-ConfigRetriever.html[ConfigRetriever]`:
 
 [source]
 ----
-var ConfigurationRetriever = require("vertx-config-js/configuration_retriever");
-var retriever = ConfigurationRetriever.create(vertx);
+var ConfigRetriever = require("vertx-config-js/config_retriever");
+var retriever = ConfigRetriever.create(vertx);
 
 ----
 
@@ -66,7 +66,7 @@ You can configure your own stores:
 
 [source]
 ----
-var ConfigurationRetriever = require("vertx-config-js/configuration_retriever");
+var ConfigRetriever = require("vertx-config-js/config_retriever");
 var httpStore = {
   "type" : "http",
   "config" : {
@@ -96,7 +96,7 @@ var options = {
   ]
 };
 
-var retriever = ConfigurationRetriever.create(vertx, options);
+var retriever = ConfigRetriever.create(vertx, options);
 
 ----
 
@@ -107,7 +107,7 @@ as follows:
 
 [source]
 ----
-retriever.getConfiguration(function (ar, ar_err) {
+retriever.getConfig(function (ar, ar_err) {
   if (ar_err != null) {
     // Failed to retrieve the configuration
   } else {
@@ -143,7 +143,7 @@ Each declared data store must specify the `type`. It can also define the `format
 not set JSON is used.
 
 Some configurations tore requires additional configuration (such a path...). This
-configuration is passed as a Json Object using `link:../dataobjects.html#ConfigurationStoreOptions#setConfig[config]`
+configuration is passed as a Json Object using `link:../dataobjects.html#ConfigStoreOptions#setConfig[config]`
 
 ==== File
 
@@ -317,7 +317,7 @@ configuration is reloaded every 5 seconds.
 [source, js]
 ----
 var Vertx = require("vertx-js/vertx");
-var ConfigurationRetriever = require("vertx-config-js/configuration_retriever");
+var ConfigRetriever = require("vertx-config-js/config_retriever");
 var options = {
   "scanPeriod" : 2000,
   "stores" : [
@@ -326,8 +326,8 @@ var options = {
   ]
 };
 
-var retriever = ConfigurationRetriever.create(Vertx.vertx(), options);
-retriever.getConfiguration(function (json, json_err) {
+var retriever = ConfigRetriever.create(Vertx.vertx(), options);
+retriever.getConfig(function (json, json_err) {
   // Initial retrieval of the configuration
 });
 
@@ -347,25 +347,25 @@ using:
 
 [source, js]
 ----
-var last = retriever.getCachedConfiguration();
+var last = retriever.getCachedConfig();
 
 ----
 
 === Reading configuration as a stream
 
-The `link:../../jsdoc/module-vertx-config-js_configuration_retriever-ConfigurationRetriever.html[ConfigurationRetriever]` provide a way to access the stream of configuration.
+The `link:../../jsdoc/module-vertx-config-js_config_retriever-ConfigRetriever.html[ConfigRetriever]` provide a way to access the stream of configuration.
 It's a `link:../../jsdoc/module-vertx-js_read_stream-ReadStream.html[ReadStream]` of `JsonObject`. By registering the right
 set of handlers you are notified:
 
 * when a new configuration is retrieved
 * when an error occur while retrieving a configuration
 * when the configuration retriever is closed (the
-`link:../../jsdoc/module-vertx-config-js_configuration_stream-ConfigurationStream.html#endHandler[endHandler]` is called).
+`link:../../jsdoc/module-vertx-config-js_config_stream-ConfigStream.html#endHandler[endHandler]` is called).
 
 [source, js]
 ----
 var Vertx = require("vertx-js/vertx");
-var ConfigurationRetriever = require("vertx-config-js/configuration_retriever");
+var ConfigRetriever = require("vertx-config-js/config_retriever");
 var options = {
   "scanPeriod" : 2000,
   "stores" : [
@@ -374,8 +374,8 @@ var options = {
   ]
 };
 
-var retriever = ConfigurationRetriever.create(Vertx.vertx(), options);
-retriever.configurationStream().endHandler(function (v) {
+var retriever = ConfigRetriever.create(Vertx.vertx(), options);
+retriever.configStream().endHandler(function (v) {
   // retriever closed
 }).exceptionHandler(function (t) {
   // an error has been caught while retrieving the configuration

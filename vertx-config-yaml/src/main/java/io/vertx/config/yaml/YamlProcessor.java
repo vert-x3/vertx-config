@@ -3,7 +3,7 @@ package io.vertx.config.yaml;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import io.vertx.config.spi.ConfigurationProcessor;
+import io.vertx.config.spi.ConfigProcessor;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -16,7 +16,7 @@ import io.vertx.core.json.JsonObject;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class YamlProcessor implements ConfigurationProcessor {
+public class YamlProcessor implements ConfigProcessor {
 
   public static ObjectMapper YAML_MAPPER = new YAMLMapper();
 

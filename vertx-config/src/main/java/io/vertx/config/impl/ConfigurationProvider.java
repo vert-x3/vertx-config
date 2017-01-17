@@ -1,12 +1,12 @@
 package io.vertx.config.impl;
 
-import io.vertx.config.spi.ConfigurationStore;
+import io.vertx.config.spi.ConfigStore;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.config.spi.ConfigurationProcessor;
+import io.vertx.config.spi.ConfigProcessor;
 
 /**
  * A configuration provider retrieve the configuration from a store and transform it to Json.
@@ -17,11 +17,11 @@ public class ConfigurationProvider {
 
   private final JsonObject configuration;
 
-  private final ConfigurationStore store;
+  private final ConfigStore store;
 
-  private final ConfigurationProcessor processor;
+  private final ConfigProcessor processor;
 
-  public ConfigurationProvider(ConfigurationStore store, ConfigurationProcessor processor, JsonObject config) {
+  public ConfigurationProvider(ConfigStore store, ConfigProcessor processor, JsonObject config) {
     this.store = store;
     this.processor = processor;
     if (config == null) {

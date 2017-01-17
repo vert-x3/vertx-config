@@ -52,7 +52,7 @@ module VertxConfig
     # @return [void]
     def get_configuration
       if block_given?
-        return @j_del.java_method(:getConfiguration, [Java::IoVertxCore::Handler.java_class]).call((Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result != nil ? JSON.parse(ar.result.encode) : nil : nil) }))
+        return @j_del.java_method(:getConfig, [Java::IoVertxCore::Handler.java_class]).call((Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result != nil ? JSON.parse(ar.result.encode) : nil : nil) }))
       end
       raise ArgumentError, "Invalid arguments when calling get_configuration()"
     end
@@ -61,7 +61,7 @@ module VertxConfig
     # @return [::Vertx::Future]
     def get_configuration_future
       if !block_given?
-        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:getConfigurationFuture, []).call(),::Vertx::Future, nil)
+        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:getConfigFuture, []).call(), ::Vertx::Future, nil)
       end
       raise ArgumentError, "Invalid arguments when calling get_configuration_future()"
     end
@@ -77,7 +77,7 @@ module VertxConfig
     # @return [Hash{String => Object}] the last configuration
     def get_cached_configuration
       if !block_given?
-        return @j_del.java_method(:getCachedConfiguration, []).call() != nil ? JSON.parse(@j_del.java_method(:getCachedConfiguration, []).call().encode) : nil
+        return @j_del.java_method(:getCachedConfig, []).call() != nil ? JSON.parse(@j_del.java_method(:getCachedConfig, []).call().encode) : nil
       end
       raise ArgumentError, "Invalid arguments when calling get_cached_configuration()"
     end
@@ -97,7 +97,7 @@ module VertxConfig
         if @cached_configuration_stream != nil
           return @cached_configuration_stream
         end
-        return @cached_configuration_stream = ::Vertx::Util::Utils.safe_create(@j_del.java_method(:configurationStream, []).call(),::VertxConfig::ConfigurationStream)
+        return @cached_configuration_stream = ::Vertx::Util::Utils.safe_create(@j_del.java_method(:configStream, []).call(), ::VertxConfig::ConfigurationStream)
       end
       raise ArgumentError, "Invalid arguments when calling configuration_stream()"
     end

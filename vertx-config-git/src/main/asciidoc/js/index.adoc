@@ -35,11 +35,11 @@ compile 'io.vertx:vertx-config-git:3.4.0-SNAPSHOT'
 == Configuring the store
 
 Once added to your classpath or dependencies, you need to configure the
-`link:../../jsdoc/module-vertx-config-js_configuration_retriever-ConfigurationRetriever.html[ConfigurationRetriever]` to use this store:
+`link:../../jsdoc/module-vertx-config-js_config_retriever-ConfigRetriever.html[ConfigRetriever]` to use this store:
 
 [source, js]
 ----
-var ConfigurationRetriever = require("vertx-config-js/configuration_retriever");
+var ConfigRetriever = require("vertx-config-js/config_retriever");
 
 var git = {
   "type" : "git",
@@ -54,7 +54,7 @@ var git = {
   }
 };
 
-var retriever = ConfigurationRetriever.create(vertx, {
+var retriever = ConfigRetriever.create(vertx, {
   "stores" : [
     git
   ]

@@ -1,6 +1,6 @@
 package io.vertx.config;
 
-import io.vertx.config.impl.spi.ConfigurationChecker;
+import io.vertx.config.impl.spi.ConfigChecker;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ConfigurationStreamTest {
 
   private Vertx vertx;
-  private ConfigurationRetriever retriever;
+  private ConfigRetriever retriever;
   private boolean doClose = true;
 
   @Rule
@@ -48,61 +48,61 @@ public class ConfigurationStreamTest {
     System.clearProperty("foo");
   }
 
-  private static ConfigurationRetrieverOptions addStores(ConfigurationRetrieverOptions options) {
+  private static ConfigRetrieverOptions addStores(ConfigRetrieverOptions options) {
     return options
         .addStore(
-            new ConfigurationStoreOptions()
+            new ConfigStoreOptions()
                 .setType("file")
                 .setConfig(new JsonObject().put("path", "src/test/resources/file/regular.json")))
         .addStore(
-            new ConfigurationStoreOptions()
+            new ConfigStoreOptions()
                 .setType("sys")
                 .setConfig(new JsonObject().put("cache", false)));
   }
 
   @Test
   public void testRetrievingTheConfiguration(TestContext tc) {
-    retriever = ConfigurationRetriever.create(vertx,
-        addStores(new ConfigurationRetrieverOptions()));
+    retriever = ConfigRetriever.create(vertx,
+        addStores(new ConfigRetrieverOptions()));
     Async async = tc.async();
-    retriever.configurationStream()
+    retriever.configStream()
         .handler(conf -> {
-          ConfigurationChecker.check(conf);
+          ConfigChecker.check(conf);
           assertThat(conf.getString("foo")).isEqualToIgnoringCase("bar");
-          ConfigurationChecker.check(retriever.getCachedConfiguration());
+          ConfigChecker.check(retriever.getCachedConfig());
           async.complete();
         });
   }
 
   @Test
   public void testRetrievingTheConfigurationAndClose(TestContext tc) {
-    retriever = ConfigurationRetriever.create(vertx,
-        addStores(new ConfigurationRetrieverOptions()));
+    retriever = ConfigRetriever.create(vertx,
+        addStores(new ConfigRetrieverOptions()));
     Async async = tc.async();
     doClose = false;
-    retriever.configurationStream()
+    retriever.configStream()
         .endHandler(v -> async.complete())
         .handler(conf -> {
-          ConfigurationChecker.check(conf);
+          ConfigChecker.check(conf);
           assertThat(conf.getString("foo")).isEqualToIgnoringCase("bar");
-          ConfigurationChecker.check(retriever.getCachedConfiguration());
+          ConfigChecker.check(retriever.getCachedConfig());
           retriever.close();
         });
   }
 
   @Test
   public void testPauseResumeCycles(TestContext tc) {
-    retriever = ConfigurationRetriever.create(vertx,
-        addStores(new ConfigurationRetrieverOptions()));
+    retriever = ConfigRetriever.create(vertx,
+        addStores(new ConfigRetrieverOptions()));
     Async async = tc.async();
     AtomicInteger steps = new AtomicInteger();
-    retriever.configurationStream()
+    retriever.configStream()
         .handler(conf -> {
           if (steps.get() == 0) {
             assertThat(conf.getString("foo")).isEqualToIgnoringCase("bar");
-            retriever.configurationStream().pause();
+            retriever.configStream().pause();
             System.setProperty("foo", "bar2");
-            retriever.configurationStream().resume();
+            retriever.configStream().resume();
             steps.incrementAndGet();
           } else if (steps.get() == 1) {
             assertThat(conf.getString("foo")).isEqualToIgnoringCase("bar2");

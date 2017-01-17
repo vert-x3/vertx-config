@@ -45,12 +45,12 @@ _dependencies_ section of your build descriptor:
 compile 'io.vertx:vertx-config:3.4.0-SNAPSHOT'
 ----
 
-Once done, you first need to instantiate the `link:../../yardoc/VertxConfig/ConfigurationRetriever.html[ConfigurationRetriever]`:
+Once done, you first need to instantiate the `link:../../yardoc/VertxConfig/ConfigRetriever.html[ConfigRetriever]`:
 
 [source]
 ----
-require 'vertx-config/configuration_retriever'
-retriever = VertxConfig::ConfigurationRetriever.create(vertx)
+require 'vertx-config/config_retriever'
+retriever = VertxConfig::ConfigRetriever.create(vertx)
 
 ----
 
@@ -66,7 +66,7 @@ You can configure your own stores:
 
 [source]
 ----
-require 'vertx-config/configuration_retriever'
+require 'vertx-config/config_retriever'
 httpStore = {
   'type' => "http",
   'config' => {
@@ -96,7 +96,7 @@ options = {
   ]
 }
 
-retriever = VertxConfig::ConfigurationRetriever.create(vertx, options)
+retriever = VertxConfig::ConfigRetriever.create(vertx, options)
 
 ----
 
@@ -107,7 +107,7 @@ as follows:
 
 [source]
 ----
-retriever.get_configuration() { |ar_err,ar|
+retriever.get_config() { |ar_err,ar|
   if (ar_err != nil)
     # Failed to retrieve the configuration
   else
@@ -143,7 +143,7 @@ Each declared data store must specify the `type`. It can also define the `format
 not set JSON is used.
 
 Some configurations tore requires additional configuration (such a path...). This
-configuration is passed as a Json Object using `link:../dataobjects.html#ConfigurationStoreOptions#set_config-instance_method[config]`
+configuration is passed as a Json Object using `link:../dataobjects.html#ConfigStoreOptions#set_config-instance_method[config]`
 
 ==== File
 
@@ -317,7 +317,7 @@ configuration is reloaded every 5 seconds.
 [source, ruby]
 ----
 require 'vertx/vertx'
-require 'vertx-config/configuration_retriever'
+require 'vertx-config/config_retriever'
 options = {
   'scanPeriod' => 2000,
   'stores' => [
@@ -326,8 +326,8 @@ options = {
   ]
 }
 
-retriever = VertxConfig::ConfigurationRetriever.create(Vertx::Vertx.vertx(), options)
-retriever.get_configuration() { |json_err,json|
+retriever = VertxConfig::ConfigRetriever.create(Vertx::Vertx.vertx(), options)
+retriever.get_config() { |json_err,json|
   # Initial retrieval of the configuration
 }
 
@@ -347,25 +347,25 @@ using:
 
 [source, ruby]
 ----
-last = retriever.get_cached_configuration()
+last = retriever.get_cached_config()
 
 ----
 
 === Reading configuration as a stream
 
-The `link:../../yardoc/VertxConfig/ConfigurationRetriever.html[ConfigurationRetriever]` provide a way to access the stream of configuration.
+The `link:../../yardoc/VertxConfig/ConfigRetriever.html[ConfigRetriever]` provide a way to access the stream of configuration.
 It's a `link:../../yardoc/Vertx/ReadStream.html[ReadStream]` of `link:unavailable[JsonObject]`. By registering the right
 set of handlers you are notified:
 
 * when a new configuration is retrieved
 * when an error occur while retrieving a configuration
 * when the configuration retriever is closed (the
-`link:../../yardoc/VertxConfig/ConfigurationStream.html#end_handler-instance_method[endHandler]` is called).
+`link:../../yardoc/VertxConfig/ConfigStream.html#end_handler-instance_method[endHandler]` is called).
 
 [source, ruby]
 ----
 require 'vertx/vertx'
-require 'vertx-config/configuration_retriever'
+require 'vertx-config/config_retriever'
 options = {
   'scanPeriod' => 2000,
   'stores' => [
@@ -374,8 +374,8 @@ options = {
   ]
 }
 
-retriever = VertxConfig::ConfigurationRetriever.create(Vertx::Vertx.vertx(), options)
-retriever.configuration_stream().end_handler() { |v|
+retriever = VertxConfig::ConfigRetriever.create(Vertx::Vertx.vertx(), options)
+retriever.config_stream().end_handler() { |v|
   # retriever closed
 }.exception_handler() { |t|
   # an error has been caught while retrieving the configuration

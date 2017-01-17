@@ -36,7 +36,7 @@
  * == Configuring the store
  *
  * Once added to your classpath or dependencies, you need to configure the
- * {@link io.vertx.config.ConfigurationRetriever} to use this store:
+ * {@link io.vertx.config.ConfigRetriever} to use this store:
  *
  * [source, $lang]
  * ----

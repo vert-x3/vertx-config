@@ -6,14 +6,14 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
-import io.vertx.config.spi.ConfigurationProcessor;
+import io.vertx.config.spi.ConfigProcessor;
 
 /**
  * Builds a json object from the given buffer.
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class JsonProcessor implements ConfigurationProcessor {
+public class JsonProcessor implements ConfigProcessor {
 
   @Override
   public void process(Vertx vertx, JsonObject configuration, Buffer input, Handler<AsyncResult<JsonObject>> handler) {

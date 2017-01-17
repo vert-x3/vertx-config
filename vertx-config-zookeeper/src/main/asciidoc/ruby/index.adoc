@@ -37,11 +37,11 @@ compile 'io.vertx:vertx-config-zookeeper:3.4.0-SNAPSHOT'
 == Configuring the store
 
 Once added to your classpath or dependencies, you need to configure the
-`link:../../yardoc/VertxConfig/ConfigurationRetriever.html[ConfigurationRetriever]` to use this store:
+`link:../../yardoc/VertxConfig/ConfigRetriever.html[ConfigRetriever]` to use this store:
 
 [source, ruby]
 ----
-require 'vertx-config/configuration_retriever'
+require 'vertx-config/config_retriever'
 store = {
   'type' => "zookeeper",
   'config' => {
@@ -50,7 +50,7 @@ store = {
   }
 }
 
-retriever = VertxConfig::ConfigurationRetriever.create(vertx, {
+retriever = VertxConfig::ConfigRetriever.create(vertx, {
   'stores' => [
     store
   ]

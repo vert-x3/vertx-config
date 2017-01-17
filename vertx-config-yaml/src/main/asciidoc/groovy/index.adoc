@@ -35,11 +35,11 @@ compile 'io.vertx:vertx-config-yaml:3.4.0-SNAPSHOT'
 == Configuring the store to use YAML
 
 Once added to your classpath or dependencies, you need to configure the
-`link:../../apidocs/io/vertx/config/ConfigurationRetriever.html[ConfigurationRetriever]` to use this format:
+`link:../../apidocs/io/vertx/config/ConfigRetriever.html[ConfigRetriever]` to use this format:
 
 [source, groovy]
 ----
-import io.vertx.config.ConfigurationRetriever
+import io.vertx.config.ConfigRetriever
 def store = [
   type:"file",
   config:[
@@ -48,7 +48,7 @@ def store = [
   ]
 ]
 
-def retriever = ConfigurationRetriever.create(vertx, [
+def retriever = ConfigRetriever.create(vertx, [
   stores:[
     store
   ]

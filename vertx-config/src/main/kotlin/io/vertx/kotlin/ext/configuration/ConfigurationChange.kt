@@ -1,10 +1,10 @@
 package io.vertx.kotlin.ext.configuration
 
-import io.vertx.config.ConfigurationChange
+import io.vertx.config.ConfigChange
 
 fun ConfigurationChange(
     newConfiguration: io.vertx.core.json.JsonObject? = null,
-  previousConfiguration: io.vertx.core.json.JsonObject? = null): ConfigurationChange = ConfigurationChange().apply {
+  previousConfiguration: io.vertx.core.json.JsonObject? = null): ConfigChange = ConfigChange().apply {
 
   if (newConfiguration != null) {
     this.newConfiguration = newConfiguration

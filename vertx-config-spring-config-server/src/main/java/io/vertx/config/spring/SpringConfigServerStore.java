@@ -10,7 +10,7 @@ import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.config.spi.ConfigurationStore;
+import io.vertx.config.spi.ConfigStore;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -22,7 +22,7 @@ import java.util.Objects;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-class SpringConfigServerStore implements ConfigurationStore {
+class SpringConfigServerStore implements ConfigStore {
 
 
   private final String path;

@@ -10,7 +10,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
-import io.vertx.config.spi.ConfigurationStore;
+import io.vertx.config.spi.ConfigStore;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 /**
  * An implementation of configuration store reading config map from Kubernetes.
  */
-public class ConfigMapStore implements ConfigurationStore {
+public class ConfigMapStore implements ConfigStore {
   private static final String KUBERNETES_NAMESPACE = System.getenv("KUBERNETES_NAMESPACE");
   private final Vertx vertx;
   private final JsonObject configuration;

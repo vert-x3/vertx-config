@@ -1,12 +1,12 @@
 package io.vertx.config.verticle;
 
-import io.vertx.config.ConfigurationRetriever;
+import io.vertx.config.ConfigRetriever;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
-import io.vertx.config.ConfigurationRetrieverOptions;
-import io.vertx.config.ConfigurationStoreOptions;
+import io.vertx.config.ConfigRetrieverOptions;
+import io.vertx.config.ConfigStoreOptions;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -14,14 +14,14 @@ import io.vertx.config.ConfigurationStoreOptions;
 public class MyMainVerticle extends AbstractVerticle {
 
   private String deploymentId;
-  private ConfigurationRetriever configurationRetriever;
+  private ConfigRetriever configurationRetriever;
 
   @Override
   public void start(Future<Void> future) throws Exception {
-    configurationRetriever = ConfigurationRetriever.create(vertx,
-        new ConfigurationRetrieverOptions()
+    configurationRetriever = ConfigRetriever.create(vertx,
+        new ConfigRetrieverOptions()
             .setScanPeriod(500)
-            .addStore(new ConfigurationStoreOptions()
+            .addStore(new ConfigStoreOptions()
                 .setType("http")
                 .setConfig(new JsonObject()
                     .put("host", "localhost")
@@ -36,7 +36,7 @@ public class MyMainVerticle extends AbstractVerticle {
     });
 
     // Retrieve the current configuration.
-    configurationRetriever.getConfiguration(ar -> {
+    configurationRetriever.getConfig(ar -> {
       JsonObject configuration = ar.result();
       deployMyVerticle(configuration, future);
     });

@@ -37,19 +37,19 @@ compile 'io.vertx:vertx-config-zookeeper:3.4.0-SNAPSHOT'
 == Configuring the store
 
 Once added to your classpath or dependencies, you need to configure the
-`link:../../apidocs/io/vertx/config/ConfigurationRetriever.html[ConfigurationRetriever]` to use this store:
+`link:../../apidocs/io/vertx/config/ConfigRetriever.html[ConfigRetriever]` to use this store:
 
 [source, java]
 ----
-ConfigurationStoreOptions store = new ConfigurationStoreOptions()
+ConfigStoreOptions store = new ConfigStoreOptions()
     .setType("zookeeper")
     .setConfig(new JsonObject()
         .put("connection", "localhost:2181")
         .put("path", "/path/to/my/conf")
     );
 
-ConfigurationRetriever retriever = ConfigurationRetriever.create(vertx,
-    new ConfigurationRetrieverOptions().addStore(store));
+ConfigRetriever retriever = ConfigRetriever.create(vertx,
+    new ConfigRetrieverOptions().addStore(store));
 ----
 
 The store configuration is used to configure the Apache Curator client and the _path_ of the Zookeeper node

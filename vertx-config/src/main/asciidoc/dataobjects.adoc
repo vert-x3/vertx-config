@@ -1,7 +1,7 @@
 = Cheatsheets
 
-[[ConfigurationChange]]
-== ConfigurationChange
+[[ConfigChange]]
+== ConfigChange
 
 ++++
  A structure representing a configuration change.
@@ -16,8 +16,8 @@
 |[[previousConfiguration]]`previousConfiguration`|`Json object`|-
 |===
 
-[[ConfigurationRetrieverOptions]]
-== ConfigurationRetrieverOptions
+[[ConfigRetrieverOptions]]
+== ConfigRetrieverOptions
 
 ++++
 ++++
@@ -28,11 +28,11 @@
 |===
 ^|Name | Type ^| Description
 |[[scanPeriod]]`scanPeriod`|`Number (long)`|-
-|[[stores]]`stores`|`Array of link:dataobjects.html#ConfigurationStoreOptions[ConfigurationStoreOptions]`|-
+|[[stores]]`stores`|`Array of link:dataobjects.html#ConfigStoreOptions[ConfigStoreOptions]`|-
 |===
 
-[[ConfigurationStoreOptions]]
-== ConfigurationStoreOptions
+[[ConfigStoreOptions]]
+== ConfigStoreOptions
 
 ++++
 ++++

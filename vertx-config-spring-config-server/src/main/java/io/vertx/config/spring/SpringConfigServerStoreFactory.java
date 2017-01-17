@@ -1,7 +1,7 @@
 package io.vertx.config.spring;
 
-import io.vertx.config.spi.ConfigurationStore;
-import io.vertx.config.spi.ConfigurationStoreFactory;
+import io.vertx.config.spi.ConfigStore;
+import io.vertx.config.spi.ConfigStoreFactory;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
@@ -10,7 +10,7 @@ import io.vertx.core.json.JsonObject;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class SpringConfigServerStoreFactory implements ConfigurationStoreFactory {
+public class SpringConfigServerStoreFactory implements ConfigStoreFactory {
 
 
   @Override
@@ -19,7 +19,7 @@ public class SpringConfigServerStoreFactory implements ConfigurationStoreFactory
   }
 
   @Override
-  public ConfigurationStore create(Vertx vertx, JsonObject configuration) {
+  public ConfigStore create(Vertx vertx, JsonObject configuration) {
     return new SpringConfigServerStore(vertx, configuration);
   }
 }

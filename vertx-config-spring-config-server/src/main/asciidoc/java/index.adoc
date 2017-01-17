@@ -35,16 +35,16 @@ compile 'io.vertx:vertx-config-spring-config-server:3.4.0-SNAPSHOT'
 == Configuring the store
 
 Once added to your classpath or dependencies, you need to configure the
-`link:../../apidocs/io/vertx/config/ConfigurationRetriever.html[ConfigurationRetriever]` to use this store:
+`link:../../apidocs/io/vertx/config/ConfigRetriever.html[ConfigRetriever]` to use this store:
 
 [source, java]
 ----
-ConfigurationStoreOptions store = new ConfigurationStoreOptions()
+ConfigStoreOptions store = new ConfigStoreOptions()
     .setType("spring-config-server")
     .setConfig(new JsonObject().put("url", "http://localhost:8888/foo/development"));
 
-ConfigurationRetriever retriever = ConfigurationRetriever.create(vertx,
-    new ConfigurationRetrieverOptions().addStore(store));
+ConfigRetriever retriever = ConfigRetriever.create(vertx,
+    new ConfigRetrieverOptions().addStore(store));
 ----
 
 

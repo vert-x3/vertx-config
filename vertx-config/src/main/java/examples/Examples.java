@@ -1,11 +1,11 @@
 package examples;
 
+import io.vertx.config.ConfigRetriever;
+import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.config.ConfigurationRetriever;
-import io.vertx.config.ConfigurationRetrieverOptions;
-import io.vertx.config.ConfigurationStoreOptions;
+import io.vertx.config.ConfigStoreOptions;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -14,30 +14,30 @@ public class Examples {
 
 
   public void example1(Vertx vertx) {
-    ConfigurationRetriever retriever = ConfigurationRetriever.create(vertx);
+    ConfigRetriever retriever = ConfigRetriever.create(vertx);
   }
 
   public void example2(Vertx vertx) {
-    ConfigurationStoreOptions httpStore = new ConfigurationStoreOptions()
+    ConfigStoreOptions httpStore = new ConfigStoreOptions()
         .setType("http")
         .setConfig(new JsonObject()
             .put("host", "localhost").put("port", 8080).put("path", "/conf"));
 
-    ConfigurationStoreOptions fileStore = new ConfigurationStoreOptions()
+    ConfigStoreOptions fileStore = new ConfigStoreOptions()
         .setType("file")
         .setConfig(new JsonObject().put("path", "my-config.json"));
 
-    ConfigurationStoreOptions sysPropsStore = new ConfigurationStoreOptions().setType("sys");
+    ConfigStoreOptions sysPropsStore = new ConfigStoreOptions().setType("sys");
 
 
-    ConfigurationRetrieverOptions options = new ConfigurationRetrieverOptions()
+    ConfigRetrieverOptions options = new ConfigRetrieverOptions()
         .addStore(httpStore).addStore(fileStore).addStore(sysPropsStore);
 
-    ConfigurationRetriever retriever = ConfigurationRetriever.create(vertx, options);
+    ConfigRetriever retriever = ConfigRetriever.create(vertx, options);
   }
 
-  public void example3(ConfigurationRetriever retriever) {
-    retriever.getConfiguration(ar -> {
+  public void example3(ConfigRetriever retriever) {
+    retriever.getConfig(ar -> {
       if (ar.failed()) {
         // Failed to retrieve the configuration
       } else {
@@ -47,31 +47,31 @@ public class Examples {
   }
 
   public void file() {
-    ConfigurationStoreOptions file = new ConfigurationStoreOptions()
+    ConfigStoreOptions file = new ConfigStoreOptions()
         .setType("file")
         .setFormat("properties")
         .setConfig(new JsonObject().put("path", "path-to-file.properties"));
   }
 
   public void json() {
-    ConfigurationStoreOptions json = new ConfigurationStoreOptions()
+    ConfigStoreOptions json = new ConfigStoreOptions()
         .setType("json")
         .setConfig(new JsonObject().put("key", "value"));
   }
 
   public void sys() {
-    ConfigurationStoreOptions json = new ConfigurationStoreOptions()
+    ConfigStoreOptions json = new ConfigStoreOptions()
         .setType("sys")
         .setConfig(new JsonObject().put("cache", "false"));
   }
 
   public void env() {
-    ConfigurationStoreOptions json = new ConfigurationStoreOptions()
+    ConfigStoreOptions json = new ConfigStoreOptions()
         .setType("env");
   }
 
   public void http() {
-    ConfigurationStoreOptions http = new ConfigurationStoreOptions()
+    ConfigStoreOptions http = new ConfigStoreOptions()
         .setType("http")
         .setConfig(new JsonObject()
             .put("host", "localhost")
@@ -80,7 +80,7 @@ public class Examples {
   }
 
   public void http2() {
-    ConfigurationStoreOptions http = new ConfigurationStoreOptions()
+    ConfigStoreOptions http = new ConfigStoreOptions()
         .setType("http")
         .setConfig(new JsonObject()
             .put("defaultHost", "localhost")
@@ -90,7 +90,7 @@ public class Examples {
   }
 
   public void eb() {
-    ConfigurationStoreOptions eb = new ConfigurationStoreOptions()
+    ConfigStoreOptions eb = new ConfigStoreOptions()
         .setType("event-bus")
         .setConfig(new JsonObject()
             .put("address", "address-getting-the-conf")
@@ -98,7 +98,7 @@ public class Examples {
   }
 
   public void dir() {
-    ConfigurationStoreOptions dir = new ConfigurationStoreOptions()
+    ConfigStoreOptions dir = new ConfigStoreOptions()
         .setType("directory")
         .setConfig(new JsonObject().put("path", "config")
             .put("filesets", new JsonArray()
@@ -108,14 +108,14 @@ public class Examples {
             ));
   }
 
-  public void period(ConfigurationStoreOptions store1, ConfigurationStoreOptions store2) {
-    ConfigurationRetrieverOptions options = new ConfigurationRetrieverOptions()
+  public void period(ConfigStoreOptions store1, ConfigStoreOptions store2) {
+    ConfigRetrieverOptions options = new ConfigRetrieverOptions()
         .setScanPeriod(2000)
         .addStore(store1)
         .addStore(store2);
 
-    ConfigurationRetriever retriever = ConfigurationRetriever.create(Vertx.vertx(), options);
-    retriever.getConfiguration(json -> {
+    ConfigRetriever retriever = ConfigRetriever.create(Vertx.vertx(), options);
+    retriever.getConfig(json -> {
       // Initial retrieval of the configuration
     });
 
@@ -127,14 +127,14 @@ public class Examples {
     });
   }
 
-  public void stream(ConfigurationStoreOptions store1, ConfigurationStoreOptions store2) {
-    ConfigurationRetrieverOptions options = new ConfigurationRetrieverOptions()
+  public void stream(ConfigStoreOptions store1, ConfigStoreOptions store2) {
+    ConfigRetrieverOptions options = new ConfigRetrieverOptions()
         .setScanPeriod(2000)
         .addStore(store1)
         .addStore(store2);
 
-    ConfigurationRetriever retriever = ConfigurationRetriever.create(Vertx.vertx(), options);
-    retriever.configurationStream()
+    ConfigRetriever retriever = ConfigRetriever.create(Vertx.vertx(), options);
+    retriever.configStream()
         .endHandler(v -> {
           // retriever closed
         })
@@ -147,8 +147,8 @@ public class Examples {
 
   }
 
-  public void cache(ConfigurationRetriever retriever) {
-    JsonObject last = retriever.getCachedConfiguration();
+  public void cache(ConfigRetriever retriever) {
+    JsonObject last = retriever.getCachedConfig();
   }
 
 }

@@ -1,11 +1,11 @@
 package io.vertx.kotlin.config
 
-import io.vertx.config.ConfigurationStoreOptions
+import io.vertx.config.ConfigStoreOptions
 
 fun ConfigurationStoreOptions(
     config: io.vertx.core.json.JsonObject? = null,
   format: String? = null,
-  type: String? = null): ConfigurationStoreOptions = io.vertx.config.ConfigurationStoreOptions().apply {
+  type: String? = null): ConfigStoreOptions = ConfigStoreOptions().apply {
 
   if (config != null) {
     this.config = config

@@ -6,12 +6,12 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
-import io.vertx.config.spi.ConfigurationProcessor;
+import io.vertx.config.spi.ConfigProcessor;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class RawProcessor implements ConfigurationProcessor {
+public class RawProcessor implements ConfigProcessor {
   @Override
   public String name() {
     return "raw";

@@ -45,12 +45,12 @@ _dependencies_ section of your build descriptor:
 compile 'io.vertx:vertx-config:3.4.0-SNAPSHOT'
 ----
 
-Once done, you first need to instantiate the `link:../../apidocs/io/vertx/config/ConfigurationRetriever.html[ConfigurationRetriever]`:
+Once done, you first need to instantiate the `link:../../apidocs/io/vertx/config/ConfigRetriever.html[ConfigRetriever]`:
 
 [source]
 ----
-import io.vertx.config.ConfigurationRetriever
-def retriever = ConfigurationRetriever.create(vertx)
+import io.vertx.config.ConfigRetriever
+def retriever = ConfigRetriever.create(vertx)
 
 ----
 
@@ -66,7 +66,7 @@ You can configure your own stores:
 
 [source]
 ----
-import io.vertx.config.ConfigurationRetriever
+import io.vertx.config.ConfigRetriever
 def httpStore = [
   type:"http",
   config:[
@@ -96,7 +96,7 @@ def options = [
   ]
 ]
 
-def retriever = ConfigurationRetriever.create(vertx, options)
+def retriever = ConfigRetriever.create(vertx, options)
 
 ----
 
@@ -107,7 +107,7 @@ as follows:
 
 [source]
 ----
-retriever.getConfiguration({ ar ->
+retriever.getConfig({ ar ->
   if (ar.failed()) {
     // Failed to retrieve the configuration
   } else {
@@ -143,7 +143,7 @@ Each declared data store must specify the `type`. It can also define the `format
 not set JSON is used.
 
 Some configurations tore requires additional configuration (such a path...). This
-configuration is passed as a Json Object using `link:../../apidocs/io/vertx/config/ConfigurationStoreOptions.html#setConfig-io.vertx.core.json.JsonObject-[setConfig]`
+configuration is passed as a Json Object using `link:../../apidocs/io/vertx/config/ConfigStoreOptions.html#setConfig-io.vertx.core.json.JsonObject-[setConfig]`
 
 ==== File
 
@@ -317,7 +317,7 @@ configuration is reloaded every 5 seconds.
 [source, groovy]
 ----
 import io.vertx.core.Vertx
-import io.vertx.config.ConfigurationRetriever
+import io.vertx.config.ConfigRetriever
 def options = [
   scanPeriod:2000,
   stores:[
@@ -326,8 +326,8 @@ def options = [
   ]
 ]
 
-def retriever = ConfigurationRetriever.create(Vertx.vertx(), options)
-retriever.getConfiguration({ json ->
+def retriever = ConfigRetriever.create(Vertx.vertx(), options)
+retriever.getConfig({ json ->
   // Initial retrieval of the configuration
 })
 
@@ -347,25 +347,25 @@ using:
 
 [source, groovy]
 ----
-def last = retriever.getCachedConfiguration()
+def last = retriever.getCachedConfig()
 
 ----
 
 === Reading configuration as a stream
 
-The `link:../../apidocs/io/vertx/config/ConfigurationRetriever.html[ConfigurationRetriever]` provide a way to access the stream of configuration.
+The `link:../../apidocs/io/vertx/config/ConfigRetriever.html[ConfigRetriever]` provide a way to access the stream of configuration.
 It's a `link:../../apidocs/io/vertx/core/streams/ReadStream.html[ReadStream]` of `link:../../apidocs/io/vertx/core/json/JsonObject.html[JsonObject]`. By registering the right
 set of handlers you are notified:
 
 * when a new configuration is retrieved
 * when an error occur while retrieving a configuration
 * when the configuration retriever is closed (the
-`link:../../apidocs/io/vertx/config/ConfigurationStream.html#endHandler-io.vertx.core.Handler-[endHandler]` is called).
+`link:../../apidocs/io/vertx/config/ConfigStream.html#endHandler-io.vertx.core.Handler-[endHandler]` is called).
 
 [source, groovy]
 ----
 import io.vertx.core.Vertx
-import io.vertx.config.ConfigurationRetriever
+import io.vertx.config.ConfigRetriever
 def options = [
   scanPeriod:2000,
   stores:[
@@ -374,8 +374,8 @@ def options = [
   ]
 ]
 
-def retriever = ConfigurationRetriever.create(Vertx.vertx(), options)
-retriever.configurationStream().endHandler({ v ->
+def retriever = ConfigRetriever.create(Vertx.vertx(), options)
+retriever.configStream().endHandler({ v ->
   // retriever closed
 }).exceptionHandler({ t ->
   // an error has been caught while retrieving the configuration

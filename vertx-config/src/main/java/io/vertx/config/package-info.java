@@ -45,7 +45,7 @@
  * compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
  * ----
  *
- * Once done, you first need to instantiate the {@link io.vertx.config.ConfigurationRetriever}:
+ * Once done, you first need to instantiate the {@link io.vertx.config.ConfigRetriever}:
  *
  * [source]
  * ----
@@ -74,7 +74,7 @@
  *
  * [source]
  * ----
- * {@link examples.Examples#example3(ConfigurationRetriever)}
+ * {@link examples.Examples#example3(ConfigRetriever)}
  * ----
  *
  * === Overloading rules
@@ -103,7 +103,7 @@
  * not set JSON is used.
  *
  * Some configurations tore requires additional configuration (such a path...). This
- * configuration is passed as a Json Object using {@link io.vertx.config.ConfigurationStoreOptions#setConfig(io.vertx.core.json.JsonObject)}
+ * configuration is passed as a Json Object using {@link io.vertx.config.ConfigStoreOptions#setConfig(io.vertx.core.json.JsonObject)}
  *
  * ==== File
  *
@@ -216,7 +216,7 @@
  *
  * [source, $lang]
  * ----
- * {@link examples.Examples#period(ConfigurationStoreOptions, ConfigurationStoreOptions)}
+ * {@link examples.Examples#period(ConfigStoreOptions, ConfigStoreOptions)}
  * ----
  *
  * === Retrieving the last retrieved configuration
@@ -226,23 +226,23 @@
  *
  * [source, $lang]
  * ----
- * {@link examples.Examples#cache(ConfigurationRetriever)}
+ * {@link examples.Examples#cache(ConfigRetriever)}
  * ----
  *
  * === Reading configuration as a stream
  *
- * The {@link io.vertx.config.ConfigurationRetriever} provide a way to access the stream of configuration.
+ * The {@link io.vertx.config.ConfigRetriever} provide a way to access the stream of configuration.
  * It's a {@link io.vertx.core.streams.ReadStream} of {@link io.vertx.core.json.JsonObject}. By registering the right
  * set of handlers you are notified:
  *
  * * when a new configuration is retrieved
  * * when an error occur while retrieving a configuration
  * * when the configuration retriever is closed (the
- * {@link io.vertx.config.ConfigurationStream#endHandler(io.vertx.core.Handler)} is called).
+ * {@link io.vertx.config.ConfigStream#endHandler(io.vertx.core.Handler)} is called).
  *
  * [source, $lang]
  * ----
- * {@link examples.Examples#stream(ConfigurationStoreOptions, ConfigurationStoreOptions)}
+ * {@link examples.Examples#stream(ConfigStoreOptions, ConfigStoreOptions)}
  * ----
  *
  * === Extending the Configuration Retriever

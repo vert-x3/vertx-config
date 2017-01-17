@@ -1,6 +1,6 @@
 package io.vertx.config;
 
-import io.vertx.config.impl.spi.ConfigurationChecker;
+import io.vertx.config.impl.spi.ConfigChecker;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ConfigurationRetrieverTest {
 
   private Vertx vertx;
-  private ConfigurationRetriever retriever;
+  private ConfigRetriever retriever;
 
   @Before
   public void setUp(TestContext tc) {
@@ -38,68 +38,68 @@ public class ConfigurationRetrieverTest {
     System.clearProperty("foo");
   }
 
-  private static ConfigurationRetrieverOptions addStores(ConfigurationRetrieverOptions options) {
+  private static ConfigRetrieverOptions addStores(ConfigRetrieverOptions options) {
     return options
         .addStore(
-            new ConfigurationStoreOptions()
+            new ConfigStoreOptions()
                 .setType("file")
                 .setConfig(new JsonObject().put("path", "src/test/resources/file/regular.json")))
         .addStore(
-            new ConfigurationStoreOptions()
+            new ConfigStoreOptions()
                 .setType("sys")
                 .setConfig(new JsonObject().put("cache", false)));
   }
 
-  private static ConfigurationRetrieverOptions addReversedStores(ConfigurationRetrieverOptions options) {
+  private static ConfigRetrieverOptions addReversedStores(ConfigRetrieverOptions options) {
     return options
         .addStore(
-            new ConfigurationStoreOptions()
+            new ConfigStoreOptions()
                 .setType("sys")
                 .setConfig(new JsonObject().put("cache", false)))
         .addStore(
-            new ConfigurationStoreOptions()
+            new ConfigStoreOptions()
                 .setType("file")
                 .setConfig(new JsonObject().put("path", "src/test/resources/file/regular.json")));
   }
 
   @Test
   public void testLoading(TestContext tc) {
-    retriever = ConfigurationRetriever.create(vertx,
-        addStores(new ConfigurationRetrieverOptions()));
+    retriever = ConfigRetriever.create(vertx,
+        addStores(new ConfigRetrieverOptions()));
     Async async = tc.async();
 
-    retriever.getConfiguration(ar -> {
-      ConfigurationChecker.check(ar);
+    retriever.getConfig(ar -> {
+      ConfigChecker.check(ar);
       assertThat(ar.result().getString("foo")).isEqualToIgnoringCase("bar");
-      ConfigurationChecker.check(retriever.getCachedConfiguration());
+      ConfigChecker.check(retriever.getCachedConfig());
       async.complete();
     });
   }
 
   @Test
   public void testLoadingWithFuturePolyglotVersion(TestContext tc) {
-    retriever = ConfigurationRetriever.create(vertx,
-        addStores(new ConfigurationRetrieverOptions()));
+    retriever = ConfigRetriever.create(vertx,
+        addStores(new ConfigRetrieverOptions()));
     Async async = tc.async();
 
-    retriever.<JsonObject>getConfigurationFuture().setHandler(ar -> {
-      ConfigurationChecker.check(ar);
+    retriever.<JsonObject>getConfigFuture().setHandler(ar -> {
+      ConfigChecker.check(ar);
       assertThat(ar.result().getString("foo")).isEqualToIgnoringCase("bar");
-      ConfigurationChecker.check(retriever.getCachedConfiguration());
+      ConfigChecker.check(retriever.getCachedConfig());
       async.complete();
     });
   }
 
   @Test
   public void testLoadingWithFutureJAvaVersion(TestContext tc) {
-    retriever = ConfigurationRetriever.create(vertx,
-        addStores(new ConfigurationRetrieverOptions()));
+    retriever = ConfigRetriever.create(vertx,
+        addStores(new ConfigRetrieverOptions()));
     Async async = tc.async();
 
-    retriever.getConfigurationFuture().setHandler(ar -> {
-      ConfigurationChecker.check(ar);
+    retriever.getConfigFuture().setHandler(ar -> {
+      ConfigChecker.check(ar);
       assertThat(ar.result().getString("foo")).isEqualToIgnoringCase("bar");
-      ConfigurationChecker.check(retriever.getCachedConfiguration());
+      ConfigChecker.check(retriever.getCachedConfig());
       async.complete();
     });
   }
@@ -110,9 +110,9 @@ public class ConfigurationRetrieverTest {
     vertx.runOnContext(v -> {
       vertx.getOrCreateContext().config().put("hello", "hello");
       System.setProperty("foo", "bar");
-      retriever = ConfigurationRetriever.create(vertx);
+      retriever = ConfigRetriever.create(vertx);
 
-      retriever.getConfiguration(ar -> {
+      retriever.getConfig(ar -> {
         assertThat(ar.result().getString("foo")).isEqualToIgnoringCase("bar");
         assertThat(ar.result().getString("hello")).isEqualToIgnoringCase("hello");
         assertThat(ar.result().getString("PATH")).isNotNull();
@@ -129,9 +129,9 @@ public class ConfigurationRetrieverTest {
           .put("hello", "hello")
           .put("foo", "bar");
       System.setProperty("foo", "baz");
-      retriever = ConfigurationRetriever.create(vertx);
+      retriever = ConfigRetriever.create(vertx);
 
-      retriever.getConfiguration(ar -> {
+      retriever.getConfig(ar -> {
         assertThat(ar.result().getString("foo")).isEqualToIgnoringCase("baz");
         assertThat(ar.result().getString("hello")).isEqualToIgnoringCase("hello");
         assertThat(ar.result().getString("PATH")).isNotNull();
@@ -143,11 +143,11 @@ public class ConfigurationRetrieverTest {
   @Test
   public void testOverloading(TestContext tc) {
     System.setProperty("key", "new-value");
-    retriever = ConfigurationRetriever.create(vertx,
-        addStores(new ConfigurationRetrieverOptions()));
+    retriever = ConfigRetriever.create(vertx,
+        addStores(new ConfigRetrieverOptions()));
     Async async = tc.async();
 
-    retriever.getConfiguration(ar -> {
+    retriever.getConfig(ar -> {
       assertThat(ar.result().getString("key")).isEqualToIgnoringCase("new-value");
       async.complete();
     });
@@ -156,9 +156,9 @@ public class ConfigurationRetrieverTest {
   @Test
   public void testReversedOverloading(TestContext tc) {
     System.setProperty("key", "new-value");
-    retriever = ConfigurationRetriever.create(vertx, addReversedStores(new ConfigurationRetrieverOptions()));
+    retriever = ConfigRetriever.create(vertx, addReversedStores(new ConfigRetrieverOptions()));
     Async async = tc.async();
-    retriever.getConfiguration(ar -> {
+    retriever.getConfig(ar -> {
       assertThat(ar.result().getString("key")).isEqualToIgnoringCase("value");
       async.complete();
     });

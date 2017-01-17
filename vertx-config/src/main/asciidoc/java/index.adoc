@@ -45,11 +45,11 @@ _dependencies_ section of your build descriptor:
 compile 'io.vertx:vertx-config:3.4.0-SNAPSHOT'
 ----
 
-Once done, you first need to instantiate the `link:../../apidocs/io/vertx/config/ConfigurationRetriever.html[ConfigurationRetriever]`:
+Once done, you first need to instantiate the `link:../../apidocs/io/vertx/config/ConfigRetriever.html[ConfigRetriever]`:
 
 [source]
 ----
-ConfigurationRetriever retriever = ConfigurationRetriever.create(vertx);
+ConfigRetriever retriever = ConfigRetriever.create(vertx);
 ----
 
 By default the Vert.x Configuration Retriever is configured with the following stores (in
@@ -64,22 +64,22 @@ You can configure your own stores:
 
 [source]
 ----
-ConfigurationStoreOptions httpStore = new ConfigurationStoreOptions()
+ConfigStoreOptions httpStore = new ConfigStoreOptions()
     .setType("http")
     .setConfig(new JsonObject()
         .put("host", "localhost").put("port", 8080).put("path", "/conf"));
 
-ConfigurationStoreOptions fileStore = new ConfigurationStoreOptions()
+ConfigStoreOptions fileStore = new ConfigStoreOptions()
     .setType("file")
     .setConfig(new JsonObject().put("path", "my-config.json"));
 
-ConfigurationStoreOptions sysPropsStore = new ConfigurationStoreOptions().setType("sys");
+ConfigStoreOptions sysPropsStore = new ConfigStoreOptions().setType("sys");
 
 
-ConfigurationRetrieverOptions options = new ConfigurationRetrieverOptions()
+ConfigRetrieverOptions options = new ConfigRetrieverOptions()
     .addStore(httpStore).addStore(fileStore).addStore(sysPropsStore);
 
-ConfigurationRetriever retriever = ConfigurationRetriever.create(vertx, options);
+ConfigRetriever retriever = ConfigRetriever.create(vertx, options);
 ----
 
 More details about the overloading rules and available stores are available below.
@@ -89,7 +89,7 @@ as follows:
 
 [source]
 ----
-retriever.getConfiguration(ar -> {
+retriever.getConfig(ar -> {
   if (ar.failed()) {
     // Failed to retrieve the configuration
   } else {
@@ -124,7 +124,7 @@ Each declared data store must specify the `type`. It can also define the `format
 not set JSON is used.
 
 Some configurations tore requires additional configuration (such a path...). This
-configuration is passed as a Json Object using `link:../../apidocs/io/vertx/config/ConfigurationStoreOptions.html#setConfig-io.vertx.core.json.JsonObject-[setConfig]`
+configuration is passed as a Json Object using `link:../../apidocs/io/vertx/config/ConfigStoreOptions.html#setConfig-io.vertx.core.json.JsonObject-[setConfig]`
 
 ==== File
 
@@ -133,7 +133,7 @@ supported formats.
 
 [source, java]
 ----
-ConfigurationStoreOptions file = new ConfigurationStoreOptions()
+ConfigStoreOptions file = new ConfigStoreOptions()
     .setType("file")
     .setFormat("properties")
     .setConfig(new JsonObject().put("path", "path-to-file.properties"));
@@ -147,7 +147,7 @@ The JSON configuration store just serves the given JSON config as it is.
 
 [source, java]
 ----
-ConfigurationStoreOptions json = new ConfigurationStoreOptions()
+ConfigStoreOptions json = new ConfigStoreOptions()
     .setType("json")
     .setConfig(new JsonObject().put("key", "value"));
 ----
@@ -161,7 +161,7 @@ the global configuration.
 
 [source, java]
 ----
-ConfigurationStoreOptions json = new ConfigurationStoreOptions()
+ConfigStoreOptions json = new ConfigStoreOptions()
     .setType("env");
 ----
 
@@ -174,7 +174,7 @@ global configuration.
 
 [source, java]
 ----
-ConfigurationStoreOptions json = new ConfigurationStoreOptions()
+ConfigStoreOptions json = new ConfigStoreOptions()
     .setType("sys")
     .setConfig(new JsonObject().put("cache", "false"));
 ----
@@ -191,7 +191,7 @@ any supported format.
 
 [source, java]
 ----
-ConfigurationStoreOptions http = new ConfigurationStoreOptions()
+ConfigStoreOptions http = new ConfigStoreOptions()
     .setType("http")
     .setConfig(new JsonObject()
         .put("host", "localhost")
@@ -206,7 +206,7 @@ properties.
 
 [source, java]
 ----
-ConfigurationStoreOptions http = new ConfigurationStoreOptions()
+ConfigStoreOptions http = new ConfigStoreOptions()
     .setType("http")
     .setConfig(new JsonObject()
         .put("defaultHost", "localhost")
@@ -222,7 +222,7 @@ stores let you distribute your configuration among your local and distributed co
 
 [source, java]
 ----
-ConfigurationStoreOptions eb = new ConfigurationStoreOptions()
+ConfigStoreOptions eb = new ConfigStoreOptions()
     .setType("event-bus")
     .setConfig(new JsonObject()
         .put("address", "address-getting-the-conf")
@@ -249,7 +249,7 @@ different format, BUT files in a fileset must share the same format).
 
 [source, java]
 ----
-ConfigurationStoreOptions dir = new ConfigurationStoreOptions()
+ConfigStoreOptions dir = new ConfigStoreOptions()
     .setType("directory")
     .setConfig(new JsonObject().put("path", "config")
         .put("filesets", new JsonArray()
@@ -267,13 +267,13 @@ configuration is reloaded every 5 seconds.
 
 [source, java]
 ----
-ConfigurationRetrieverOptions options = new ConfigurationRetrieverOptions()
+ConfigRetrieverOptions options = new ConfigRetrieverOptions()
     .setScanPeriod(2000)
     .addStore(store1)
     .addStore(store2);
 
-ConfigurationRetriever retriever = ConfigurationRetriever.create(Vertx.vertx(), options);
-retriever.getConfiguration(json -> {
+ConfigRetriever retriever = ConfigRetriever.create(Vertx.vertx(), options);
+retriever.getConfig(json -> {
   // Initial retrieval of the configuration
 });
 
@@ -292,29 +292,29 @@ using:
 
 [source, java]
 ----
-JsonObject last = retriever.getCachedConfiguration();
+JsonObject last = retriever.getCachedConfig();
 ----
 
 === Reading configuration as a stream
 
-The `link:../../apidocs/io/vertx/config/ConfigurationRetriever.html[ConfigurationRetriever]` provide a way to access the stream of configuration.
+The `link:../../apidocs/io/vertx/config/ConfigRetriever.html[ConfigRetriever]` provide a way to access the stream of configuration.
 It's a `link:../../apidocs/io/vertx/core/streams/ReadStream.html[ReadStream]` of `link:../../apidocs/io/vertx/core/json/JsonObject.html[JsonObject]`. By registering the right
 set of handlers you are notified:
 
 * when a new configuration is retrieved
 * when an error occur while retrieving a configuration
 * when the configuration retriever is closed (the
-`link:../../apidocs/io/vertx/config/ConfigurationStream.html#endHandler-io.vertx.core.Handler-[endHandler]` is called).
+`link:../../apidocs/io/vertx/config/ConfigStream.html#endHandler-io.vertx.core.Handler-[endHandler]` is called).
 
 [source, java]
 ----
-ConfigurationRetrieverOptions options = new ConfigurationRetrieverOptions()
+ConfigRetrieverOptions options = new ConfigRetrieverOptions()
     .setScanPeriod(2000)
     .addStore(store1)
     .addStore(store2);
 
-ConfigurationRetriever retriever = ConfigurationRetriever.create(Vertx.vertx(), options);
-retriever.configurationStream()
+ConfigRetriever retriever = ConfigRetriever.create(Vertx.vertx(), options);
+retriever.configStream()
     .endHandler(v -> {
       // retriever closed
     })

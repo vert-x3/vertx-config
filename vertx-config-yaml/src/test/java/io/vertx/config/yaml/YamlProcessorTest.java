@@ -1,14 +1,14 @@
 package io.vertx.config.yaml;
 
-import io.vertx.config.ConfigurationRetriever;
-import io.vertx.config.ConfigurationRetrieverOptions;
+import io.vertx.config.ConfigRetriever;
+import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
 import io.vertx.core.file.FileSystemException;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.config.ConfigurationStoreOptions;
+import io.vertx.config.ConfigStoreOptions;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -27,7 +27,7 @@ import static org.junit.Assert.fail;
 @RunWith(VertxUnitRunner.class)
 public class YamlProcessorTest {
 
-  private ConfigurationRetriever retriever;
+  private ConfigRetriever retriever;
   private Vertx vertx;
 
   @Before
@@ -45,14 +45,14 @@ public class YamlProcessorTest {
   @Test
   public void testEmptyYaml(TestContext tc) {
     Async async = tc.async();
-    retriever = ConfigurationRetriever.create(vertx,
-        new ConfigurationRetrieverOptions().addStore(
-            new ConfigurationStoreOptions()
+    retriever = ConfigRetriever.create(vertx,
+        new ConfigRetrieverOptions().addStore(
+            new ConfigStoreOptions()
                 .setType("file")
                 .setFormat("yaml")
                 .setConfig(new JsonObject().put("path", "src/test/resources/empty.yaml"))));
 
-    retriever.getConfiguration(ar -> {
+    retriever.getConfig(ar -> {
       expectSuccess(ar);
       assertThat(ar.result()).isNotNull();
       assertThat(ar.result()).isEmpty();
@@ -71,14 +71,14 @@ public class YamlProcessorTest {
   @Test
   public void testWithTextFile(TestContext tc) {
     Async async = tc.async();
-    retriever = ConfigurationRetriever.create(vertx,
-        new ConfigurationRetrieverOptions().addStore(
-            new ConfigurationStoreOptions()
+    retriever = ConfigRetriever.create(vertx,
+        new ConfigRetrieverOptions().addStore(
+            new ConfigStoreOptions()
                 .setType("file")
                 .setFormat("yaml")
                 .setConfig(new JsonObject().put("path", "src/test/resources/some-text.txt"))));
 
-    retriever.getConfiguration(ar -> {
+    retriever.getConfig(ar -> {
       assertThat(ar.failed()).isTrue();
       assertThat(ar.cause()).isNotNull().isInstanceOf(DecodeException.class);
       async.complete();
@@ -88,14 +88,14 @@ public class YamlProcessorTest {
   @Test
   public void testWithMissingFile(TestContext tc) {
     Async async = tc.async();
-    retriever = ConfigurationRetriever.create(vertx,
-        new ConfigurationRetrieverOptions().addStore(
-            new ConfigurationStoreOptions()
+    retriever = ConfigRetriever.create(vertx,
+        new ConfigRetrieverOptions().addStore(
+            new ConfigStoreOptions()
                 .setType("file")
                 .setFormat("yaml")
                 .setConfig(new JsonObject().put("path", "src/test/resources/some-missing-file.yaml"))));
 
-    retriever.getConfiguration(ar -> {
+    retriever.getConfig(ar -> {
       assertThat(ar.failed()).isTrue();
       assertThat(ar.cause()).isNotNull().isInstanceOf(FileSystemException.class);
       async.complete();
@@ -105,14 +105,14 @@ public class YamlProcessorTest {
   @Test
   public void testBasicYamlFile(TestContext tc) {
     Async async = tc.async();
-    retriever = ConfigurationRetriever.create(vertx,
-        new ConfigurationRetrieverOptions().addStore(
-            new ConfigurationStoreOptions()
+    retriever = ConfigRetriever.create(vertx,
+        new ConfigRetrieverOptions().addStore(
+            new ConfigStoreOptions()
                 .setType("file")
                 .setFormat("yaml")
                 .setConfig(new JsonObject().put("path", "src/test/resources/basic.yaml"))));
 
-    retriever.getConfiguration(ar -> {
+    retriever.getConfig(ar -> {
       expectSuccess(ar);
       JsonObject json = ar.result();
       assertThat(json.getInteger("invoice")).isEqualTo(34843);
@@ -132,14 +132,14 @@ public class YamlProcessorTest {
   @Test
   public void testSimpleYamlConfiguration(TestContext tc) {
     Async async = tc.async();
-    retriever = ConfigurationRetriever.create(vertx,
-        new ConfigurationRetrieverOptions().addStore(
-            new ConfigurationStoreOptions()
+    retriever = ConfigRetriever.create(vertx,
+        new ConfigRetrieverOptions().addStore(
+            new ConfigStoreOptions()
                 .setType("file")
                 .setFormat("yaml")
                 .setConfig(new JsonObject().put("path", "src/test/resources/simple.yaml"))));
 
-    retriever.getConfiguration(ar -> {
+    retriever.getConfig(ar -> {
       if (ar.failed()) {
         ar.cause().printStackTrace();
       }
@@ -169,14 +169,14 @@ public class YamlProcessorTest {
   @Test
   public void testStructures(TestContext tc) {
     Async async = tc.async();
-    retriever = ConfigurationRetriever.create(vertx,
-        new ConfigurationRetrieverOptions().addStore(
-            new ConfigurationStoreOptions()
+    retriever = ConfigRetriever.create(vertx,
+        new ConfigRetrieverOptions().addStore(
+            new ConfigStoreOptions()
                 .setType("file")
                 .setFormat("yaml")
                 .setConfig(new JsonObject().put("path", "src/test/resources/structure.yaml"))));
 
-    retriever.getConfiguration(ar -> {
+    retriever.getConfig(ar -> {
       expectSuccess(ar);
       JsonObject json = ar.result();
       // Lists

@@ -3,7 +3,7 @@ package io.vertx.config.hocon;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigRenderOptions;
-import io.vertx.config.spi.ConfigurationProcessor;
+import io.vertx.config.spi.ConfigProcessor;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -13,7 +13,7 @@ import io.vertx.core.json.JsonObject;
 import java.io.Reader;
 import java.io.StringReader;
 
-import static io.vertx.config.impl.spi.PropertiesConfigurationProcessor.closeQuietly;
+import static io.vertx.config.impl.spi.PropertiesConfigProcessor.closeQuietly;
 
 /**
  * A processor using Typesafe Conf to read Hocon files. It also support JSON and Properties.
@@ -22,7 +22,7 @@ import static io.vertx.config.impl.spi.PropertiesConfigurationProcessor.closeQui
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class HoconProcessor implements ConfigurationProcessor {
+public class HoconProcessor implements ConfigProcessor {
   @Override
   public String name() {
     return "hocon";

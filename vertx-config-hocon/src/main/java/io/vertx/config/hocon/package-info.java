@@ -38,7 +38,7 @@
  * == Configuring the store to use HOCON
  *
  * Once added to your classpath or dependencies, you need to configure the
- * {@link io.vertx.config.ConfigurationRetriever} to use this format:
+ * {@link io.vertx.config.ConfigRetriever} to use this format:
  *
  * [source, $lang]
  * ----

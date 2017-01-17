@@ -35,11 +35,11 @@ compile 'io.vertx:vertx-config-git:3.4.0-SNAPSHOT'
 == Configuring the store
 
 Once added to your classpath or dependencies, you need to configure the
-`link:../../apidocs/io/vertx/config/ConfigurationRetriever.html[ConfigurationRetriever]` to use this store:
+`link:../../apidocs/io/vertx/config/ConfigRetriever.html[ConfigRetriever]` to use this store:
 
 [source, groovy]
 ----
-import io.vertx.config.ConfigurationRetriever
+import io.vertx.config.ConfigRetriever
 
 def git = [
   type:"git",
@@ -54,7 +54,7 @@ def git = [
   ]
 ]
 
-def retriever = ConfigurationRetriever.create(vertx, [
+def retriever = ConfigRetriever.create(vertx, [
   stores:[
     git
   ]

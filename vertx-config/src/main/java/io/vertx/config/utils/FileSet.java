@@ -5,7 +5,7 @@ import io.vertx.core.impl.launcher.commands.FileSelector;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.config.spi.ConfigurationProcessor;
+import io.vertx.config.spi.ConfigProcessor;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ public class FileSet {
   private final static Logger LOGGER = LoggerFactory.getLogger(FileSet.class);
 
   private final String pattern;
-  private final ConfigurationProcessor processor;
+  private final ConfigProcessor processor;
   private final File root;
   private final Vertx vertx;
 

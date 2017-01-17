@@ -34,7 +34,7 @@ public class ScanAndBroadcastTest {
   private Vertx vertx;
   private JsonObject http;
   private HttpServer server;
-  private ConfigurationRetriever retriever;
+  private ConfigRetriever retriever;
 
   @Before
   public void setUp(TestContext tc) {
@@ -66,13 +66,13 @@ public class ScanAndBroadcastTest {
     await().untilAtomic(done, is(true));
   }
 
-  private static List<ConfigurationStoreOptions> stores() {
-    List<ConfigurationStoreOptions> options = new ArrayList<>();
-    options.add(new ConfigurationStoreOptions().setType("file")
+  private static List<ConfigStoreOptions> stores() {
+    List<ConfigStoreOptions> options = new ArrayList<>();
+    options.add(new ConfigStoreOptions().setType("file")
         .setConfig(new JsonObject().put("path", "src/test/resources/file/regular.json")));
-    options.add(new ConfigurationStoreOptions().setType("sys")
+    options.add(new ConfigStoreOptions().setType("sys")
         .setConfig(new JsonObject().put("cache", false)));
-    options.add(new ConfigurationStoreOptions().setType("http")
+    options.add(new ConfigStoreOptions().setType("http")
         .setConfig(new JsonObject()
             .put("host", "localhost")
             .put("port", 8080)
@@ -84,11 +84,11 @@ public class ScanAndBroadcastTest {
   public void testScanning() {
     AtomicBoolean done = new AtomicBoolean();
     vertx.runOnContext(v -> {
-      retriever = ConfigurationRetriever.create(vertx,
-          new ConfigurationRetrieverOptions().setScanPeriod(1000).setStores(stores()));
+      retriever = ConfigRetriever.create(vertx,
+          new ConfigRetrieverOptions().setScanPeriod(1000).setStores(stores()));
 
       AtomicReference<JsonObject> current = new AtomicReference<>();
-      retriever.getConfiguration(json -> {
+      retriever.getConfig(json -> {
         retriever.listen(change -> {
           if (current.get() != null  && ! current.get().equals(change.getPreviousConfiguration())) {
             throw new IllegalStateException("Previous configuration not correct");
@@ -138,11 +138,11 @@ public class ScanAndBroadcastTest {
   public void testScanningWhenNoChanges(TestContext tc) {
     Async async = tc.async();
     vertx.runOnContext(v -> {
-      retriever = ConfigurationRetriever.create(vertx,
-          new ConfigurationRetrieverOptions().setScanPeriod(500).setStores(stores()));
+      retriever = ConfigRetriever.create(vertx,
+          new ConfigRetrieverOptions().setScanPeriod(500).setStores(stores()));
 
       AtomicReference<JsonObject> current = new AtomicReference<>();
-      retriever.getConfiguration(json -> {
+      retriever.getConfig(json -> {
         retriever.listen(change -> {
           if (current.get() != null  && ! current.get().equals(change.getPreviousConfiguration())) {
             throw new IllegalStateException("Previous configuration not correct");
