@@ -9,7 +9,7 @@
     <version>23</version>
   </parent>
 
-  <artifactId>vertx-configuration-parent</artifactId>
+  <artifactId>vertx-config-parent</artifactId>
   <version>3.4.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
@@ -20,14 +20,14 @@
   </properties>
 
   <modules>
-    <module>vertx-configuration</module>
-    <module>vertx-configuration-hocon-processor</module>
-    <module>vertx-configuration-yaml-processor</module>
-    <module>vertx-configuration-spring-config-server-store</module>
-    <module>vertx-configuration-kubernetes-configmap</module>
-    <module>vertx-configuration-redis-store</module>
-    <module>vertx-configuration-git-store</module>
-    <module>vertx-configuration-zookeeper-store</module>
+    <module>vertx-config</module>
+    <module>vertx-config-hocon</module>
+    <module>vertx-config-yaml</module>
+    <module>vertx-config-spring-config-server</module>
+    <module>vertx-config-kubernetes-configmap</module>
+    <module>vertx-config-redis</module>
+    <module>vertx-config-git</module>
+    <module>vertx-config-zookeeper</module>
   </modules>
 
   <build>
