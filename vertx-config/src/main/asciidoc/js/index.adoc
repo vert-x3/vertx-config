@@ -390,7 +390,7 @@ retriever.configurationStream().endHandler(function (v) {
 
 You can extend the configuration by implementing:
 
-* the `io.vertx.ext.configuration.spi.ConfigurationProcessor` SPI to add support for a
+* the `io.vertx.config.spi.ConfigurationProcessor` SPI to add support for a
 format
-* the `io.vertx.ext.configuration.spi.ConfigurationStoreFactory` SPI to add support for
+* the `io.vertx.config.spi.ConfigurationStoreFactory` SPI to add support for
 configuration store (place from where the configuration data is retrieved)

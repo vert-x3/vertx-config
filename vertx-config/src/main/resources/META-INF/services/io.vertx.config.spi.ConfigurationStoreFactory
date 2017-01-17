@@ -1,0 +1,7 @@
+io.vertx.config.impl.spi.FileConfigurationStoreFactory
+io.vertx.config.impl.spi.JsonConfigurationStoreFactory
+io.vertx.config.impl.spi.EnvVariablesConfigurationStore
+io.vertx.config.impl.spi.SystemPropertiesConfigurationStore
+io.vertx.config.impl.spi.HttpConfigurationStoreFactory
+io.vertx.config.impl.spi.EventBusConfigurationStoreFactory
+io.vertx.config.impl.spi.DirectoryConfigurationStoreFactory

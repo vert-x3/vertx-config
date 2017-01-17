@@ -1,4 +1,4 @@
 moduleName = vertx-config-module
 moduleVersion = 1.0
-extensionClasses = io.vertx.groovy.ext.configuration.redis.GroovyExtension
-staticExtensionClasses = io.vertx.groovy.ext.configuration.redis.GroovyStaticExtension
+extensionClasses = io.vertx.groovy.config.redis.GroovyExtension
+staticExtensionClasses = io.vertx.groovy.config.redis.GroovyStaticExtension

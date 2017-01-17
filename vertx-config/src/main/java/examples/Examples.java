@@ -3,9 +3,9 @@ package examples;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.configuration.ConfigurationRetriever;
-import io.vertx.ext.configuration.ConfigurationRetrieverOptions;
-import io.vertx.ext.configuration.ConfigurationStoreOptions;
+import io.vertx.config.ConfigurationRetriever;
+import io.vertx.config.ConfigurationRetrieverOptions;
+import io.vertx.config.ConfigurationStoreOptions;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>

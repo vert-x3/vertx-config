@@ -2,10 +2,10 @@ require 'vertx/vertx'
 require 'vertx/future'
 require 'vertx-config/configuration_stream'
 require 'vertx/util/utils.rb'
-# Generated from io.vertx.ext.configuration.ConfigurationRetriever
+# Generated from io.vertx.config.ConfigurationRetriever
 module VertxConfig
   #  Defines a configuration retriever that read configuration from
-  #  {Nil}
+  #  
   #  and tracks changes periodically.
   class ConfigurationRetriever
     # @private
@@ -32,7 +32,7 @@ module VertxConfig
       @@j_api_type
     end
     def self.j_class
-      Java::IoVertxExtConfiguration::ConfigurationRetriever.java_class
+      Java::IoVertxConfig::ConfigurationRetriever.java_class
     end
     #  Creates an instance of the default implementation of the {::VertxConfig::ConfigurationRetriever}.
     # @param [::Vertx::Vertx] vertx the vert.x instance
@@ -40,13 +40,13 @@ module VertxConfig
     # @return [::VertxConfig::ConfigurationRetriever] the created instance.
     def self.create(vertx=nil,options=nil)
       if vertx.class.method_defined?(:j_del) && !block_given? && options == nil
-        return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtConfiguration::ConfigurationRetriever.java_method(:create, [Java::IoVertxCore::Vertx.java_class]).call(vertx.j_del),::VertxConfig::ConfigurationRetriever)
+        return ::Vertx::Util::Utils.safe_create(Java::IoVertxConfig::ConfigurationRetriever.java_method(:create, [Java::IoVertxCore::Vertx.java_class]).call(vertx.j_del),::VertxConfig::ConfigurationRetriever)
       elsif vertx.class.method_defined?(:j_del) && options.class == Hash && !block_given?
-        return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtConfiguration::ConfigurationRetriever.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtConfiguration::ConfigurationRetrieverOptions.java_class]).call(vertx.j_del,Java::IoVertxExtConfiguration::ConfigurationRetrieverOptions.new(::Vertx::Util::Utils.to_json_object(options))),::VertxConfig::ConfigurationRetriever)
+        return ::Vertx::Util::Utils.safe_create(Java::IoVertxConfig::ConfigurationRetriever.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxConfig::ConfigurationRetrieverOptions.java_class]).call(vertx.j_del,Java::IoVertxConfig::ConfigurationRetrieverOptions.new(::Vertx::Util::Utils.to_json_object(options))),::VertxConfig::ConfigurationRetriever)
       end
       raise ArgumentError, "Invalid arguments when calling create(#{vertx},#{options})"
     end
-    #  Reads the configuration from the different {Nil}
+    #  Reads the configuration from the different 
     #  and computes the final configuration.
     # @yield handler receiving the computed configuration, or a failure if the configuration cannot be retrieved
     # @return [void]

@@ -22,9 +22,9 @@ var ConfigurationStream = require('vertx-config-js/configuration_stream');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var JConfigurationRetriever = io.vertx.ext.configuration.ConfigurationRetriever;
-var ConfigurationRetrieverOptions = io.vertx.ext.configuration.ConfigurationRetrieverOptions;
-var ConfigurationChange = io.vertx.ext.configuration.ConfigurationChange;
+var JConfigurationRetriever = io.vertx.config.ConfigurationRetriever;
+var ConfigurationRetrieverOptions = io.vertx.config.ConfigurationRetrieverOptions;
+var ConfigurationChange = io.vertx.config.ConfigurationChange;
 
 /**
  Defines a configuration retriever that read configuration from
@@ -36,7 +36,7 @@ var ConfigurationRetriever = function(j_val) {
   var that = this;
 
   /**
-   Reads the configuration from the different {@link ConfigurationStore}
+   Reads the configuration from the different 
    and computes the final configuration.
 
    @public
@@ -135,7 +135,7 @@ var ConfigurationRetriever = function(j_val) {
   this._jdel = j_configurationRetriever;
 };
 
-ConfigurationRetriever._jclass = utils.getJavaClass("io.vertx.ext.configuration.ConfigurationRetriever");
+ConfigurationRetriever._jclass = utils.getJavaClass("io.vertx.config.ConfigurationRetriever");
 ConfigurationRetriever._jtype = {
   accept: function(obj) {
     return ConfigurationRetriever._jclass.isInstance(obj._jdel);
@@ -167,7 +167,7 @@ ConfigurationRetriever.create = function() {
   if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
     return utils.convReturnVertxGen(ConfigurationRetriever, JConfigurationRetriever["create(io.vertx.core.Vertx)"](__args[0]._jdel));
   }else if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null)) {
-    return utils.convReturnVertxGen(ConfigurationRetriever, JConfigurationRetriever["create(io.vertx.core.Vertx,io.vertx.ext.configuration.ConfigurationRetrieverOptions)"](__args[0]._jdel, __args[1] != null ? new ConfigurationRetrieverOptions(new JsonObject(JSON.stringify(__args[1]))) : null));
+    return utils.convReturnVertxGen(ConfigurationRetriever, JConfigurationRetriever["create(io.vertx.core.Vertx,io.vertx.config.ConfigurationRetrieverOptions)"](__args[0]._jdel, __args[1] != null ? new ConfigurationRetrieverOptions(new JsonObject(JSON.stringify(__args[1]))) : null));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 

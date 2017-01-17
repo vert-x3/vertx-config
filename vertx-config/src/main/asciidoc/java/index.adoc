@@ -45,7 +45,7 @@ _dependencies_ section of your build descriptor:
 compile 'io.vertx:vertx-config:3.4.0-SNAPSHOT'
 ----
 
-Once done, you first need to instantiate the `link:../../apidocs/io/vertx/ext/configuration/ConfigurationRetriever.html[ConfigurationRetriever]`:
+Once done, you first need to instantiate the `link:../../apidocs/io/vertx/config/ConfigurationRetriever.html[ConfigurationRetriever]`:
 
 [source]
 ----
@@ -124,7 +124,7 @@ Each declared data store must specify the `type`. It can also define the `format
 not set JSON is used.
 
 Some configurations tore requires additional configuration (such a path...). This
-configuration is passed as a Json Object using `link:../../apidocs/io/vertx/ext/configuration/ConfigurationStoreOptions.html#setConfig-io.vertx.core.json.JsonObject-[setConfig]`
+configuration is passed as a Json Object using `link:../../apidocs/io/vertx/config/ConfigurationStoreOptions.html#setConfig-io.vertx.core.json.JsonObject-[setConfig]`
 
 ==== File
 
@@ -297,14 +297,14 @@ JsonObject last = retriever.getCachedConfiguration();
 
 === Reading configuration as a stream
 
-The `link:../../apidocs/io/vertx/ext/configuration/ConfigurationRetriever.html[ConfigurationRetriever]` provide a way to access the stream of configuration.
+The `link:../../apidocs/io/vertx/config/ConfigurationRetriever.html[ConfigurationRetriever]` provide a way to access the stream of configuration.
 It's a `link:../../apidocs/io/vertx/core/streams/ReadStream.html[ReadStream]` of `link:../../apidocs/io/vertx/core/json/JsonObject.html[JsonObject]`. By registering the right
 set of handlers you are notified:
 
 * when a new configuration is retrieved
 * when an error occur while retrieving a configuration
 * when the configuration retriever is closed (the
-`link:../../apidocs/io/vertx/ext/configuration/ConfigurationStream.html#endHandler-io.vertx.core.Handler-[endHandler]` is called).
+`link:../../apidocs/io/vertx/config/ConfigurationStream.html#endHandler-io.vertx.core.Handler-[endHandler]` is called).
 
 [source, java]
 ----
@@ -330,7 +330,7 @@ retriever.configurationStream()
 
 You can extend the configuration by implementing:
 
-* the `io.vertx.ext.configuration.spi.ConfigurationProcessor` SPI to add support for a
+* the `io.vertx.config.spi.ConfigurationProcessor` SPI to add support for a
 format
-* the `io.vertx.ext.configuration.spi.ConfigurationStoreFactory` SPI to add support for
+* the `io.vertx.config.spi.ConfigurationStoreFactory` SPI to add support for
 configuration store (place from where the configuration data is retrieved)

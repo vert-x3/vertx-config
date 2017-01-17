@@ -20,7 +20,7 @@ var ReadStream = require('vertx-js/read_stream');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var JConfigurationStream = io.vertx.ext.configuration.ConfigurationStream;
+var JConfigurationStream = io.vertx.config.ConfigurationStream;
 
 /**
 
@@ -112,7 +112,7 @@ var ConfigurationStream = function(j_val) {
   this._jdel = j_configurationStream;
 };
 
-ConfigurationStream._jclass = utils.getJavaClass("io.vertx.ext.configuration.ConfigurationStream");
+ConfigurationStream._jclass = utils.getJavaClass("io.vertx.config.ConfigurationStream");
 ConfigurationStream._jtype = {
   accept: function(obj) {
     return ConfigurationStream._jclass.isInstance(obj._jdel);

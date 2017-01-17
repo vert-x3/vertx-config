@@ -37,7 +37,7 @@ compile 'io.vertx:vertx-config-hocon:3.4.0-SNAPSHOT'
 == Configuring the store to use HOCON
 
 Once added to your classpath or dependencies, you need to configure the
-`link:../../apidocs/io/vertx/ext/configuration/ConfigurationRetriever.html[ConfigurationRetriever]` to use this format:
+`link:../../apidocs/io/vertx/config/ConfigurationRetriever.html[ConfigurationRetriever]` to use this format:
 
 [source, java]
 ----

@@ -37,11 +37,11 @@ compile 'io.vertx:vertx-config-kubernetes-configmap:3.4.0-SNAPSHOT'
 == Configuring the store
 
 Once added to your classpath or dependencies, you need to configure the
-`link:../../apidocs/io/vertx/ext/configuration/ConfigurationRetriever.html[ConfigurationRetriever]` to use this store:
+`link:../../apidocs/io/vertx/config/ConfigurationRetriever.html[ConfigurationRetriever]` to use this store:
 
 [source, groovy]
 ----
-import io.vertx.ext.configuration.ConfigurationRetriever
+import io.vertx.config.ConfigurationRetriever
 def store = [
   type:"configmap",
   config:[
@@ -73,7 +73,7 @@ To read data from a secret, just configure the `secret` property to `true`:
 
 [source, groovy]
 ----
-import io.vertx.ext.configuration.ConfigurationRetriever
+import io.vertx.config.ConfigurationRetriever
 def store = [
   type:"configmap",
   config:[

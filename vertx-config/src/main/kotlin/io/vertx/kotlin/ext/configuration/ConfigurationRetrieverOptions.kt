@@ -1,10 +1,11 @@
 package io.vertx.kotlin.ext.configuration
 
-import io.vertx.ext.configuration.ConfigurationRetrieverOptions
+import io.vertx.config.ConfigurationRetrieverOptions
+import io.vertx.config.ConfigurationStoreOptions
 
 fun ConfigurationRetrieverOptions(
     scanPeriod: Long? = null,
-  stores: List<io.vertx.ext.configuration.ConfigurationStoreOptions>? = null): ConfigurationRetrieverOptions = io.vertx.ext.configuration.ConfigurationRetrieverOptions().apply {
+  stores: List<ConfigurationStoreOptions>? = null): ConfigurationRetrieverOptions = ConfigurationRetrieverOptions().apply {
 
   if (scanPeriod != null) {
     this.scanPeriod = scanPeriod

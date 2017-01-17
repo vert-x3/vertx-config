@@ -1,6 +1,6 @@
 require 'vertx/read_stream'
 require 'vertx/util/utils.rb'
-# Generated from io.vertx.ext.configuration.ConfigurationStream
+# Generated from io.vertx.config.ConfigurationStream
 module VertxConfig
   class ConfigurationStream
     include ::Vertx::ReadStream
@@ -28,7 +28,7 @@ module VertxConfig
       @@j_api_type
     end
     def self.j_class
-      Java::IoVertxExtConfiguration::ConfigurationStream.java_class
+      Java::IoVertxConfig::ConfigurationStream.java_class
     end
     # @return [self]
     def pause
