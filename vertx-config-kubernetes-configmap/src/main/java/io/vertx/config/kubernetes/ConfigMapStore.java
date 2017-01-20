@@ -148,13 +148,7 @@ public class ConfigMapStore implements ConfigStore {
           json.completer()
       );
       return json;
-    }).setHandler(ar -> {
-      if (ar.failed()) {
-        completionHandler.handle(Future.failedFuture(ar.cause()));
-      } else {
-        completionHandler.handle(Future.succeededFuture(ar.result()));
-      }
-    });
+    }).setHandler(completionHandler);
   }
 
   private static Map<String, Object> asObjectMap(Map<String, String> source) {
