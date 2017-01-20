@@ -12,16 +12,15 @@ import io.vertx.core.json.JsonObject;
 public interface ConfigStoreFactory {
 
   /**
-   * @return the name of the factory, used in the {@link io.vertx.config.ConfigurationVerticle} configuration
-   * to create an instance of the store.
+   * @return the name of the factory.
    */
   String name();
 
   /**
    * Creates an instance of the {@link ConfigStore}.
    *
-   * @param vertx         the vert.x instance
-   * @param configuration the configuration
+   * @param vertx         the vert.x instance, never {@code null}
+   * @param configuration the configuration, never {@code null}, but potentially empty
    * @return the created configuration store
    */
   ConfigStore create(Vertx vertx, JsonObject configuration);
