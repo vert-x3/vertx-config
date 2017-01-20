@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 public class GitConfigStore implements ConfigStore {
 
   private final static Logger LOGGER
-      = LoggerFactory.getLogger(GitConfigStore.class);
+    = LoggerFactory.getLogger(GitConfigStore.class);
 
   private final Vertx vertx;
   private final File path;
@@ -40,15 +40,15 @@ public class GitConfigStore implements ConfigStore {
     this.vertx = vertx;
 
     String path = Objects.requireNonNull(configuration.getString("path"),
-        "The `path` configuration is required.");
+      "The `path` configuration is required.");
     this.path = new File(path);
     if (this.path.isFile()) {
       throw new IllegalArgumentException("The `path` must not be a file");
     }
 
     JsonArray filesets = Objects.requireNonNull(configuration
-            .getJsonArray("filesets"),
-        "The `filesets` element is required.");
+        .getJsonArray("filesets"),
+      "The `filesets` element is required.");
 
     for (Object o : filesets) {
       JsonObject json = (JsonObject) o;
@@ -58,15 +58,14 @@ public class GitConfigStore implements ConfigStore {
 
     // Git repository
     url = Objects.requireNonNull(configuration.getString("url"),
-        "The `url` configuration (Git repository location) is required.");
+      "The `url` configuration (Git repository location) is required.");
     branch = configuration.getString("branch", "master");
     remote = configuration.getString("remote", "origin");
 
     try {
       git = initializeGit();
     } catch (Exception e) {
-      throw new IllegalStateException("Unable to initialize the Git" +
-          " repository", e);
+      throw new VertxException("Unable to initialize the Git repository", e);
     }
   }
 
@@ -78,24 +77,24 @@ public class GitConfigStore implements ConfigStore {
         PullResult pull = git.pull().setRemote(remote).call();
         if (!pull.isSuccessful()) {
           LOGGER.warn("Unable to pull the branch + '" + branch +
-              "' from the remote repository '" + remote + "'");
+            "' from the remote repository '" + remote + "'");
         }
         return git;
       } else {
         git.checkout().
-            setName(branch).
-            setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK).
-            setStartPoint(remote + "/" + branch).
-            call();
+          setName(branch).
+          setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK).
+          setStartPoint(remote + "/" + branch).
+          call();
         return git;
       }
     } else {
       return Git.cloneRepository()
-          .setURI(url)
-          .setBranch(branch)
-          .setRemote(remote)
-          .setDirectory(path)
-          .call();
+        .setURI(url)
+        .setBranch(branch)
+        .setRemote(remote)
+        .setDirectory(path)
+        .call();
     }
   }
 
@@ -103,15 +102,15 @@ public class GitConfigStore implements ConfigStore {
   @Override
   public void get(Handler<AsyncResult<Buffer>> completionHandler) {
     update()   // Update repository
-        .compose(v -> read()) // Read files
-        .compose(this::compute)  // Compute the merged json
-        .setHandler(ar -> {     // Forward
-          if (ar.failed()) {
-            completionHandler.handle(Future.failedFuture(ar.cause()));
-          } else {
-            completionHandler.handle(Future.succeededFuture(ar.result()));
-          }
-        });
+      .compose(v -> read()) // Read files
+      .compose(this::compute)  // Compute the merged json
+      .setHandler(ar -> {     // Forward
+        if (ar.failed()) {
+          completionHandler.handle(Future.failedFuture(ar.cause()));
+        } else {
+          completionHandler.handle(Future.succeededFuture(ar.result()));
+        }
+      });
   }
 
   private Future<Buffer> compute(List<File> files) {
@@ -136,7 +135,7 @@ public class GitConfigStore implements ConfigStore {
       } else {
         JsonObject json = new JsonObject();
         futures.stream().map(f -> (JsonObject) f.result())
-            .forEach(json::mergeIn);
+          .forEach(json::mergeIn);
         result.complete(Buffer.buffer(json.encode()));
       }
     });
@@ -147,27 +146,27 @@ public class GitConfigStore implements ConfigStore {
   private Future<Void> update() {
     Future<Void> result = Future.future();
     vertx.executeBlocking(
-        future -> {
-          PullResult call = null;
-          try {
-            call = git.pull().setRemote(remote).setRemoteBranchName(branch).call();
-          } catch (GitAPIException e) {
-            future.fail(e);
-            return;
-          }
-          if (call.isSuccessful()) {
-            future.complete();
+      future -> {
+        PullResult call = null;
+        try {
+          call = git.pull().setRemote(remote).setRemoteBranchName(branch).call();
+        } catch (GitAPIException e) {
+          future.fail(e);
+          return;
+        }
+        if (call.isSuccessful()) {
+          future.complete();
+        } else {
+          if (call.getMergeResult() != null) {
+            future.fail("Unable to merge repository - Conflicts: "
+              + call.getMergeResult().getCheckoutConflicts());
           } else {
-            if (call.getMergeResult() != null) {
-              future.fail("Unable to merge repository - Conflicts: "
-                  + call.getMergeResult().getCheckoutConflicts());
-            } else {
-              future.fail("Unable to rebase repository - Conflicts: "
-                  + call.getRebaseResult().getConflicts());
-            }
+            future.fail("Unable to rebase repository - Conflicts: "
+              + call.getRebaseResult().getConflicts());
           }
-        },
-        result.completer()
+        }
+      },
+      result.completer()
     );
     return result;
   }
@@ -175,14 +174,14 @@ public class GitConfigStore implements ConfigStore {
   private Future<List<File>> read() {
     Future<List<File>> result = Future.future();
     vertx.executeBlocking(
-        fut -> {
-          try {
-            fut.complete(FileSet.traverse(path).stream().sorted().collect(Collectors.toList()));
-          } catch (Throwable e) {
-            fut.fail(e);
-          }
-        },
-        result.completer());
+      fut -> {
+        try {
+          fut.complete(FileSet.traverse(path).stream().sorted().collect(Collectors.toList()));
+        } catch (Throwable e) {
+          fut.fail(e);
+        }
+      },
+      result.completer());
     return result;
   }
 
