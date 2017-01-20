@@ -215,7 +215,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
       }
 
       if (conf != null && !conf.isEmpty()) {
-        this.handler.handle(conf);
+        vertx.runOnContext(v -> this.handler.handle(conf));
       }
 
       return this;
@@ -232,6 +232,11 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
       JsonObject conf;
       Handler<JsonObject> succ;
       synchronized (this) {
+        if (! paused) {
+          // Cannot resume a non paused stream
+          return this;
+        }
+        
         paused = false;
         conf = last;
         if (last != null) {
@@ -266,7 +271,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
       }
 
       if (!isPaused && succ != null) {
-        succ.handle(conf);
+        vertx.runOnContext(v -> succ.handle(conf));
       }
 
     }
@@ -278,7 +283,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
       }
 
       if (err != null) {
-        err.handle(cause);
+        vertx.runOnContext(v -> err.handle(cause));
       }
 
     }
@@ -289,7 +294,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
         handler = endHandler;
       }
       if (handler != null) {
-        handler.handle(null);
+        vertx.runOnContext(v -> handler.handle(null));
       }
     }
   }
