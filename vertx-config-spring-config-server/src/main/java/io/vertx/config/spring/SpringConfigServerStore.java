@@ -35,7 +35,8 @@ class SpringConfigServerStore implements ConfigStore {
     this.timeout = configuration.getLong("timeout", 3000L);
     Objects.requireNonNull(url);
 
-    HttpClientOptions options = new HttpClientOptions();
+    HttpClientOptions options = new HttpClientOptions(
+      configuration.getJsonObject("httpClientConfiguration", new JsonObject()));
     try {
       URL u = new URL(url);
       options.setDefaultHost(u.getHost());

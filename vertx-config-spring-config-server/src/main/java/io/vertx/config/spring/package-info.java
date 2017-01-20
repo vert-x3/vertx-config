@@ -50,6 +50,7 @@
  * * `timeout` - the timeout (in milliseconds) to retrieve the configuration, 3000 by default
  * * `user` - the `user` (no authentication by default)
  * * `password` - the `password`
+ * * `httpClientConfiguration` - the configuration of the underlying HTTP client
  *
  */
 @Document(fileName = "index.adoc")
