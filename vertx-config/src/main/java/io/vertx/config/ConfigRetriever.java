@@ -9,6 +9,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.config.impl.ConfigRetrieverImpl;
+import io.vertx.core.streams.ReadStream;
 
 /**
  * Defines a configuration retriever that read configuration from
@@ -92,6 +93,6 @@ public interface ConfigRetriever {
    * @return the stream of configurations.
    */
   @CacheReturn
-  ConfigStream configStream();
+  ReadStream<JsonObject> configStream();
 
 }
