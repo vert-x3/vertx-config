@@ -28,14 +28,16 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
 
   private final Vertx vertx;
   private final List<ConfigurationProvider> providers;
-  private final long scan;
+  private long scan;
   private final List<Handler<ConfigChange>> listeners = new ArrayList<>();
   private final ConfigStreamImpl streamOfConfiguration = new ConfigStreamImpl();
+  private final ConfigRetrieverOptions options;
 
   private JsonObject current = new JsonObject();
 
   public ConfigRetrieverImpl(Vertx vertx, ConfigRetrieverOptions options) {
     this.vertx = vertx;
+    this.options = options;
 
     ServiceLoader<ConfigStoreFactory> storeImpl =
         ServiceLoader.load(ConfigStoreFactory.class,
@@ -77,15 +79,17 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
       providers.add(new ConfigurationProvider(store, processor, option.getConfig()));
     }
 
+    getConfig(x -> {
+      // Ignored.
+    });
+  }
+
+  public synchronized void initializePeriodicScan() {
     if (options.getScanPeriod() > 0) {
       this.scan = vertx.setPeriodic(options.getScanPeriod(), l -> scan());
     } else {
       this.scan = -1;
     }
-
-    getConfig(x -> {
-      // Ignored.
-    });
   }
 
   @Override
@@ -110,7 +114,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
   }
 
   @Override
-  public void close() {
+  public synchronized void close() {
     if (scan != -1) {
       vertx.cancelTimer(scan);
     }

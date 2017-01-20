@@ -29,7 +29,9 @@ public interface ConfigRetriever {
    * @return the created instance.
    */
   static ConfigRetriever create(Vertx vertx, ConfigRetrieverOptions options) {
-    return new ConfigRetrieverImpl(vertx, options);
+    ConfigRetrieverImpl retriever = new ConfigRetrieverImpl(vertx, options);
+    retriever.initializePeriodicScan();
+    return retriever;
   }
 
   /**
