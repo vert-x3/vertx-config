@@ -36,7 +36,7 @@ public class RedisConfigStore implements ConfigStore {
       if (ar.failed()) {
         completionHandler.handle(Future.failedFuture(ar.cause()));
       } else {
-        completionHandler.handle(Future.succeededFuture(Buffer.buffer(ar.result().encode())));
+        completionHandler.handle(ar.map(json -> Buffer.buffer(ar.result().encode())));
       }
     });
   }
