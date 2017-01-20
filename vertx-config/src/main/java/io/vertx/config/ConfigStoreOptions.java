@@ -27,7 +27,7 @@ public class ConfigStoreOptions {
 
   public ConfigStoreOptions(JsonObject json) {
     type = json.getString("type");
-    config = json.getJsonObject("config", new JsonObject());
+    config = json.getJsonObject("config");
     format = json.getString("format", "json");
   }
 
