@@ -22,7 +22,7 @@ public class ConfigStoreOptions {
 
   public ConfigStoreOptions(ConfigStoreOptions other) {
     this.type = other.type;
-    this.config = other.config;
+    this.config = other.config == null ? null : other.config.copy();
   }
 
   public ConfigStoreOptions(JsonObject json) {
@@ -56,7 +56,6 @@ public class ConfigStoreOptions {
   }
 
   public JsonObject getConfig() {
-    //TODO can contain store and format config
     return config;
   }
 
