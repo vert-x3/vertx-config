@@ -40,9 +40,14 @@ public class EventBusConfigStore implements ConfigStore {
   }
 
   @Override
-  public synchronized void get(Handler<AsyncResult<Buffer>> completionHandler) {
-    if (last != null) {
-      completionHandler.handle(Future.succeededFuture(last));
+  public void get(Handler<AsyncResult<Buffer>> completionHandler) {
+    Buffer buffer;
+    synchronized (this) {
+      buffer = last;
+    }
+
+    if (buffer != null) {
+      completionHandler.handle(Future.succeededFuture(buffer));
     } else {
       completionHandler.handle(Future.succeededFuture(Buffer.buffer("{}")));
     }
