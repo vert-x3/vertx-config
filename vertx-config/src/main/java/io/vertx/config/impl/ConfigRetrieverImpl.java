@@ -5,15 +5,15 @@ import io.vertx.config.ConfigChange;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
-import io.vertx.config.ConfigStream;
+import io.vertx.config.spi.ConfigProcessor;
 import io.vertx.config.spi.ConfigStore;
+import io.vertx.config.spi.ConfigStoreFactory;
 import io.vertx.config.utils.Processors;
 import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.config.spi.ConfigProcessor;
-import io.vertx.config.spi.ConfigStoreFactory;
+import io.vertx.core.streams.ReadStream;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -135,7 +135,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
   }
 
   @Override
-  public ConfigStream configStream() {
+  public ReadStream<JsonObject> configStream() {
     return streamOfConfiguration;
   }
 
@@ -185,7 +185,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
     });
   }
 
-  private class ConfigStreamImpl implements ConfigStream {
+  private class ConfigStreamImpl implements ReadStream<JsonObject> {
 
     private Handler<JsonObject> handler;
     private Handler<Throwable> exceptionHandler;
@@ -195,14 +195,14 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
     private boolean paused = false;
 
     @Override
-    public synchronized ConfigStream exceptionHandler(Handler<Throwable> handler) {
+    public synchronized ReadStream<JsonObject> exceptionHandler(Handler<Throwable> handler) {
       Objects.requireNonNull(handler);
       this.exceptionHandler = handler;
       return this;
     }
 
     @Override
-    public ConfigStream handler(Handler<JsonObject> handler) {
+    public ReadStream<JsonObject> handler(Handler<JsonObject> handler) {
       Objects.requireNonNull(handler);
       JsonObject conf;
       synchronized (this) {
@@ -218,13 +218,13 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
     }
 
     @Override
-    public synchronized ConfigStream pause() {
+    public synchronized ReadStream<JsonObject> pause() {
       paused = true;
       return this;
     }
 
     @Override
-    public ConfigStream resume() {
+    public ReadStream<JsonObject> resume() {
       JsonObject conf = null;
       Handler<JsonObject> succ;
       synchronized (this) {
@@ -244,7 +244,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
     }
 
     @Override
-    public synchronized ConfigStream endHandler(Handler<Void> endHandler) {
+    public synchronized ReadStream<JsonObject> endHandler(Handler<Void> endHandler) {
       Objects.requireNonNull(endHandler);
       this.endHandler = endHandler;
       return this;
