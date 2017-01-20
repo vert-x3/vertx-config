@@ -238,7 +238,7 @@
  * * when a new configuration is retrieved
  * * when an error occur while retrieving a configuration
  * * when the configuration retriever is closed (the
- * {@link io.vertx.config.ConfigStream#endHandler(io.vertx.core.Handler)} is called).
+ * {@link io.vertx.core.streams.ReadStream#endHandler(io.vertx.core.Handler)} is called).
  *
  * [source, $lang]
  * ----
