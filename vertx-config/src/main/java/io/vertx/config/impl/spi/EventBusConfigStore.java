@@ -24,10 +24,12 @@ public class EventBusConfigStore implements ConfigStore {
     consumer = vertx.eventBus().consumer(address);
     consumer.handler(message -> {
       Object body = message.body();
-      if (body instanceof JsonObject) {
-        last = Buffer.buffer(((JsonObject) body).encode());
-      } else if (body instanceof Buffer) {
-        last = (Buffer) body;
+      synchronized (EventBusConfigStore.this) {
+        if (body instanceof JsonObject) {
+          last = Buffer.buffer(((JsonObject) body).encode());
+        } else if (body instanceof Buffer) {
+          last = (Buffer) body;
+        }
       }
     });
   }
@@ -38,7 +40,7 @@ public class EventBusConfigStore implements ConfigStore {
   }
 
   @Override
-  public void get(Handler<AsyncResult<Buffer>> completionHandler) {
+  public synchronized void get(Handler<AsyncResult<Buffer>> completionHandler) {
     if (last != null) {
       completionHandler.handle(Future.succeededFuture(last));
     } else {
