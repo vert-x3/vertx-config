@@ -2,13 +2,13 @@ package io.vertx.config;
 
 import io.vertx.codegen.annotations.CacheReturn;
 import io.vertx.codegen.annotations.VertxGen;
+import io.vertx.config.impl.ConfigRetrieverImpl;
 import io.vertx.config.spi.ConfigStore;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.config.impl.ConfigRetrieverImpl;
 import io.vertx.core.streams.ReadStream;
 
 /**
@@ -38,20 +38,20 @@ public interface ConfigRetriever {
    * Creates an instance of the default implementation of the {@link ConfigRetriever}, using the default
    * settings (json file, system properties and environment variables).
    *
-   * @param vertx   the vert.x instance
+   * @param vertx the vert.x instance
    * @return the created instance.
    */
   static ConfigRetriever create(Vertx vertx) {
     ConfigRetrieverOptions options = new ConfigRetrieverOptions();
     options
-        .addStore(
-            new ConfigStoreOptions().setType("json")
-                .setConfig(vertx.getOrCreateContext().config()))
-        .addStore(
-            new ConfigStoreOptions().setType("sys")
-        )
-        .addStore(new ConfigStoreOptions().setType("env")
-        );
+      .addStore(
+        new ConfigStoreOptions().setType("json")
+          .setConfig(vertx.getOrCreateContext().config()))
+      .addStore(
+        new ConfigStoreOptions().setType("sys")
+      )
+      .addStore(new ConfigStoreOptions().setType("env")
+      );
     return create(vertx, options);
   }
 
@@ -92,7 +92,8 @@ public interface ConfigRetriever {
   void listen(Handler<ConfigChange> listener);
 
   /**
-   * @return the stream of configurations.
+   * @return the stream of configurations. It's single stream (unicast) and that delivers the last known config
+   * and the successors periodically.
    */
   @CacheReturn
   ReadStream<JsonObject> configStream();
