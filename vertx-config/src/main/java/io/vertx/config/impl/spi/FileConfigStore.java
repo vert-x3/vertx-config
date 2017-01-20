@@ -28,16 +28,6 @@ public class FileConfigStore implements ConfigStore {
 
   @Override
   public void get(Handler<AsyncResult<Buffer>> completionHandler) {
-    vertx.fileSystem().readFile(path, ar -> {
-      if (ar.failed()) {
-        completionHandler.handle(Future.failedFuture(ar.cause()));
-      } else {
-        try {
-          completionHandler.handle(Future.succeededFuture(ar.result()));
-        } catch (Exception e) {
-          completionHandler.handle(Future.failedFuture(e));
-        }
-      }
-    });
+    vertx.fileSystem().readFile(path, completionHandler);
   }
 }
