@@ -59,7 +59,7 @@ public class ConfigMapStore implements ConfigStore {
   }
 
   @Override
-  public void close(Handler<Void> completionHandler) {
+  public synchronized void close(Handler<Void> completionHandler) {
     if (client != null) {
       client.close();
       client = null;
@@ -97,7 +97,7 @@ public class ConfigMapStore implements ConfigStore {
   }
 
   @Override
-  public void get(Handler<AsyncResult<Buffer>> completionHandler) {
+  public synchronized void get(Handler<AsyncResult<Buffer>> completionHandler) {
     Future<KubernetesClient> retrieveClient;
     if (client == null) {
       retrieveClient = getClient();
