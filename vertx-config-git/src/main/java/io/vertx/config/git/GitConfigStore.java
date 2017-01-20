@@ -104,13 +104,7 @@ public class GitConfigStore implements ConfigStore {
     update()   // Update repository
       .compose(v -> read()) // Read files
       .compose(this::compute)  // Compute the merged json
-      .setHandler(ar -> {     // Forward
-        if (ar.failed()) {
-          completionHandler.handle(Future.failedFuture(ar.cause()));
-        } else {
-          completionHandler.handle(Future.succeededFuture(ar.result()));
-        }
-      });
+      .setHandler(completionHandler); // Forward
   }
 
   private Future<Buffer> compute(List<File> files) {
@@ -147,7 +141,7 @@ public class GitConfigStore implements ConfigStore {
     Future<Void> result = Future.future();
     vertx.executeBlocking(
       future -> {
-        PullResult call = null;
+        PullResult call;
         try {
           call = git.pull().setRemote(remote).setRemoteBranchName(branch).call();
         } catch (GitAPIException e) {
