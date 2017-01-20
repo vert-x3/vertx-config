@@ -229,19 +229,19 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
 
     @Override
     public ReadStream<JsonObject> resume() {
-      JsonObject conf = null;
+      JsonObject conf;
       Handler<JsonObject> succ;
       synchronized (this) {
         paused = false;
+        conf = last;
         if (last != null) {
-          conf = last;
           last = null;
         }
         succ = this.handler;
       }
 
       if (conf != null && succ != null) {
-        succ.handle(conf);
+        vertx.runOnContext(v -> succ.handle(conf));
       }
 
       return this;
