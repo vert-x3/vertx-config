@@ -41,11 +41,9 @@ public class ConfigRetrieverOptionsConverter {
   public static void toJson(ConfigRetrieverOptions obj, JsonObject json) {
     json.put("scanPeriod", obj.getScanPeriod());
     if (obj.getStores() != null) {
-      json.put("stores", new JsonArray(
-          obj.getStores().
-              stream().
-              map(item -> item.toJson()).
-              collect(java.util.stream.Collectors.toList())));
+      JsonArray array = new JsonArray();
+      obj.getStores().forEach(item -> array.add(item.toJson()));
+      json.put("stores", array);
     }
   }
 }

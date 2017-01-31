@@ -245,6 +245,16 @@
  * {@link examples.Examples#stream(ConfigStoreOptions, ConfigStoreOptions)}
  * ----
  *
+ * === Retrieving the configuration as a Future
+ *
+ * The {@link io.vertx.config.ConfigRetriever} provide a way to retrieve the configuration as a
+ * {@link io.vertx.core.Future}:
+ *
+ * [source, $lang]
+ * ----
+ * {@link examples.Examples#future(io.vertx.config.ConfigRetriever)}
+ * ----
+ *
  * === Extending the Configuration Retriever
  *
  * You can extend the configuration by implementing:

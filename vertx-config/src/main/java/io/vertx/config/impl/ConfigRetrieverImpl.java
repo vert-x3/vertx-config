@@ -107,13 +107,6 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
   }
 
   @Override
-  public Future<JsonObject> getConfigFuture() {
-    Future<JsonObject> future = Future.future();
-    getConfig(future.completer());
-    return future;
-  }
-
-  @Override
   public synchronized void close() {
     if (scan != -1) {
       vertx.cancelTimer(scan);
