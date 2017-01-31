@@ -1,7 +1,7 @@
 package io.vertx.config.impl.spi;
 
 import io.vertx.config.spi.ConfigStore;
-import io.vertx.config.utils.JsonObjectHelper;
+import io.vertx.config.spi.utils.JsonObjectHelper;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;

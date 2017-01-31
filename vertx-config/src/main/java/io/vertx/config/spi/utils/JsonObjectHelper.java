@@ -1,4 +1,4 @@
-package io.vertx.config.utils;
+package io.vertx.config.spi.utils;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;

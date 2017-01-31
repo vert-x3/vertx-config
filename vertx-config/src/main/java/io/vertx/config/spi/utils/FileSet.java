@@ -1,4 +1,4 @@
-package io.vertx.config.utils;
+package io.vertx.config.spi.utils;
 
 import io.vertx.core.*;
 import io.vertx.core.impl.launcher.commands.FileSelector;
@@ -10,6 +10,7 @@ import io.vertx.config.spi.ConfigProcessor;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Utility class to manage file set selected using a pattern.
@@ -74,7 +75,7 @@ public class FileSet {
           }
           return relative;
         })
-        .filter(s -> s != null)
+        .filter(Objects::nonNull)
         .filter(this::matches)
         .map(s -> new File(root, s))
         .forEach(file -> {

@@ -3,7 +3,7 @@ package io.vertx.config.kubernetes;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.*;
-import io.vertx.config.utils.JsonObjectHelper;
+import io.vertx.config.spi.utils.JsonObjectHelper;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;

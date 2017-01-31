@@ -8,7 +8,7 @@ import io.vertx.config.ConfigStoreOptions;
 import io.vertx.config.spi.ConfigProcessor;
 import io.vertx.config.spi.ConfigStore;
 import io.vertx.config.spi.ConfigStoreFactory;
-import io.vertx.config.utils.Processors;
+import io.vertx.config.spi.utils.Processors;
 import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -236,7 +236,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
           // Cannot resume a non paused stream
           return this;
         }
-        
+
         paused = false;
         conf = last;
         if (last != null) {

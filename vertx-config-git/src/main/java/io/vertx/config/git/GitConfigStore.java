@@ -1,7 +1,7 @@
 package io.vertx.config.git;
 
 import io.vertx.config.spi.ConfigStore;
-import io.vertx.config.utils.FileSet;
+import io.vertx.config.spi.utils.FileSet;
 import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;

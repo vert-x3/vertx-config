@@ -1,4 +1,4 @@
-package io.vertx.config.utils;
+package io.vertx.config.spi.utils;
 
 import io.vertx.config.spi.ConfigProcessor;
 import io.vertx.config.spi.ConfigStoreFactory;
