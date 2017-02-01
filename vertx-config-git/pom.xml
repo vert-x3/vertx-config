@@ -12,6 +12,7 @@
 
   <properties>
     <jgit.version>4.4.1.201607150455-r</jgit.version>
+    <doc.skip>false</doc.skip>
   </properties>
 
   <artifactId>vertx-config-git</artifactId>
@@ -27,6 +28,27 @@
       <groupId>org.eclipse.jgit</groupId>
       <artifactId>org.eclipse.jgit</artifactId>
       <version>${jgit.version}</version>
+    </dependency>
+
+    <!-- dependencies required for convergence in the Vert.x stack -->
+
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.3.5</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.16</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+      <version>1.1.1</version>
     </dependency>
 
     <dependency>
