@@ -15,13 +15,13 @@ import io.vertx.config.ConfigStoreOptions
  */
 fun ConfigRetrieverOptions(
   scanPeriod: Long? = null,
-  stores: List<io.vertx.config.ConfigStoreOptions>? = null): ConfigRetrieverOptions = io.vertx.config.ConfigRetrieverOptions().apply {
+  stores: Iterable<io.vertx.config.ConfigStoreOptions>? = null): ConfigRetrieverOptions = io.vertx.config.ConfigRetrieverOptions().apply {
 
   if (scanPeriod != null) {
     this.setScanPeriod(scanPeriod)
   }
   if (stores != null) {
-    this.setStores(stores)
+    this.setStores(stores.toList())
   }
 }
 

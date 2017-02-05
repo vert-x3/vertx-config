@@ -41,10 +41,13 @@ Once added to your classpath or dependencies, you need to configure the
 
 [source, kotlin]
 ----
-import io.vertx.kotlin.common.json.*
-import io.vertx.kotlin.config.ConfigRetriever
+import io.vertx.config.ConfigRetriever
+import io.vertx.config.ConfigRetrieverOptions
+import io.vertx.config.ConfigStoreOptions
+import io.vertx.kotlin.config.*
+import io.vertx.kotlin.core.json.*
 
-var store = io.vertx.config.ConfigStoreOptions(
+var store = ConfigStoreOptions(
   type = "zookeeper",
   config = json {
     obj(
@@ -53,7 +56,7 @@ var store = io.vertx.config.ConfigStoreOptions(
     )
   })
 
-var retriever = ConfigRetriever.create(vertx, io.vertx.config.ConfigRetrieverOptions(
+var retriever = ConfigRetriever.create(vertx, ConfigRetrieverOptions(
   stores = listOf(store)))
 
 ----
