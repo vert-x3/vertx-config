@@ -1,11 +1,13 @@
-= Yaml Configuration Format
+= Hocon Configuration Format
 
-The Yaml Configuration Format extends the Vert.x Configuration Retriever and provides the
-support for the Yaml Configuration Format format.
+The Hocon Configuration Format extends the Vert.x Configuration Retriever and provides the
+support for the HOCON(https://github.com/typesafehub/config/blob/master/HOCON.md) format.
 
-== Using the Yaml Configuration Format
+It supports includes, json, properties, macros...
 
-To use the Yaml Configuration Format, add the following dependency to the
+== Using the Hocon Configuration Format
+
+To use the Hocon Configuration Format, add the following dependency to the
 _dependencies_ section of your build descriptor:
 
 * Maven (in your `pom.xml`):
@@ -14,7 +16,7 @@ _dependencies_ section of your build descriptor:
 ----
 <dependency>
   <groupId>io.vertx</groupId>
-  <artifactId>vertx-config-yaml</artifactId>
+  <artifactId>vertx-config-hocon</artifactId>
   <version>3.4.0-SNAPSHOT</version>
 </dependency>
 <dependency>
@@ -29,10 +31,10 @@ _dependencies_ section of your build descriptor:
 [source,groovy,subs="+attributes"]
 ----
 compile 'io.vertx:vertx-config:3.4.0-SNAPSHOT'
-compile 'io.vertx:vertx-config-yaml:3.4.0-SNAPSHOT'
+compile 'io.vertx:vertx-config-hocon:3.4.0-SNAPSHOT'
 ----
 
-== Configuring the store to use YAML
+== Configuring the store to use HOCON
 
 Once added to your classpath or dependencies, you need to configure the
 `link:../../jsdoc/module-vertx-config-js_config_retriever-ConfigRetriever.html[ConfigRetriever]` to use this format:
@@ -43,8 +45,8 @@ var ConfigRetriever = require("vertx-config-js/config_retriever");
 var store = {
   "type" : "file",
   "config" : {
-    "path" : "my-config.conf",
-    "format" : "hocon"
+    "path" : "my-config.yaml",
+    "format" : "yaml"
   }
 };
 
@@ -56,4 +58,4 @@ var retriever = ConfigRetriever.create(vertx, {
 
 ----
 
-You just need to set `format` to `yaml`.
+You just need to set `format` to `hocon`.

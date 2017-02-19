@@ -15,12 +15,12 @@ _dependencies_ section of your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-config-git</artifactId>
-  <version>3.4.0.Beta1</version>
+  <version>3.4.0-SNAPSHOT</version>
 </dependency>
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-config</artifactId>
-  <version>3.4.0.Beta1</version>
+  <version>3.4.0-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -28,8 +28,8 @@ _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-config:3.4.0.Beta1'
-compile 'io.vertx:vertx-config-git:3.4.0.Beta1'
+compile 'io.vertx:vertx-config:3.4.0-SNAPSHOT'
+compile 'io.vertx:vertx-config-git:3.4.0-SNAPSHOT'
 ----
 
 == Configuring the store
@@ -39,7 +39,6 @@ Once added to your classpath or dependencies, you need to configure the
 
 [source, groovy]
 ----
-import io.vertx.config.ConfigRetriever
 
 def git = [
   type:"git",

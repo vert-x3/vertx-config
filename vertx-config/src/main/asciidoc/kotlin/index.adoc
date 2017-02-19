@@ -34,7 +34,7 @@ _dependencies_ section of your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-config</artifactId>
-  <version>3.4.0.Beta1</version>
+  <version>3.4.0-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -42,15 +42,13 @@ _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-config:3.4.0.Beta1'
+compile 'io.vertx:vertx-config:3.4.0-SNAPSHOT'
 ----
 
 Once done, you first need to instantiate the `link:../../apidocs/io/vertx/config/ConfigRetriever.html[ConfigRetriever]`:
 
 [source]
 ----
-import io.vertx.config.ConfigRetriever
-
 var retriever = ConfigRetriever.create(vertx)
 
 ----
@@ -67,12 +65,6 @@ You can configure your own stores:
 
 [source]
 ----
-import io.vertx.config.ConfigRetriever
-import io.vertx.config.ConfigRetrieverOptions
-import io.vertx.config.ConfigStoreOptions
-import io.vertx.kotlin.config.*
-import io.vertx.kotlin.core.json.*
-
 var httpStore = ConfigStoreOptions(
   type = "http",
   config = json {
@@ -107,7 +99,6 @@ as follows:
 
 [source]
 ----
-
 retriever.getConfig({ ar ->
   if (ar.failed()) {
     // Failed to retrieve the configuration
@@ -153,10 +144,6 @@ supported formats.
 
 [source, kotlin]
 ----
-import io.vertx.config.ConfigStoreOptions
-import io.vertx.kotlin.config.*
-import io.vertx.kotlin.core.json.*
-
 var file = ConfigStoreOptions(
   type = "file",
   format = "properties",
@@ -174,10 +161,6 @@ The JSON configuration store just serves the given JSON config as it is.
 
 [source, kotlin]
 ----
-import io.vertx.config.ConfigStoreOptions
-import io.vertx.kotlin.config.*
-import io.vertx.kotlin.core.json.*
-
 var json = ConfigStoreOptions(
   type = "json",
   config = json {
@@ -195,9 +178,6 @@ the global configuration.
 
 [source, kotlin]
 ----
-import io.vertx.config.ConfigStoreOptions
-import io.vertx.kotlin.config.*
-
 var json = ConfigStoreOptions(
   type = "env")
 
@@ -212,10 +192,6 @@ global configuration.
 
 [source, kotlin]
 ----
-import io.vertx.config.ConfigStoreOptions
-import io.vertx.kotlin.config.*
-import io.vertx.kotlin.core.json.*
-
 var json = ConfigStoreOptions(
   type = "sys",
   config = json {
@@ -236,10 +212,6 @@ any supported format.
 
 [source, kotlin]
 ----
-import io.vertx.config.ConfigStoreOptions
-import io.vertx.kotlin.config.*
-import io.vertx.kotlin.core.json.*
-
 var http = ConfigStoreOptions(
   type = "http",
   config = json {
@@ -259,10 +231,6 @@ properties.
 
 [source, kotlin]
 ----
-import io.vertx.config.ConfigStoreOptions
-import io.vertx.kotlin.config.*
-import io.vertx.kotlin.core.json.*
-
 var http = ConfigStoreOptions(
   type = "http",
   config = json {
@@ -283,10 +251,6 @@ stores let you distribute your configuration among your local and distributed co
 
 [source, kotlin]
 ----
-import io.vertx.config.ConfigStoreOptions
-import io.vertx.kotlin.config.*
-import io.vertx.kotlin.core.json.*
-
 var eb = ConfigStoreOptions(
   type = "event-bus",
   config = json {
@@ -315,10 +279,6 @@ different format, BUT files in a fileset must share the same format).
 
 [source, kotlin]
 ----
-import io.vertx.config.ConfigStoreOptions
-import io.vertx.kotlin.config.*
-import io.vertx.kotlin.core.json.*
-
 var dir = ConfigStoreOptions(
   type = "directory",
   config = json {
@@ -341,11 +301,6 @@ configuration is reloaded every 5 seconds.
 
 [source, kotlin]
 ----
-import io.vertx.config.ConfigRetriever
-import io.vertx.config.ConfigRetrieverOptions
-import io.vertx.core.Vertx
-import io.vertx.kotlin.config.*
-
 var options = ConfigRetrieverOptions(
   scanPeriod = 2000,
   stores = listOf(store1, store2))
@@ -371,7 +326,6 @@ using:
 
 [source, kotlin]
 ----
-
 var last = retriever.getCachedConfig()
 
 ----
@@ -389,11 +343,6 @@ set of handlers you are notified:
 
 [source, kotlin]
 ----
-import io.vertx.config.ConfigRetriever
-import io.vertx.config.ConfigRetrieverOptions
-import io.vertx.core.Vertx
-import io.vertx.kotlin.config.*
-
 var options = ConfigRetrieverOptions(
   scanPeriod = 2000,
   stores = listOf(store1, store2))
@@ -417,8 +366,6 @@ The `link:../../apidocs/io/vertx/config/ConfigRetriever.html[ConfigRetriever]` p
 
 [source, kotlin]
 ----
-import io.vertx.config.ConfigRetriever
-
 var future = ConfigRetriever.getConfigAsFuture(retriever)
 future.setHandler({ ar ->
   if (ar.failed()) {

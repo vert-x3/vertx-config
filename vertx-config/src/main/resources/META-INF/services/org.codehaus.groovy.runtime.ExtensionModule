@@ -1,4 +1,0 @@
-moduleName = io.vertx.config.ConfigRetriever-module
-moduleVersion = 1.0
-extensionClasses = io.vertx.groovy.config.ConfigRetriever_GroovyExtension
-staticExtensionClasses = io.vertx.groovy.config.ConfigRetriever_GroovyStaticExtension
