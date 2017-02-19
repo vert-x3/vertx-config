@@ -15,12 +15,12 @@ _dependencies_ section of your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-config-redis</artifactId>
-  <version>3.4.0-SNAPSHOT</version>
+  <version>3.4.0.Beta1</version>
 </dependency>
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-config</artifactId>
-  <version>3.4.0-SNAPSHOT</version>
+  <version>3.4.0.Beta1</version>
 </dependency>
 ----
 
@@ -28,8 +28,8 @@ _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-config:3.4.0-SNAPSHOT'
-compile 'io.vertx:vertx-config-redis:3.4.0-SNAPSHOT'
+compile 'io.vertx:vertx-config:3.4.0.Beta1'
+compile 'io.vertx:vertx-config-redis:3.4.0.Beta1'
 ----
 
 == Configuring the store
@@ -39,10 +39,13 @@ Once added to your classpath or dependencies, you need to configure the
 
 [source, kotlin]
 ----
-import io.vertx.kotlin.common.json.*
-import io.vertx.kotlin.config.ConfigRetriever
+import io.vertx.config.ConfigRetriever
+import io.vertx.config.ConfigRetrieverOptions
+import io.vertx.config.ConfigStoreOptions
+import io.vertx.kotlin.config.*
+import io.vertx.kotlin.core.json.*
 
-var store = io.vertx.config.ConfigStoreOptions(
+var store = ConfigStoreOptions(
   type = "redis",
   config = json {
     obj(
@@ -52,7 +55,7 @@ var store = io.vertx.config.ConfigStoreOptions(
     )
   })
 
-var retriever = ConfigRetriever.create(vertx, io.vertx.config.ConfigRetrieverOptions(
+var retriever = ConfigRetriever.create(vertx, ConfigRetrieverOptions(
   stores = listOf(store)))
 
 ----

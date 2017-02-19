@@ -6,7 +6,7 @@
   <parent>
     <groupId>io.vertx</groupId>
     <artifactId>vertx-ext-parent</artifactId>
-    <version>23</version>
+    <version>24</version>
   </parent>
 
   <artifactId>vertx-config-parent</artifactId>
@@ -15,7 +15,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <vertx.version>3.4.0-SNAPSHOT</vertx.version>
+    <stack.version>3.4.0-SNAPSHOT</stack.version>
     <doc.skip>true</doc.skip>
   </properties>
 
@@ -47,7 +47,7 @@
       <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-dependencies</artifactId>
-        <version>${vertx.version}</version>
+        <version>${stack.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
