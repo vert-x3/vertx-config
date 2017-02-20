@@ -4,12 +4,12 @@
  * The Vert.x Configuration retriever provides a way to configure your Vert.x application.
  * It:
  *
- * * offer multiple configuration syntaxes (json, properties, yaml (extension), hocon
+ * * offers multiple configuration syntaxes (json, properties, yaml (extension), hocon
  * (extension)...
- * * offer multiple configuration stores (files, directories, http, git (extension), redis
+ * * offers multiple configuration stores (files, directories, http, git (extension), redis
  * (extension), system properties, environment properties)...
- * * let you define the processing order and overloading
- * * support runtime reconfiguration
+ * * lets you define the processing order and overloading
+ * * supports runtime reconfiguration
  *
  * == Concepts
  *
@@ -77,7 +77,7 @@
  * {@link examples.Examples#example3(ConfigRetriever)}
  * ----
  *
- * === Overloading rules
+ * == Overloading rules
  *
  * The declaration order of the configuration store is important as it defines the
  * overloading. For conflicting key, configuration stores arriving _last_ overloads the
@@ -92,12 +92,12 @@
  *
  * If you declare them in the reverse order (B, A), you would get: * `{a:value, b:1, c:2}`.
  *
- * === Available configuration stores
+ * == Available configuration stores
  *
  * The Vert.x Configuration Retriever provides a set of configuration store and format.
  * Some more are available as extension and you can implement your own.
  *
- * ==== Structure of the configuration
+ * === Structure of the configuration
  *
  * Each declared data store must specify the `type`. It can also define the `format`. If
  * not set JSON is used.
@@ -105,7 +105,7 @@
  * Some configurations tore requires additional configuration (such a path...). This
  * configuration is passed as a Json Object using {@link io.vertx.config.ConfigStoreOptions#setConfig(io.vertx.core.json.JsonObject)}
  *
- * ==== File
+ * === File
  *
  * This configuration store just read the configuration from a file. It supports all
  * supported formats.
@@ -117,7 +117,7 @@
  *
  * The `path` configuration is required.
  *
- * ==== JSON
+ * === JSON
  *
  * The JSON configuration store just serves the given JSON config as it is.
  *
@@ -128,7 +128,7 @@
  *
  * The only supported format for this configuration store is JSON.
  *
- * ==== Environment Variables
+ * === Environment Variables
  *
  * This configuration store maps environment variables to a Json Object contributed to
  * the global configuration.
@@ -140,7 +140,7 @@
  *
  * This configuration store does not support the `format` configuration.
  *
- * ==== System Properties
+ * === System Properties
  *
  * This configuration store maps system properties to a Json Object contributed to the
  * global configuration.
@@ -155,7 +155,7 @@
  * You can configure the `cache` attribute (`true` by default) let you decide whether or
  * not it caches the system properties on the first access and does not reload them.
  *
- * ==== HTTP
+ * === HTTP
  *
  * This configuration stores retrieves the configuration from a HTTP location. It can use
  * any supported format.
@@ -175,7 +175,7 @@
  * {@link examples.Examples#http2()}
  * ----
  *
- * ==== Event Bus
+ * === Event Bus
  *
  * This event bus configuration stores receives the configuration from the event bus. This
  * stores let you distribute your configuration among your local and distributed components.
@@ -187,7 +187,7 @@
  *
  * This configuration store supports any type of format.
  *
- * ==== Directory
+ * === Directory
  *
  * This configuration store is similar to the `file` configuration store, but instead of
  * reading a single file, read several files from a directory.
@@ -208,7 +208,7 @@
  * {@link examples.Examples#dir()}
  * ----
  *
- * === Listening for configuration changes
+ * == Listening for configuration changes
  *
  * The Configuration Retriever periodically retrieve the configuration and if the outcome
  * is different from the current one, your application can be reconfigured. By default the
@@ -219,7 +219,7 @@
  * {@link examples.Examples#period(ConfigStoreOptions, ConfigStoreOptions)}
  * ----
  *
- * === Retrieving the last retrieved configuration
+ * == Retrieving the last retrieved configuration
  *
  * You can retrieved the last retrieved configuration without "waiting" to be retrieved
  * using:
@@ -229,7 +229,7 @@
  * {@link examples.Examples#cache(ConfigRetriever)}
  * ----
  *
- * === Reading configuration as a stream
+ * == Reading configuration as a stream
  *
  * The {@link io.vertx.config.ConfigRetriever} provide a way to access the stream of configuration.
  * It's a {@link io.vertx.core.streams.ReadStream} of {@link io.vertx.core.json.JsonObject}. By registering the right
@@ -245,7 +245,7 @@
  * {@link examples.Examples#stream(ConfigStoreOptions, ConfigStoreOptions)}
  * ----
  *
- * === Retrieving the configuration as a Future
+ * == Retrieving the configuration as a Future
  *
  * The {@link io.vertx.config.ConfigRetriever} provide a way to retrieve the configuration as a
  * {@link io.vertx.core.Future}:
@@ -255,7 +255,7 @@
  * {@link examples.Examples#future(io.vertx.config.ConfigRetriever)}
  * ----
  *
- * === Extending the Configuration Retriever
+ * == Extending the Configuration Retriever
  *
  * You can extend the configuration by implementing:
  *
