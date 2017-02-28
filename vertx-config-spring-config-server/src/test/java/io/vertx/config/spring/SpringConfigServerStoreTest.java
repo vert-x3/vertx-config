@@ -71,7 +71,7 @@ public class SpringConfigServerStoreTest {
       JsonObject config = json.result();
 
       assertThat(config.getString("bar")).isEqualToIgnoringCase("spam");
-      assertThat(config.getString("foo")).isEqualToIgnoringCase("from-default");
+      assertThat(config.getString("foo")).isEqualToIgnoringCase("baz");
       assertThat(config.getString("info.description")).isEqualToIgnoringCase("Spring Cloud Samples");
 
       async.complete();
