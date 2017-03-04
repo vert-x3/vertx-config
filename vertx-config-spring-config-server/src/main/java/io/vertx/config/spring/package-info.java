@@ -1,10 +1,10 @@
 /**
- * = Spring Config Server Store
+ * === Spring Config Server Store
  *
  * The Spring Config Server Store extends the Vert.x Configuration Retriever and provides the
  * a way to retrieve configuration from a Spring Server.
  *
- * == Using the Spring Config Server Store
+ * ==== Using the Spring Config Server Store
  *
  * To use the Spring Config Server Store, add the following dependency to the
  * _dependencies_ section of your build descriptor:
@@ -33,7 +33,7 @@
  * compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
  * ----
  *
- * == Configuring the store
+ * ==== Configuring the store
  *
  * Once added to your classpath or dependencies, you need to configure the
  * {@link io.vertx.config.ConfigRetriever} to use this store:
@@ -53,7 +53,7 @@
  * * `httpClientConfiguration` - the configuration of the underlying HTTP client
  *
  */
-@Document(fileName = "index.adoc")
+@Document(fileName = "spring-store.adoc")
 @ModuleGen(name = "vertx-config", groupPackage = "io.vertx")
 package io.vertx.config.spring;
 

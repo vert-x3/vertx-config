@@ -1,10 +1,10 @@
 /**
- * = Yaml Configuration Format
+ * === Yaml Configuration Format
  *
  * The Yaml Configuration Format extends the Vert.x Configuration Retriever and provides the
  * support for the Yaml Configuration Format format.
  *
- * == Using the Yaml Configuration Format
+ * ==== Using the Yaml Configuration Format
  *
  * To use the Yaml Configuration Format, add the following dependency to the
  * _dependencies_ section of your build descriptor:
@@ -33,7 +33,7 @@
  * compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
  * ----
  *
- * == Configuring the store to use YAML
+ * ==== Configuring the store to use YAML
  *
  * Once added to your classpath or dependencies, you need to configure the
  * {@link io.vertx.config.ConfigRetriever} to use this format:
@@ -45,7 +45,7 @@
  *
  * You just need to set `format` to `yaml`.
  */
-@Document(fileName = "index.adoc")
+@Document(fileName = "yaml-format.adoc")
 @ModuleGen(name = "vertx-config", groupPackage = "io.vertx")
 package io.vertx.config.yaml;
 

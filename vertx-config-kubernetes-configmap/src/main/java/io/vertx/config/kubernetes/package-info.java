@@ -1,10 +1,10 @@
 /**
- * = Kubernetes ConfigMap Store
+ * === Kubernetes ConfigMap Store
  *
  * The Kubernetes ConfigMap Store extends the Vert.x Configuration Retriever and provides the
  * support Kubernetes Config Map and Secrets. So, configuration is retrieved by reading the config map or the secrets.
  *
- * == Using the Kubernetes ConfigMap Store
+ * ==== Using the Kubernetes ConfigMap Store
  *
  * To use the Kubernetes ConfigMap Store, add the following dependency to the
  * _dependencies_ section of your build descriptor:
@@ -33,7 +33,7 @@
  * compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
  * ----
  *
- * == Configuring the store
+ * ==== Configuring the store
  *
  * Once added to your classpath or dependencies, you need to configure the
  * {@link io.vertx.config.ConfigRetriever} to use this store:
@@ -61,7 +61,7 @@
  * {@link examples.Examples#example2(io.vertx.core.Vertx)}
  * ----
  */
-@Document(fileName = "index.adoc")
+@Document(fileName = "kubernetes-store.adoc")
 @ModuleGen(name = "vertx-config", groupPackage = "io.vertx")
 package io.vertx.config.kubernetes;
 

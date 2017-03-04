@@ -1,10 +1,10 @@
 /**
- * = Zookeeper Configuration Store
+ * === Zookeeper Configuration Store
  *
  * The Zookeeper Configuration Store extends the Vert.x Configuration Retriever and provides the
  * way to retrieve configuration from a Zookeeper server. It uses Apache Curator as client.
  *
- * == Using the Zookeeper Configuration Store
+ * ==== Using the Zookeeper Configuration Store
  *
  * To use the Redis Configuration Store, add the following dependency to the
  * _dependencies_ section of your build descriptor:
@@ -33,7 +33,7 @@
  * compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
  * ----
  *
- * == Configuring the store
+ * ==== Configuring the store
  *
  * Once added to your classpath or dependencies, you need to configure the
  * {@link io.vertx.config.ConfigRetriever} to use this store:
@@ -56,7 +56,7 @@
  * 1000 ms by default.
  *
  */
-@Document(fileName = "index.adoc")
+@Document(fileName = "zookeeper-store.adoc")
 @ModuleGen(name = "vertx-config", groupPackage = "io.vertx")
 package io.vertx.config.zookeeper;
 

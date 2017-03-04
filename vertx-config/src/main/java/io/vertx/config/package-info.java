@@ -1,7 +1,7 @@
 /**
- * = Vert.x Configuration Retriever
+ * = Vert.x Config
  *
- * The Vert.x Configuration retriever provides a way to configure your Vert.x application.
+ * Vert.x Config provides a way to configure your Vert.x application.
  * It:
  *
  * * offers multiple configuration syntaxes (json, properties, yaml (extension), hocon
@@ -13,18 +13,18 @@
  *
  * == Concepts
  *
- * The configuration retriever is structured around:
+ * The library is structured around:
  *
- * * a **Configuration Retriever** instantiated and used by the Vert.x application. It
+ * * a **Config Retriever** instantiated and used by the Vert.x application. It
  * configures a set of configuration store
- * * **configuration store** defines a location from where the configuration data is read
+ * * **Configuration store** defines a location from where the configuration data is read
  * and and a syntax (json by default)
  *
  * The configuration is retrieved as a JSON Object.
  *
- * == Using the Vert.x Configuration Retriever
+ * == Using the Config Retriever
  *
- * To use the Vert.x Configuration Retriever, add the following dependency to the
+ * To use the Config Retriever, add the following dependency to the
  * _dependencies_ section of your build descriptor:
  *
  * * Maven (in your `pom.xml`):
@@ -52,7 +52,7 @@
  * {@link examples.Examples#example1(io.vertx.core.Vertx)}
  * ----
  *
- * By default the Vert.x Configuration Retriever is configured with the following stores (in
+ * By default the Config Retriever is configured with the following stores (in
  * this order):
  *
  * * The Vert.x verticle `config()`
@@ -69,7 +69,7 @@
  *
  * More details about the overloading rules and available stores are available below.
  *
- * Once you have the instance of the Vert.x Configuration Retriever, _retrieve_ the configuration
+ * Once you have the instance of the Config Retriever, _retrieve_ the configuration
  * as follows:
  *
  * [source]
@@ -94,7 +94,7 @@
  *
  * == Available configuration stores
  *
- * The Vert.x Configuration Retriever provides a set of configuration store and format.
+ * The Config Retriever provides a set of configuration store and format.
  * Some more are available as extension and you can implement your own.
  *
  * === Structure of the configuration
@@ -255,14 +255,33 @@
  * {@link examples.Examples#future(io.vertx.config.ConfigRetriever)}
  * ----
  *
- * == Extending the Configuration Retriever
+ * == Extending the Config Retriever
  *
  * You can extend the configuration by implementing:
  *
- * * the `io.vertx.config.spi.ConfigurationProcessor` SPI to add support for a
+ * * the {@link io.vertx.config.spi.ConfigProcessor} SPI to add support for a
  * format
- * * the `io.vertx.config.spi.ConfigurationStoreFactory` SPI to add support for
+ * * the {@link io.vertx.config.spi.ConfigStoreFactory} SPI to add support for
  * configuration store (place from where the configuration data is retrieved)
+ *
+ * == Provided formats
+ *
+ * include::hocon-format.adoc[]
+ *
+ * include::yaml-format.adoc[]
+ *
+ * == Provided stores
+ *
+ * include::git-store.adoc[]
+ *
+ * include::kubernetes-store.adoc[]
+ *
+ * include::redis-store.adoc[]
+ *
+ * include::zookeeper-store.adoc[]
+ *
+ * include::spring-store.adoc[]
+ *
  */
 @Document(fileName = "index.adoc")
 @ModuleGen(name = "vertx-config", groupPackage = "io.vertx")

@@ -1,10 +1,10 @@
 /**
- * = Git Configuration Store
+ * === Git Configuration Store
  *
  * The Git Configuration Store is an extension to the Vert.x Configuration Retriever to
  * retrieve configuration from a Git repository.
  *
- * == Using the Git Configuration Store
+ * ==== Using the Git Configuration Store
  *
  * To use the Git Configuration, add the following dependency to the
  * _dependencies_ section of your build descriptor:
@@ -33,7 +33,7 @@
  * compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
  * ----
  *
- * == Configuring the store
+ * ==== Configuring the store
  *
  * Once added to your classpath or dependencies, you need to configure the
  * {@link io.vertx.config.ConfigRetriever} to use this store:
@@ -53,7 +53,7 @@
  * You can also configure the `branch` (`master` by default) to use and the name of the
  * `remote` repository (`origin` by default).
  *
- * == How does it works
+ * ==== How does it works
  *
  * If the local `path` does not exist, the configuration store clones the repository into
  * this directory. Then it reads the file matching the different file sets.
@@ -64,7 +64,7 @@
  * Periodically, the repositories is updated to check if the configuration has been updated.
  *
  */
-@Document(fileName = "index.adoc")
+@Document(fileName = "git-store.adoc")
 @ModuleGen(name = "vertx-config", groupPackage = "io.vertx")
 package io.vertx.config.git;
 
