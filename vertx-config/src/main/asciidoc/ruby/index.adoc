@@ -34,7 +34,7 @@ _dependencies_ section of your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-config</artifactId>
-  <version>3.4.0-SNAPSHOT</version>
+  <version>3.4.0</version>
 </dependency>
 ----
 
@@ -42,7 +42,7 @@ _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-config:3.4.0-SNAPSHOT'
+compile 'io.vertx:vertx-config:3.4.0'
 ----
 
 Once done, you first need to instantiate the `link:../../yardoc/VertxConfig/ConfigRetriever.html[ConfigRetriever]`:
@@ -414,13 +414,19 @@ format
 * the `link:unavailable[ConfigStoreFactory]` SPI to add support for
 configuration store (place from where the configuration data is retrieved)
 
-== Provided formats
+== Additional formats
+
+In addition of the out of the box format supported by this library, Vert.x Config provides additional
+formats you can use in your application.
 
 include::hocon-format.adoc[]
 
 include::yaml-format.adoc[]
 
-== Provided stores
+== Additional stores
+
+In addition of the out of the box stores supported by this library, Vert.x Config provides additional
+stores you can use in your application.
 
 include::git-store.adoc[]
 
