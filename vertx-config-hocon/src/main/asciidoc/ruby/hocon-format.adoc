@@ -17,12 +17,12 @@ _dependencies_ section of your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-config-hocon</artifactId>
-  <version>3.4.0</version>
+  <version>3.4.1-SNAPSHOT</version>
 </dependency>
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-config</artifactId>
-  <version>3.4.0</version>
+  <version>3.4.1-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -30,8 +30,8 @@ _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-config:3.4.0'
-compile 'io.vertx:vertx-config-hocon:3.4.0'
+compile 'io.vertx:vertx-config:3.4.1-SNAPSHOT'
+compile 'io.vertx:vertx-config-hocon:3.4.1-SNAPSHOT'
 ----
 
 ==== Configuring the store to use HOCON
@@ -44,9 +44,9 @@ Once added to your classpath or dependencies, you need to configure the
 require 'vertx-config/config_retriever'
 store = {
   'type' => "file",
+  'format' => "hocon",
   'config' => {
-    'path' => "my-config.yaml",
-    'format' => "yaml"
+    'path' => "my-config.conf"
   }
 }
 
