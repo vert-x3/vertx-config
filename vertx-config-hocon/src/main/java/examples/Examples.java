@@ -14,11 +14,11 @@ public class Examples {
 
   public void example1(Vertx vertx) {
     ConfigStoreOptions store = new ConfigStoreOptions()
-        .setType("file")
-        .setConfig(new JsonObject()
-            .put("path", "my-config.yaml")
-            .put("format", "yaml")
-        );
+      .setType("file")
+      .setFormat("hocon")
+      .setConfig(new JsonObject()
+        .put("path", "my-config.conf")
+      );
 
     ConfigRetriever retriever = ConfigRetriever.create(vertx,
         new ConfigRetrieverOptions().addStore(store));
