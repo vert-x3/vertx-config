@@ -21,9 +21,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.jayway.awaitility.Awaitility.await;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.is;
+import static com.jayway.awaitility.Awaitility.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.hamcrest.CoreMatchers.*;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -98,10 +98,10 @@ public class ScanAndBroadcastTest {
         current.set(json.result());
       });
 
-      waitUntil(() -> current.get() != null, x -> {
+      assertWaitUntil(() -> current.get() != null, x -> {
         current.set(null);
         http.put("some-key", "some-value");
-        waitUntil(() -> current.get() != null, x2 -> {
+        assertWaitUntil(() -> current.get() != null, x2 -> {
           assertThat(current.get().getString("some-key")).isEqualTo("some-value");
           done.set(true);
         });
@@ -110,11 +110,11 @@ public class ScanAndBroadcastTest {
     await().untilAtomic(done, is(true));
   }
 
-  private void waitUntil(Callable<Boolean> condition, Handler<AsyncResult<Void>> next) {
-    waitUntil(new AtomicInteger(), condition, next);
+  private void assertWaitUntil(Callable<Boolean> condition, Handler<AsyncResult<Void>> next) {
+    assertWaitUntil(new AtomicInteger(), condition, next);
   }
 
-  private void waitUntil(AtomicInteger counter, Callable<Boolean> condition, Handler<AsyncResult<Void>> next) {
+  private void assertWaitUntil(AtomicInteger counter, Callable<Boolean> condition, Handler<AsyncResult<Void>> next) {
     boolean success;
     try {
       success = condition.call();
@@ -129,7 +129,7 @@ public class ScanAndBroadcastTest {
         next.handle(Future.failedFuture("timeout"));
       } else {
         counter.incrementAndGet();
-        vertx.setTimer(10, l -> waitUntil(counter, condition, next));
+        vertx.setTimer(10, l -> assertWaitUntil(counter, condition, next));
       }
     }
   }
@@ -152,7 +152,7 @@ public class ScanAndBroadcastTest {
         http.put("some-key", "some-value-2");
       });
 
-      waitUntil(() -> current.get() != null, r -> {
+      assertWaitUntil(() -> current.get() != null, r -> {
         if (r.failed()) {
           tc.fail(r.cause());
         } else {
