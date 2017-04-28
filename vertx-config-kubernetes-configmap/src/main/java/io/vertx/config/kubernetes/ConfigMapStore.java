@@ -28,6 +28,7 @@ public class ConfigMapStore implements ConfigStore {
   private final String name;
   private final String key;
   private final boolean secret;
+  private final boolean optional;
   private KubernetesClient client;
 
 
@@ -42,6 +43,7 @@ public class ConfigMapStore implements ConfigStore {
         ns = "default";
       }
     }
+    this.optional = configuration.getBoolean("optional", true);
     this.namespace = ns;
     this.name = configuration.getString("name");
     this.key = configuration.getString("key");
@@ -129,7 +131,11 @@ public class ConfigMapStore implements ConfigStore {
             } else {
               ConfigMap map = client.configMaps().inNamespace(namespace).withName(name).get();
               if (map == null) {
-                future.fail("Cannot find the config map '" + name + "' in '" + namespace + "'");
+                if (optional) {
+                  future.complete(Buffer.buffer("{}"));
+                } else {
+                  future.fail("Cannot find the config map '" + name + "' in '" + namespace + "'");
+                }
               } else {
                 if (this.key == null) {
                   Map<String, Object> cm = asObjectMap(map.getData());

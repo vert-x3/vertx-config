@@ -48,6 +48,7 @@
  * * `namespace` - the project namespace, `default` by default. If the `KUBERNETES_NAMESPACE` ENV variable is set, it
  * uses this value.
  * * `name` - the name of the config map
+ * * `optional` - whether or not the config map is optional (`true` by default)
  *
  * If the config map is composed by several element, you can use the `key` parameter to tell
  * which `key` is read
@@ -60,6 +61,9 @@
  * ----
  * {@link examples.Examples#example2(io.vertx.core.Vertx)}
  * ----
+ *
+ * If the config map is not available, an empty JSON object is passed as configuration chunk. To disable this
+ * behavior and explicitly fail, you can set the `optional` configuration to `false`.
  */
 @Document(fileName = "kubernetes-store.adoc")
 @ModuleGen(name = "vertx-config", groupPackage = "io.vertx")
