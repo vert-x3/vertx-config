@@ -148,7 +148,12 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
             JsonObject prev = current;
             current = ar.result();
             listeners.forEach(l -> l.handle(new ConfigChange(prev, current)));
-            streamOfConfiguration.handle(current);
+            try {
+              streamOfConfiguration.handle(current);
+            } catch (Throwable e) {
+              // Report the error on the context exception handler.
+              vertx.exceptionHandler().handle(e);
+            }
           }
         }
       }
@@ -161,9 +166,9 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
           Future<JsonObject> conf = Future.future();
           s.get(vertx, ar -> {
             if (ar.succeeded()) {
-              conf.complete(ar.result());
+              conf.tryComplete(ar.result());
             } else {
-              conf.fail(ar.cause());
+              conf.tryFail(ar.cause());
             }
           });
           return conf;
@@ -172,12 +177,22 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
 
     CompositeFuture.all(futures).setHandler(r -> {
       if (r.failed()) {
-        completionHandler.handle(Future.failedFuture(r.cause()));
+        try {
+          completionHandler.handle(Future.failedFuture(r.cause()));
+        } catch (Throwable e) {
+          // Report the error on the context exception handler.
+          vertx.exceptionHandler().handle(e);
+        }
       } else {
         // Merge the different futures
         JsonObject json = new JsonObject();
         futures.forEach(future -> json.mergeIn((JsonObject) future.result()));
-        completionHandler.handle(Future.succeededFuture(json));
+        try {
+          completionHandler.handle(Future.succeededFuture(json));
+        } catch (Throwable e) {
+          // Report the error on the context exception handler.
+          vertx.exceptionHandler().handle(e);
+        }
       }
     });
   }

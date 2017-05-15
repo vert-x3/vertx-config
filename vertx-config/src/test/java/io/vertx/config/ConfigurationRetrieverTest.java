@@ -11,7 +11,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static com.jayway.awaitility.Awaitility.await;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -162,6 +169,28 @@ public class ConfigurationRetrieverTest {
       assertThat(ar.result().getString("key")).isEqualToIgnoringCase("value");
       async.complete();
     });
+  }
+
+  @Test
+  public void testExceptionWhenCallbackFailed(TestContext tc) {
+    List<ConfigStoreOptions> options = new ArrayList<>();
+    options.add(new ConfigStoreOptions().setType("file")
+      .setConfig(new JsonObject().put("path", "src/test/resources/file/regular.json")));
+    retriever = ConfigRetriever.create(vertx, new ConfigRetrieverOptions().setStores(options));
+
+    AtomicReference<Throwable> reference = new AtomicReference<>();
+    vertx.exceptionHandler(reference::set);
+
+    retriever.getConfig(ar -> {
+      tc.assertTrue(ar.succeeded());
+      tc.assertNotNull(ar.result());
+
+      // Class cast exception here - on purpose
+      ar.result().getString("int");
+    });
+
+    await().untilAtomic(reference, is(notNullValue()));
+    assertThat(reference.get()).isInstanceOf(ClassCastException.class).hasMessageContaining("java.lang.Integer");
   }
 
 }
