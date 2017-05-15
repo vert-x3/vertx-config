@@ -2,7 +2,7 @@ package io.vertx.config.kubernetes;
 
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.mock.KubernetesMockClient;
+import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
@@ -28,64 +28,79 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ConfigMapStoreTest {
 
   private static final String SOME_JSON = new JsonObject().put("foo", "bar")
-      .put("port", 8080)
-      .put("debug", true).encode();
+    .put("port", 8080)
+    .put("debug", true).encode();
   private static final String SOME_PROPS = "foo=bar\nport=8080\ndebug=true";
 
   private Vertx vertx;
   private KubernetesClient client;
   private ConfigMapStore store;
+  private KubernetesMockServer server;
 
   @Before
   public void setUp() {
     vertx = Vertx.vertx();
 
     ConfigMap map1 = new ConfigMapBuilder().withMetadata(new ObjectMetaBuilder().withName("my-config-map").build())
-        .addToData("my-app-json", SOME_JSON)
-        .addToData("my-app-props", SOME_PROPS)
-        .build();
+      .addToData("my-app-json", SOME_JSON)
+      .addToData("my-app-props", SOME_PROPS)
+      .build();
 
     Map<String, String> data = new LinkedHashMap<>();
     data.put("key", "value");
     data.put("bool", "true");
     data.put("count", "3");
     ConfigMap map2 = new ConfigMapBuilder().withMetadata(new ObjectMetaBuilder().withName("my-config-map-2").build())
-        .withData(data)
-        .build();
+      .withData(data)
+      .build();
 
     ConfigMap map3 = new ConfigMapBuilder().withMetadata(new ObjectMetaBuilder().withName("my-config-map-x").build())
-        .addToData("my-app-json", SOME_JSON)
-        .build();
+      .addToData("my-app-json", SOME_JSON)
+      .build();
 
     Secret secret = new SecretBuilder().withMetadata(new ObjectMetaBuilder().withName("my-secret").build())
-        .addToData("password", "secret")
-        .build();
+      .addToData("password", "secret")
+      .build();
 
-    KubernetesMockClient client = new KubernetesMockClient();
-    client.configMaps().inNamespace("default").list().andReturn(new ConfigMapListBuilder().addToItems(map1, map2)
-        .build());
-    client.configMaps().inNamespace("default").withName("my-config-map").get().andReturn(map1);
-    client.configMaps().inNamespace("default").withName("my-config-map-2").get().andReturn(map2);
+    server = new KubernetesMockServer();
+    server.init();
 
-    client.configMaps().inNamespace("my-project").list().andReturn(new ConfigMapListBuilder().addToItems(map3)
-        .build());
-    client.configMaps().inNamespace("my-project").withName("my-config-map-x").get().andReturn(map3);
+    server.expect().get().withPath("/api/v1/namespaces/default/configmaps").andReturn(200, new
+      ConfigMapListBuilder().addToItems(map1, map2).build()).always();
+    server.expect().get().withPath("/api/v1/namespaces/my-project/configmaps").andReturn(200, new
+      ConfigMapListBuilder().addToItems(map3).build()).always();
 
-    client.secrets().inNamespace("my-project").withName("my-secret").get().andReturn(secret);
-    this.client = client.replay();
+    server.expect().get().withPath("/api/v1/namespaces/default/configmaps/my-config-map")
+      .andReturn(200, map1).always();
+    server.expect().get().withPath("/api/v1/namespaces/default/configmaps/my-config-map-2")
+      .andReturn(200, map2).always();
+
+    server.expect().get().withPath("/api/v1/namespaces/my-project/configmaps/my-config-map-x")
+      .andReturn(200, map3).always();
+
+    server.expect().get().withPath("/api/v1/namespaces/default/configmaps/my-unknown-config-map")
+      .andReturn(500, null).always();
+    server.expect().get().withPath("/api/v1/namespaces/default/configmaps/my-unknown-map")
+      .andReturn(500, null).always();
+
+    server.expect().get().withPath("/api/v1/namespaces/my-project/secrets/my-secret").andReturn(200, secret)
+      .always();
+
+    client = server.createClient();
   }
 
   @After
   public void tearDown() {
     store.close(null);
     vertx.close();
+    server.shutdown();
   }
 
   @Test
   public void testWithJson(TestContext tc) {
     Async async = tc.async();
     store = new ConfigMapStore(vertx, new JsonObject()
-        .put("name", "my-config-map").put("key", "my-app-json"));
+      .put("name", "my-config-map").put("key", "my-app-json"));
     store.setClient(client);
     checkJsonConfig(tc, async);
   }
@@ -94,7 +109,7 @@ public class ConfigMapStoreTest {
   public void testWithUnknownConfigMap(TestContext tc) {
     Async async = tc.async();
     store = new ConfigMapStore(vertx, new JsonObject()
-        .put("name", "my-unknown-config-map"));
+      .put("name", "my-unknown-config-map"));
     store.setClient(client);
     store.get(ar -> {
       assertThat(ar.failed()).isTrue();
@@ -106,7 +121,7 @@ public class ConfigMapStoreTest {
   public void testWithUnknownSecrets(TestContext tc) {
     Async async = tc.async();
     store = new ConfigMapStore(vertx, new JsonObject()
-        .put("name", "my-unknown-secret").put("secret", true));
+      .put("name", "my-unknown-secret").put("secret", true));
     store.setClient(client);
     store.get(ar -> {
       assertThat(ar.failed()).isTrue();
@@ -118,9 +133,9 @@ public class ConfigMapStoreTest {
   public void testWithSecret(TestContext tc) {
     Async async = tc.async();
     store = new ConfigMapStore(vertx, new JsonObject()
-        .put("name", "my-secret")
-        .put("secret", true)
-        .put("namespace", "my-project"));
+      .put("name", "my-secret")
+      .put("secret", true)
+      .put("namespace", "my-project"));
     store.setClient(client);
     store.get(ar -> {
       tc.assertTrue(ar.succeeded());
@@ -148,9 +163,9 @@ public class ConfigMapStoreTest {
   public void testWithJsonInAnotherNamespace(TestContext tc) {
     Async async = tc.async();
     store = new ConfigMapStore(vertx, new JsonObject()
-        .put("name", "my-config-map-x")
-        .put("namespace", "my-project")
-        .put("key", "my-app-json"));
+      .put("name", "my-config-map-x")
+      .put("namespace", "my-project")
+      .put("key", "my-app-json"));
     store.setClient(client);
     checkJsonConfig(tc, async);
   }
@@ -159,7 +174,7 @@ public class ConfigMapStoreTest {
   public void testWithUnknownKey(TestContext tc) {
     Async async = tc.async();
     store = new ConfigMapStore(vertx, new JsonObject()
-        .put("name", "my-config-map").put("key", "my-unknown-key"));
+      .put("name", "my-config-map").put("key", "my-unknown-key"));
     store.setClient(client);
     store.get(ar -> {
       tc.assertTrue(ar.failed());
@@ -171,7 +186,7 @@ public class ConfigMapStoreTest {
   public void testWithUnknownMap(TestContext tc) {
     Async async = tc.async();
     store = new ConfigMapStore(vertx, new JsonObject()
-        .put("name", "my-unknown-map"));
+      .put("name", "my-unknown-map"));
     store.setClient(client);
     store.get(ar -> {
       tc.assertTrue(ar.failed());
@@ -183,7 +198,7 @@ public class ConfigMapStoreTest {
   public void testWithProperties(TestContext tc) {
     Async async = tc.async();
     store = new ConfigMapStore(vertx, new JsonObject()
-        .put("name", "my-config-map").put("key", "my-app-props"));
+      .put("name", "my-config-map").put("key", "my-app-props"));
     store.setClient(client);
     store.get(ar -> {
       tc.assertTrue(ar.succeeded());
@@ -204,7 +219,7 @@ public class ConfigMapStoreTest {
   public void testWithoutKey(TestContext tc) {
     Async async = tc.async();
     store = new ConfigMapStore(vertx, new JsonObject()
-        .put("name", "my-config-map-2"));
+      .put("name", "my-config-map-2"));
     store.setClient(client);
     store.get(ar -> {
       tc.assertTrue(ar.succeeded());
