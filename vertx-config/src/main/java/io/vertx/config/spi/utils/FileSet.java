@@ -92,7 +92,7 @@ public class FileSet {
               }
             });
         } catch (RejectedExecutionException e) {
-          // May happen because ot the internal thread pool using in the async file system.
+          // May happen because ot the internal thread pool used in the async file system.
           future.fail(e);
         }
       });
