@@ -1,16 +1,17 @@
 package io.vertx.config.spi.utils;
 
+import io.vertx.config.spi.ConfigProcessor;
 import io.vertx.core.*;
 import io.vertx.core.impl.launcher.commands.FileSelector;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.config.spi.ConfigProcessor;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.RejectedExecutionException;
 
 /**
  * Utility class to manage file set selected using a pattern.
@@ -44,7 +45,7 @@ public class FileSet {
     this.processor = Processors.get(format);
     if (this.processor == null) {
       throw new IllegalArgumentException("Unknown configuration format `" + format + "`, supported types are " +
-          Processors.getSupportedFormats());
+        Processors.getSupportedFormats());
     }
   }
 
@@ -64,33 +65,37 @@ public class FileSet {
     List<Future> futures = new ArrayList<>();
 
     files.stream()
-        .map(file -> {
-          String relative = null;
-          if (file.getAbsolutePath().startsWith(root.getAbsolutePath())) {
-            relative = file.getAbsolutePath().substring(root.getAbsolutePath().length() + 1);
-          }
-          if (relative == null) {
-            LOGGER.warn("The file `" + file.getAbsolutePath() + "` is not in '" + root
-                .getAbsolutePath() + "'");
-          }
-          return relative;
-        })
-        .filter(Objects::nonNull)
-        .filter(this::matches)
-        .map(s -> new File(root, s))
-        .forEach(file -> {
-          Future<JsonObject> future = Future.future();
-          futures.add(future);
-
+      .map(file -> {
+        String relative = null;
+        if (file.getAbsolutePath().startsWith(root.getAbsolutePath())) {
+          relative = file.getAbsolutePath().substring(root.getAbsolutePath().length() + 1);
+        }
+        if (relative == null) {
+          LOGGER.warn("The file `" + file.getAbsolutePath() + "` is not in '" + root
+            .getAbsolutePath() + "'");
+        }
+        return relative;
+      })
+      .filter(Objects::nonNull)
+      .filter(this::matches)
+      .map(s -> new File(root, s))
+      .forEach(file -> {
+        Future<JsonObject> future = Future.future();
+        futures.add(future);
+        try {
           vertx.fileSystem().readFile(file.getAbsolutePath(),
-              buffer -> {
-                if (buffer.failed()) {
-                  future.fail(buffer.cause());
-                } else {
-                  processor.process(vertx, null, buffer.result(), future.completer());
-                }
-              });
-        });
+            buffer -> {
+              if (buffer.failed()) {
+                future.fail(buffer.cause());
+              } else {
+                processor.process(vertx, null, buffer.result(), future.completer());
+              }
+            });
+        } catch (RejectedExecutionException e) {
+          // May happen because ot the internal thread pool using in the async file system.
+          future.fail(e);
+        }
+      });
 
     CompositeFuture.all(futures).setHandler(ar -> {
       if (ar.failed()) {
@@ -99,8 +104,8 @@ public class FileSet {
         // Merge
         JsonObject result = new JsonObject();
         futures.stream()
-            .map(future -> (JsonObject) future.result())
-            .forEach(result::mergeIn);
+          .map(future -> (JsonObject) future.result())
+          .forEach(result::mergeIn);
         handler.handle(Future.succeededFuture(result));
       }
     });
