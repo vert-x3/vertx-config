@@ -186,7 +186,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
       } else {
         // Merge the different futures
         JsonObject json = new JsonObject();
-        futures.forEach(future -> json.mergeIn((JsonObject) future.result()));
+        futures.forEach(future -> json.mergeIn((JsonObject) future.result(), true));
         try {
           completionHandler.handle(Future.succeededFuture(json));
         } catch (Throwable e) {
