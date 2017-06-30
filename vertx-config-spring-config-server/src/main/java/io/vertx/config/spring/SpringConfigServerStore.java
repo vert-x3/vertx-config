@@ -99,11 +99,9 @@ class SpringConfigServerStore implements ConfigStore {
   }
 
   private void parse(JsonObject body, Handler<AsyncResult<Buffer>> handler) {
-    String version = body.getString("version", null);
-    JsonArray sources = body.getJsonArray("propertySources", null);
-
-    if (version == null || sources == null) {
-      handler.handle(Future.failedFuture("Invalid configuration server response, version or property sources missing"));
+    JsonArray sources = body.getJsonArray("propertySources");
+    if (sources == null) {
+      handler.handle(Future.failedFuture("Invalid configuration server response, property sources missing"));
     } else {
       JsonObject configuration = new JsonObject();
       for (int i = 0; i < sources.size(); i++) {
