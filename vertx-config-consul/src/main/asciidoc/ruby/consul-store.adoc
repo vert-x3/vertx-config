@@ -1,7 +1,7 @@
 === Consul Configuration Store
 
 The Consul Configuration Store extends the Vert.x Configuration Retriever and provides the
-way to retrieve configuration from a Consul.
+way to retrieve configuration from a https://www.consul.io[Consul].
 
 ==== Using the Consul Configuration Store
 
@@ -59,4 +59,7 @@ retriever = VertxConfig::ConfigRetriever.create(vertx, {
 
 The store configuration is used to create an instance of
 `link:../../yardoc/VertxConsul/ConsulClient.html[ConsulClient]`. Check the documentation of the Vert.x Consul Client
-for further details.
+for further details. And this is the parameters specific to the Consul Configuration Store:
+
+`prefix`:: A prefix that will not be taken into account when building the configuration tree. Defaults to empty.
+`delimiter`:: Symbol that used to split keys in the Consul storage to obtain levels in the configuration tree. Defaults to "/".

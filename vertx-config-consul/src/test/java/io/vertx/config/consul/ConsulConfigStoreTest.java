@@ -58,7 +58,7 @@ public class ConsulConfigStoreTest {
   }
 
   @After
-  public void tearDown(TestContext tc) throws IOException {
+  public void tearDown(TestContext tc) {
     retriever.close();
     client.close();
     vertx.close(tc.asyncAssertSuccess());
@@ -76,7 +76,7 @@ public class ConsulConfigStoreTest {
   }
 
   @Test
-  public void getSimpleConfig(TestContext tc) throws Exception {
+  public void getSimpleConfig(TestContext tc) {
     Async async = tc.async();
     createRetriever();
     client.putValue("foo/bar", "value", ar -> {
@@ -88,6 +88,26 @@ public class ConsulConfigStoreTest {
         tc.assertEquals(config2.getString("bar"), "value");
         client.deleteValues("foo", h -> async.complete());
       });
+    });
+  }
+
+  @Test
+  public void listenConfigChange(TestContext tc) {
+    Async async = tc.async();
+    createRetriever();
+    client.putValue("foo/bar", "value", ar -> {
+      tc.assertTrue(ar.succeeded());
+      retriever.getConfig(init ->
+        retriever.listen(change -> {
+          JsonObject prev = change.getPreviousConfiguration();
+          tc.assertTrue(!prev.isEmpty());
+          tc.assertEquals(prev.getString("bar"), "value");
+          JsonObject next = change.getNewConfiguration();
+          tc.assertTrue(!next.isEmpty());
+          tc.assertEquals(next.getString("bar"), "new_value");
+          client.deleteValues("foo", h -> async.complete());
+        }));
+      client.putValue("foo/bar", "new_value", ignore -> {});
     });
   }
 
