@@ -1,0 +1,59 @@
+=== Consul Configuration Store
+
+The Consul Configuration Store extends the Vert.x Configuration Retriever and provides the
+way to retrieve configuration from a Consul.
+
+==== Using the Consul Configuration Store
+
+To use the Consul Configuration Store, add the following dependency to the
+_dependencies_ section of your build descriptor:
+
+* Maven (in your `pom.xml`):
+
+[source,xml,subs="+attributes"]
+----
+<dependency>
+  <groupId>io.vertx</groupId>
+  <artifactId>vertx-config-consul</artifactId>
+  <version>3.5.0-SNAPSHOT</version>
+</dependency>
+<dependency>
+  <groupId>io.vertx</groupId>
+  <artifactId>vertx-config</artifactId>
+  <version>3.5.0-SNAPSHOT</version>
+</dependency>
+----
+
+* Gradle (in your `build.gradle` file):
+
+[source,groovy,subs="+attributes"]
+----
+compile 'io.vertx:vertx-config:3.5.0-SNAPSHOT'
+compile 'io.vertx:vertx-config-consul:3.5.0-SNAPSHOT'
+----
+
+==== Configuring the store
+
+Once added to your classpath or dependencies, you need to configure the
+`link:../../apidocs/io/vertx/config/ConfigRetriever.html[ConfigRetriever]` to use this store:
+
+[source, kotlin]
+----
+var store = ConfigStoreOptions(
+  type = "consul",
+  config = json {
+    obj(
+      "host" to "localhost",
+      "port" to 8500,
+      "prefix" to "foo"
+    )
+  })
+
+var retriever = ConfigRetriever.create(vertx, ConfigRetrieverOptions(
+  stores = listOf(store)))
+
+----
+
+The store configuration is used to create an instance of
+`link:../../apidocs/io/vertx/ext/consul/ConsulClient.html[ConsulClient]`. Check the documentation of the Vert.x Consul Client
+for further details.

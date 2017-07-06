@@ -16,7 +16,9 @@ public class Examples {
     ConfigStoreOptions store = new ConfigStoreOptions()
         .setType("consul")
         .setConfig(new JsonObject()
-            .put("prefix", "foo")
+          .put("host", "localhost")
+          .put("port", 8500)
+          .put("prefix", "foo")
         );
 
     ConfigRetriever retriever = ConfigRetriever.create(vertx,
