@@ -27,6 +27,7 @@
     <module>vertx-config-redis</module>
     <module>vertx-config-git</module>
     <module>vertx-config-zookeeper</module>
+    <module>vertx-config-consul</module>
   </modules>
 
   <build>
