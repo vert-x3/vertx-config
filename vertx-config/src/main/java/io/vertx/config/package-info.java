@@ -286,6 +286,8 @@
  *
  * include::zookeeper-store.adoc[]
  *
+ * include::consul-store.adoc[]
+ *
  * include::spring-store.adoc[]
  *
  */

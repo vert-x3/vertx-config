@@ -120,6 +120,13 @@ public class Examples {
         ));
   }
 
+  public void consul() {
+    ConfigStoreOptions consul = new ConfigStoreOptions()
+      .setType("consul")
+      .setConfig(new JsonObject()
+        .put("prefix", "foo"));
+  }
+
   public void period(ConfigStoreOptions store1, ConfigStoreOptions store2) {
     ConfigRetrieverOptions options = new ConfigRetrieverOptions()
       .setScanPeriod(2000)

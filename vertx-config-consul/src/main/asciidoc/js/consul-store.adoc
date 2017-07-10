@@ -1,0 +1,65 @@
+=== Consul Configuration Store
+
+The Consul Configuration Store extends the Vert.x Configuration Retriever and provides the
+way to retrieve configuration from a https://www.consul.io[Consul].
+
+==== Using the Consul Configuration Store
+
+To use the Consul Configuration Store, add the following dependency to the
+_dependencies_ section of your build descriptor:
+
+* Maven (in your `pom.xml`):
+
+[source,xml,subs="+attributes"]
+----
+<dependency>
+  <groupId>io.vertx</groupId>
+  <artifactId>vertx-config-consul</artifactId>
+  <version>3.5.0-SNAPSHOT</version>
+</dependency>
+<dependency>
+  <groupId>io.vertx</groupId>
+  <artifactId>vertx-config</artifactId>
+  <version>3.5.0-SNAPSHOT</version>
+</dependency>
+----
+
+* Gradle (in your `build.gradle` file):
+
+[source,groovy,subs="+attributes"]
+----
+compile 'io.vertx:vertx-config:3.5.0-SNAPSHOT'
+compile 'io.vertx:vertx-config-consul:3.5.0-SNAPSHOT'
+----
+
+==== Configuring the store
+
+Once added to your classpath or dependencies, you need to configure the
+`link:../../jsdoc/module-vertx-config-js_config_retriever-ConfigRetriever.html[ConfigRetriever]` to use this store:
+
+[source, js]
+----
+var ConfigRetriever = require("vertx-config-js/config_retriever");
+var store = {
+  "type" : "consul",
+  "config" : {
+    "host" : "localhost",
+    "port" : 8500,
+    "prefix" : "foo"
+  }
+};
+
+var retriever = ConfigRetriever.create(vertx, {
+  "stores" : [
+    store
+  ]
+});
+
+----
+
+The store configuration is used to create an instance of
+`link:../../jsdoc/module-vertx-consul-js_consul_client-ConsulClient.html[ConsulClient]`. Check the documentation of the Vert.x Consul Client
+for further details. And this is the parameters specific to the Consul Configuration Store:
+
+`prefix`:: A prefix that will not be taken into account when building the configuration tree. Defaults to empty.
+`delimiter`:: Symbol that used to split keys in the Consul storage to obtain levels in the configuration tree. Defaults to "/".
