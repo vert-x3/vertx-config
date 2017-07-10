@@ -152,7 +152,11 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
               streamOfConfiguration.handle(current);
             } catch (Throwable e) {
               // Report the error on the context exception handler.
-              vertx.exceptionHandler().handle(e);
+              if (vertx.exceptionHandler() != null) {
+                vertx.exceptionHandler().handle(e);
+              } else {
+                throw e;
+              }
             }
           }
         }
@@ -181,7 +185,11 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
           completionHandler.handle(Future.failedFuture(r.cause()));
         } catch (Throwable e) {
           // Report the error on the context exception handler.
-          vertx.exceptionHandler().handle(e);
+          if (vertx.exceptionHandler() != null) {
+            vertx.exceptionHandler().handle(e);
+          } else {
+            throw e;
+          }
         }
       } else {
         // Merge the different futures
@@ -191,7 +199,11 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
           completionHandler.handle(Future.succeededFuture(json));
         } catch (Throwable e) {
           // Report the error on the context exception handler.
-          vertx.exceptionHandler().handle(e);
+          if (vertx.exceptionHandler() != null) {
+            vertx.exceptionHandler().handle(e);
+          } else {
+            throw e;
+          }
         }
       }
     });
