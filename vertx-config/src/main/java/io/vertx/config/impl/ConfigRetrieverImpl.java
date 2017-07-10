@@ -209,6 +209,13 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
     });
   }
 
+  /**
+   * @return the list of providers. For introspection purpose.
+   */
+  public List<ConfigurationProvider> getProviders() {
+      return Collections.unmodifiableList(providers);
+  }
+
   private class ConfigStreamImpl implements ReadStream<JsonObject> {
 
     private Handler<JsonObject> handler;

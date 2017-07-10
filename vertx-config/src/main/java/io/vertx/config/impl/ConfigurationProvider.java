@@ -51,4 +51,11 @@ public class ConfigurationProvider {
     store.close(handler);
   }
 
+  public ConfigStore getStore() {
+    return store;
+  }
+
+  public ConfigProcessor getProcessor() {
+    return processor;
+  }
 }
