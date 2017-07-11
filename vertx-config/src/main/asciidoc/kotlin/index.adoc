@@ -411,3 +411,7 @@ include::zookeeper-store.adoc[]
 include::consul-store.adoc[]
 
 include::spring-store.adoc[]
+
+include::vault-store.adoc[]
+
+include::consul-store.adoc[]

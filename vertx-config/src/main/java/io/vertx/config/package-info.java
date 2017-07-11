@@ -290,6 +290,9 @@
  *
  * include::spring-store.adoc[]
  *
+ * include::vault-store.adoc[]
+ *
+ * include::consul-store.adoc[]
  */
 @Document(fileName = "index.adoc")
 @ModuleGen(name = "vertx-config", groupPackage = "io.vertx")
