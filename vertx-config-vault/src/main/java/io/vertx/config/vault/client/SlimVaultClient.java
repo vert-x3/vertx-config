@@ -119,7 +119,8 @@ public class SlimVaultClient {
    * @param resultHandler the callback invoked with the result
    */
   public void list(String path, Handler<AsyncResult<List<String>>> resultHandler) {
-    String fullPath = path == null ? "list=true" : path + "?list=true";
+    Objects.requireNonNull(path, "The path is required to list secrets");
+    String fullPath = path + "?list=true";
     Objects.requireNonNull(resultHandler);
 
     read(fullPath, ar -> {

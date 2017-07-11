@@ -26,7 +26,7 @@ public class Examples {
 
   public void example1WithConfig(Vertx vertx) {
     JsonObject vault_config = new JsonObject()
-      .put("host", "1270.0.1") // The host name
+      .put("host", "127.0.0.1") // The host name
       .put("port", 8200) // The port
       .put("ssl", true); // Whether or not SSL is used (disabled by default)
 
