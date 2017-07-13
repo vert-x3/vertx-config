@@ -97,7 +97,7 @@ public class ConsulConfigStoreTest {
     createRetriever();
     client.putValue("foo/bar", "value", ar -> {
       tc.assertTrue(ar.succeeded());
-      retriever.getConfig(init ->
+      retriever.getConfig(init -> {
         retriever.listen(change -> {
           JsonObject prev = change.getPreviousConfiguration();
           tc.assertTrue(!prev.isEmpty());
@@ -106,8 +106,9 @@ public class ConsulConfigStoreTest {
           tc.assertTrue(!next.isEmpty());
           tc.assertEquals(next.getString("bar"), "new_value");
           client.deleteValues("foo", h -> async.complete());
-        }));
-      client.putValue("foo/bar", "new_value", ignore -> {});
+        });
+        client.putValue("foo/bar", "new_value", ignore -> {});
+      });
     });
   }
 
