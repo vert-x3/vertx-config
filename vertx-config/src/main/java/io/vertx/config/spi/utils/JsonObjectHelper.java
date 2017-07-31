@@ -18,34 +18,8 @@ public class JsonObjectHelper {
     return Buffer.buffer(json.encode());
   }
 
-  public static void put(JsonObject json, String name, String value) {
-    Objects.requireNonNull(value);
-
-    Boolean bool = asBoolean(value);
-    if (bool != null) {
-      json.put(name, bool);
-      return;
-    }
-
-    Double integer = asNumber(value);
-    if (integer != null) {
-      json.put(name, integer);
-      return;
-    }
-
-    JsonObject obj = asJsonObject(value);
-    if (obj != null) {
-      json.put(name, obj);
-      return;
-    }
-
-    JsonArray arr = asJsonArray(value);
-    if (arr != null) {
-      json.put(name, arr);
-      return;
-    }
-
-    json.put(name, value);
+  public static void put(JsonObject json, String name, String value, boolean rawData) {
+    json.put(name, rawData ? value : convert(value));
   }
 
   public  static Object convert(String value) {
@@ -117,7 +91,7 @@ public class JsonObjectHelper {
   public static JsonObject from(Properties props) {
     JsonObject json = new JsonObject();
     props.stringPropertyNames()
-      .forEach(name -> put(json, name, props.getProperty(name)));
+      .forEach(name -> put(json, name, props.getProperty(name), false));
     return json;
   }
 }

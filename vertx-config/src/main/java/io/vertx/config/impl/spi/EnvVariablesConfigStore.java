@@ -20,7 +20,17 @@ import java.util.Map;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 public class EnvVariablesConfigStore implements ConfigStoreFactory, ConfigStore {
+  private final boolean rawData;
+
   private JsonObject cached;
+
+  public EnvVariablesConfigStore() {
+    this(false);
+  }
+
+  public EnvVariablesConfigStore(boolean rawData) {
+    this.rawData = rawData;
+  }
 
   @Override
   public String name() {
@@ -29,21 +39,21 @@ public class EnvVariablesConfigStore implements ConfigStoreFactory, ConfigStore 
 
   @Override
   public ConfigStore create(Vertx vertx, JsonObject configuration) {
-    return this;
+    return new EnvVariablesConfigStore(configuration.getBoolean("raw-data", false));
   }
 
   @Override
   public void get(Handler<AsyncResult<Buffer>> completionHandler) {
     if (cached == null) {
-      cached = all(System.getenv());
+      cached = all(System.getenv(), rawData);
     }
     completionHandler.handle(Future.succeededFuture(Buffer.buffer(cached.encode())));
   }
 
-  private static JsonObject all(Map<String, String> env) {
+  private static JsonObject all(Map<String, String> env, boolean rawData) {
     JsonObject json = new JsonObject();
     env.entrySet().stream()
-        .forEach(entry -> JsonObjectHelper.put(json, entry.getKey(), entry.getValue()));
+        .forEach(entry -> JsonObjectHelper.put(json, entry.getKey(), entry.getValue(), rawData));
     return json;
   }
 
