@@ -82,6 +82,14 @@ public class Examples {
       .setType("env");
   }
 
+  public void env2() {
+    ConfigStoreOptions json = new ConfigStoreOptions()
+      .setType("env")
+      .setConfig(new JsonObject().put("raw-data", true));
+  }
+
+
+
   public void http() {
     ConfigStoreOptions http = new ConfigStoreOptions()
       .setType("http")

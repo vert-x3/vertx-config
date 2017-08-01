@@ -138,7 +138,17 @@
  * {@link examples.Examples#env()}
  * ----
  *
- * This configuration store does not support the `format` configuration.
+ * This configuration store does not support the `format` configuration. By default, the retrieved value are
+ * transformed into JSON compatible structures (number, string, boolean, json object and json array). To avoid this
+ * conversion, configure the `raw-data` attribute:
+ *
+ * [source, $lang]
+ * ----
+ * {@link examples.Examples#env2()}
+ * ----
+ *
+ * You can configure the `raw-data` attribute (`false` by default). If `raw-data` is `true` no attempts to convert
+ * values will be made and you'll be able to get raw values using `config.getString(key)`.
  *
  * === System Properties
  *
