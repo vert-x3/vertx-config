@@ -162,10 +162,15 @@ the global configuration.
 [source, java]
 ----
 ConfigStoreOptions json = new ConfigStoreOptions()
-  .setType("env");
+  .setType("env")
+  .setConfig(new JsonObject().put("raw-data", true));
 ----
 
 This configuration store does not support the `format` configuration.
+
+You can configure the `raw-data` attribute (`false` by default). If `raw-data`
+is `true` no attempts to convert values will be made and you'll be able to get
+raw values using `config.getString(String)`.
 
 === System Properties
 
