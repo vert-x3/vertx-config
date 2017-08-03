@@ -35,6 +35,9 @@ public class KubernetesUtils {
     InputStream is = null;
     try {
       File file = new File(OPENSHIFT_KUBERNETES_TOKEN_FILE);
+      if (! file.isFile()) {
+        throw new RuntimeException("Unable to read the token file");
+      }
       byte[] data = new byte[(int) file.length()];
       is = new FileInputStream(file);
       int count = is.read(data);

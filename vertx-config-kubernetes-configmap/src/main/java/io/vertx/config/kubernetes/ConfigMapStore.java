@@ -2,7 +2,11 @@ package io.vertx.config.kubernetes;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Secret;
-import io.fabric8.kubernetes.client.*;
+import io.fabric8.kubernetes.client.Config;
+import io.fabric8.kubernetes.client.ConfigBuilder;
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClient;
+import io.vertx.config.spi.ConfigStore;
 import io.vertx.config.spi.utils.JsonObjectHelper;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -10,7 +14,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
-import io.vertx.config.spi.ConfigStore;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -72,19 +75,18 @@ public class ConfigMapStore implements ConfigStore {
     Future<KubernetesClient> result = Future.future();
     String master = configuration.getString("master", KubernetesUtils.getDefaultKubernetesMasterUrl());
     vertx.<KubernetesClient>executeBlocking(future -> {
-      String accountToken = configuration.getString("token");
-      if (accountToken == null) {
-        accountToken = KubernetesUtils.getTokenFromFile();
-      }
+      try {
+        String accountToken = configuration.getString("token");
+        if (accountToken == null) {
+          accountToken = KubernetesUtils.getTokenFromFile();
+        }
 
-      Config config = new ConfigBuilder().withOauthToken(accountToken).withMasterUrl(master).withTrustCerts(true)
+        Config config = new ConfigBuilder().withOauthToken(accountToken).withMasterUrl(master).withTrustCerts(true)
           .build();
 
-      DefaultKubernetesClient kubernetesClient;
-      try {
-        kubernetesClient = new DefaultKubernetesClient(config);
+        DefaultKubernetesClient kubernetesClient = new DefaultKubernetesClient(config);
         future.complete(kubernetesClient);
-      } catch (KubernetesClientException e) {
+      } catch (Exception e) {
         future.fail(e);
       }
     }, ar -> {
@@ -110,48 +112,48 @@ public class ConfigMapStore implements ConfigStore {
     retrieveClient.compose(client -> {
       Future<Buffer> json = Future.future();
       vertx.executeBlocking(
-          future -> {
-            if (secret) {
-              Secret secret = client.secrets().inNamespace(namespace).withName(name).get();
-              if (secret == null) {
-                future.fail("Cannot find the config map '" + name + "' in '" + namespace + "'");
-              } else {
-                if (this.key == null) {
-                  Map<String, Object> cm = asObjectMap(secret.getData());
-                  future.complete(Buffer.buffer(new JsonObject(cm).encode()));
-                } else {
-                  String value = secret.getData().get(this.key);
-                  if (value == null) {
-                    future.fail("cannot find key '" + this.key + "' in the secret '" + this.name + "'");
-                  } else {
-                    future.complete(Buffer.buffer(value));
-                  }
-                }
-              }
+        future -> {
+          if (secret) {
+            Secret secret = client.secrets().inNamespace(namespace).withName(name).get();
+            if (secret == null) {
+              future.fail("Cannot find the config map '" + name + "' in '" + namespace + "'");
             } else {
-              ConfigMap map = client.configMaps().inNamespace(namespace).withName(name).get();
-              if (map == null) {
-                if (optional) {
-                  future.complete(Buffer.buffer("{}"));
-                } else {
-                  future.fail("Cannot find the config map '" + name + "' in '" + namespace + "'");
-                }
+              if (this.key == null) {
+                Map<String, Object> cm = asObjectMap(secret.getData());
+                future.complete(Buffer.buffer(new JsonObject(cm).encode()));
               } else {
-                if (this.key == null) {
-                  Map<String, Object> cm = asObjectMap(map.getData());
-                  future.complete(Buffer.buffer(new JsonObject(cm).encode()));
+                String value = secret.getData().get(this.key);
+                if (value == null) {
+                  future.fail("cannot find key '" + this.key + "' in the secret '" + this.name + "'");
                 } else {
-                  String value = map.getData().get(this.key);
-                  if (value == null) {
-                    future.fail("cannot find key '" + this.key + "' in the config map '" + this.name + "'");
-                  } else {
-                    future.complete(Buffer.buffer(value));
-                  }
+                  future.complete(Buffer.buffer(value));
                 }
               }
             }
-          },
-          json.completer()
+          } else {
+            ConfigMap map = client.configMaps().inNamespace(namespace).withName(name).get();
+            if (map == null) {
+              if (optional) {
+                future.complete(Buffer.buffer("{}"));
+              } else {
+                future.fail("Cannot find the config map '" + name + "' in '" + namespace + "'");
+              }
+            } else {
+              if (this.key == null) {
+                Map<String, Object> cm = asObjectMap(map.getData());
+                future.complete(Buffer.buffer(new JsonObject(cm).encode()));
+              } else {
+                String value = map.getData().get(this.key);
+                if (value == null) {
+                  future.fail("cannot find key '" + this.key + "' in the config map '" + this.name + "'");
+                } else {
+                  future.complete(Buffer.buffer(value));
+                }
+              }
+            }
+          }
+        },
+        json.completer()
       );
       return json;
     }).setHandler(completionHandler);
@@ -162,7 +164,7 @@ public class ConfigMapStore implements ConfigStore {
       return new HashMap<>();
     }
     return source.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
-        entry -> JsonObjectHelper.convert(entry.getValue())));
+      entry -> JsonObjectHelper.convert(entry.getValue())));
   }
 
 }
