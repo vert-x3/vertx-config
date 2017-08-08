@@ -15,6 +15,8 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -27,19 +29,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(VertxUnitRunner.class)
 public class ConfigMapStoreTest {
 
-  private static final String SOME_JSON = new JsonObject().put("foo", "bar")
+  protected static final String SOME_JSON = new JsonObject().put("foo", "bar")
     .put("port", 8080)
     .put("debug", true).encode();
-  private static final String SOME_PROPS = "foo=bar\nport=8080\ndebug=true";
+  protected static final String SOME_PROPS = "foo=bar\nport=8080\ndebug=true";
 
-  private Vertx vertx;
-  private KubernetesClient client;
+  protected Vertx vertx;
+  protected KubernetesClient client;
   private ConfigMapStore store;
-  private KubernetesMockServer server;
+  protected KubernetesMockServer server;
+  protected int port;
 
   @Before
-  public void setUp() {
+  public void setUp(TestContext tc) throws MalformedURLException {
     vertx = Vertx.vertx();
+    vertx.exceptionHandler(tc.exceptionHandler());
 
     ConfigMap map1 = new ConfigMapBuilder().withMetadata(new ObjectMetaBuilder().withName("my-config-map").build())
       .addToData("my-app-json", SOME_JSON)
@@ -62,8 +66,8 @@ public class ConfigMapStoreTest {
       .addToData("password", "secret")
       .build();
 
-    server = new KubernetesMockServer();
-    server.init();
+    server = new KubernetesMockServer(false);
+
 
     server.expect().get().withPath("/api/v1/namespaces/default/configmaps").andReturn(200, new
       ConfigMapListBuilder().addToItems(map1, map2).build()).always();
@@ -86,7 +90,17 @@ public class ConfigMapStoreTest {
     server.expect().get().withPath("/api/v1/namespaces/my-project/secrets/my-secret").andReturn(200, secret)
       .always();
 
+    server.init();
     client = server.createClient();
+    port = new URL(client.getConfiguration().getMasterUrl()).getPort();
+  }
+
+  private JsonObject config() {
+    return new JsonObject()
+      .put("token", client.getConfiguration().getOauthToken())
+      .put("host", "localhost")
+      .put("ssl", false)
+      .put("port", port);
   }
 
   @After
@@ -99,18 +113,19 @@ public class ConfigMapStoreTest {
   @Test
   public void testWithJson(TestContext tc) {
     Async async = tc.async();
-    store = new ConfigMapStore(vertx, new JsonObject()
-      .put("name", "my-config-map").put("key", "my-app-json"));
-    store.setClient(client);
+    store = new ConfigMapStore(vertx, config()
+      .put("name", "my-config-map")
+      .put("key", "my-app-json"));
     checkJsonConfig(tc, async);
   }
 
   @Test
   public void testWithUnknownConfigMap(TestContext tc) {
     Async async = tc.async();
-    store = new ConfigMapStore(vertx, new JsonObject()
-      .put("name", "my-unknown-config-map"));
-    store.setClient(client);
+    store = new ConfigMapStore(vertx, config()
+      .put("name", "my-unknown-config-map")
+      .put("optional", false));
+
     store.get(ar -> {
       assertThat(ar.failed()).isTrue();
       async.complete();
@@ -120,9 +135,11 @@ public class ConfigMapStoreTest {
   @Test
   public void testWithUnknownSecrets(TestContext tc) {
     Async async = tc.async();
-    store = new ConfigMapStore(vertx, new JsonObject()
-      .put("name", "my-unknown-secret").put("secret", true));
-    store.setClient(client);
+    store = new ConfigMapStore(vertx, config()
+      .put("name", "my-unknown-secret")
+      .put("optional", false)
+      .put("secret", true));
+
     store.get(ar -> {
       assertThat(ar.failed()).isTrue();
       async.complete();
@@ -132,11 +149,11 @@ public class ConfigMapStoreTest {
   @Test
   public void testWithSecret(TestContext tc) {
     Async async = tc.async();
-    store = new ConfigMapStore(vertx, new JsonObject()
+    store = new ConfigMapStore(vertx, config()
       .put("name", "my-secret")
       .put("secret", true)
       .put("namespace", "my-project"));
-    store.setClient(client);
+
     store.get(ar -> {
       tc.assertTrue(ar.succeeded());
       JsonObject json = ar.result().toJsonObject();
@@ -162,20 +179,20 @@ public class ConfigMapStoreTest {
   @Test
   public void testWithJsonInAnotherNamespace(TestContext tc) {
     Async async = tc.async();
-    store = new ConfigMapStore(vertx, new JsonObject()
+    store = new ConfigMapStore(vertx, config()
       .put("name", "my-config-map-x")
       .put("namespace", "my-project")
       .put("key", "my-app-json"));
-    store.setClient(client);
+
     checkJsonConfig(tc, async);
   }
 
   @Test
   public void testWithUnknownKey(TestContext tc) {
     Async async = tc.async();
-    store = new ConfigMapStore(vertx, new JsonObject()
+    store = new ConfigMapStore(vertx, config()
       .put("name", "my-config-map").put("key", "my-unknown-key"));
-    store.setClient(client);
+
     store.get(ar -> {
       tc.assertTrue(ar.failed());
       async.complete();
@@ -185,9 +202,10 @@ public class ConfigMapStoreTest {
   @Test
   public void testWithUnknownMap(TestContext tc) {
     Async async = tc.async();
-    store = new ConfigMapStore(vertx, new JsonObject()
-      .put("name", "my-unknown-map"));
-    store.setClient(client);
+    store = new ConfigMapStore(vertx, config()
+      .put("name", "my-unknown-map")
+      .put("optional", false));
+
     store.get(ar -> {
       tc.assertTrue(ar.failed());
       async.complete();
@@ -195,11 +213,28 @@ public class ConfigMapStoreTest {
   }
 
   @Test
+  public void testWithUnknownMapWithOptional(TestContext tc) {
+    Async async = tc.async();
+    store = new ConfigMapStore(vertx, config()
+      .put("optional", true)
+      .put("name", "my-unknown-map"));
+
+    store.get(ar -> {
+      if (ar.failed()) {
+        ar.cause().printStackTrace();
+      }
+      tc.assertTrue(ar.succeeded());
+      tc.assertEquals(ar.result().toString(), "{}");
+      async.complete();
+    });
+  }
+
+  @Test
   public void testWithProperties(TestContext tc) {
     Async async = tc.async();
-    store = new ConfigMapStore(vertx, new JsonObject()
+    store = new ConfigMapStore(vertx, config()
       .put("name", "my-config-map").put("key", "my-app-props"));
-    store.setClient(client);
+
     store.get(ar -> {
       tc.assertTrue(ar.succeeded());
       Properties properties = new Properties();
@@ -218,9 +253,9 @@ public class ConfigMapStoreTest {
   @Test
   public void testWithoutKey(TestContext tc) {
     Async async = tc.async();
-    store = new ConfigMapStore(vertx, new JsonObject()
+    store = new ConfigMapStore(vertx, config()
       .put("name", "my-config-map-2"));
-    store.setClient(client);
+
     store.get(ar -> {
       tc.assertTrue(ar.succeeded());
 
