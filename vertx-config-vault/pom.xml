@@ -12,6 +12,9 @@
 
   <artifactId>vertx-config-vault</artifactId>
 
+  <properties>
+    <doc.skip>false</doc.skip>
+  </properties>
 
   <dependencies>
     <dependency>
