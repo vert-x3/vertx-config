@@ -1,7 +1,5 @@
 package io.vertx.config.kubernetes;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -13,45 +11,7 @@ import java.io.InputStream;
 public class KubernetesUtils {
 
 
-  private static final String OPENSHIFT_KUBERNETES_TOKEN_FILE = "/var/run/secrets/kubernetes.io/serviceaccount/token";
-
-  /**
-   * Computes the default master url based on the {@code KUBERNETES_SERVICE_HOST} and
-   * {@code KUBERNETES_SERVICE_PORT} environment variables
-   *
-   * @return the computed url
-   */
-  public static String getDefaultKubernetesMasterUrl() {
-    return "https://" + System.getenv().get("KUBERNETES_SERVICE_HOST")
-        + ":" + System.getenv("KUBERNETES_SERVICE_PORT");
-  }
-
-  /**
-   * Gets the token stored in the {@code /var/run/secrets/kubernetes.io/serviceaccount/token}.
-   *
-   * @return the token
-   */
-  public static String getTokenFromFile() {
-    InputStream is = null;
-    try {
-      File file = new File(OPENSHIFT_KUBERNETES_TOKEN_FILE);
-      if (! file.isFile()) {
-        throw new RuntimeException("Unable to read the token file");
-      }
-      byte[] data = new byte[(int) file.length()];
-      is = new FileInputStream(file);
-      int count = is.read(data);
-      if (count <= 0) {
-        return null;
-      } else {
-        return new String(data);
-      }
-    } catch (IOException e) {
-      throw new RuntimeException("Could not get token file", e);
-    } finally {
-      closeQuietly(is);
-    }
-  }
+  public static final String OPENSHIFT_KUBERNETES_TOKEN_FILE = "/var/run/secrets/kubernetes.io/serviceaccount/token";
 
   private static void closeQuietly(InputStream is) {
     if (is != null) {

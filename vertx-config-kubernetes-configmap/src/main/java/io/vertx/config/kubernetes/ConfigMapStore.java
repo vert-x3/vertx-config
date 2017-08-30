@@ -1,11 +1,5 @@
 package io.vertx.config.kubernetes;
 
-import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.Secret;
-import io.fabric8.kubernetes.client.Config;
-import io.fabric8.kubernetes.client.ConfigBuilder;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClient;
 import io.vertx.config.spi.ConfigStore;
 import io.vertx.config.spi.utils.JsonObjectHelper;
 import io.vertx.core.AsyncResult;
@@ -14,6 +8,9 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.client.HttpResponse;
+import io.vertx.ext.web.client.WebClient;
+import io.vertx.ext.web.client.WebClientOptions;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,7 +29,9 @@ public class ConfigMapStore implements ConfigStore {
   private final String key;
   private final boolean secret;
   private final boolean optional;
-  private KubernetesClient client;
+
+  private final WebClient client;
+  private String token;
 
 
   public ConfigMapStore(Vertx vertx, JsonObject configuration) {
@@ -51,120 +50,142 @@ public class ConfigMapStore implements ConfigStore {
     this.name = configuration.getString("name");
     this.key = configuration.getString("key");
     this.secret = configuration.getBoolean("secret", false);
-    Objects.requireNonNull(this.name);
-  }
+    int port = configuration.getInteger("port", 0);
+    if (port == 0) {
+      if (configuration.getBoolean("ssl", true)) {
+        port = 443;
+      } else {
+        port = 80;
+      }
+    }
 
-  /**
-   * For testing purpose only - inject the kubernetes client.
-   *
-   * @param client the client.
-   */
-  synchronized void setClient(KubernetesClient client) {
-    this.client = client;
+    String p = System.getenv("KUBERNETES_SERVICE_PORT");
+    if (p != null) {
+      port = Integer.valueOf(p);
+    }
+
+    String host = configuration.getString("host");
+    String h = System.getenv("KUBERNETES_SERVICE_HOST");
+    if (h != null) {
+      host = h;
+    }
+
+    client = WebClient.create(vertx,
+      new WebClientOptions()
+        .setTrustAll(true)
+        .setSsl(configuration.getBoolean("ssl", true))
+        .setDefaultHost(host)
+        .setDefaultPort(port)
+        .setFollowRedirects(true)
+    );
+
+    Objects.requireNonNull(this.name);
   }
 
   @Override
   public synchronized void close(Handler<Void> completionHandler) {
     if (client != null) {
       client.close();
-      client = null;
     }
   }
 
-  private Future<KubernetesClient> getClient() {
-    Future<KubernetesClient> result = Future.future();
-    String master = configuration.getString("master", KubernetesUtils.getDefaultKubernetesMasterUrl());
-    vertx.<KubernetesClient>executeBlocking(future -> {
-      try {
-        String accountToken = configuration.getString("token");
-        if (accountToken == null) {
-          accountToken = KubernetesUtils.getTokenFromFile();
-        }
 
-        Config config = new ConfigBuilder().withOauthToken(accountToken).withMasterUrl(master).withTrustCerts(true)
-          .build();
+  private Future<String> getToken() {
+    Future<String> result = Future.future();
 
-        DefaultKubernetesClient kubernetesClient = new DefaultKubernetesClient(config);
-        future.complete(kubernetesClient);
-      } catch (Exception e) {
-        future.fail(e);
-      }
-    }, ar -> {
+    String token = configuration.getString("token");
+    if (token != null && !token.trim().isEmpty()) {
+      this.token = token;
+      result.complete(token);
+      return result;
+    }
+
+    // Read from file
+    vertx.fileSystem().readFile(KubernetesUtils.OPENSHIFT_KUBERNETES_TOKEN_FILE, ar -> {
       if (ar.failed()) {
-        result.fail(ar.cause());
+        result.tryFail(ar.cause());
       } else {
-        this.client = ar.result();
-        result.complete(ar.result());
+        this.token = ar.result().toString();
+        result.tryComplete(ar.result().toString());
       }
     });
+
     return result;
   }
 
   @Override
   public synchronized void get(Handler<AsyncResult<Buffer>> completionHandler) {
-    Future<KubernetesClient> retrieveClient;
-    if (client == null) {
-      retrieveClient = getClient();
+    Future<String> retrieveToken;
+    if (token == null) {
+      retrieveToken = getToken();
     } else {
-      retrieveClient = Future.succeededFuture(client);
+      retrieveToken = Future.succeededFuture(token);
     }
 
-    retrieveClient.compose(client -> {
-      Future<Buffer> json = Future.future();
-      vertx.executeBlocking(
-        future -> {
-          if (secret) {
-            Secret secret = client.secrets().inNamespace(namespace).withName(name).get();
-            if (secret == null) {
-              future.fail("Cannot find the config map '" + name + "' in '" + namespace + "'");
-            } else {
-              if (this.key == null) {
-                Map<String, Object> cm = asObjectMap(secret.getData());
-                future.complete(Buffer.buffer(new JsonObject(cm).encode()));
-              } else {
-                String value = secret.getData().get(this.key);
-                if (value == null) {
-                  future.fail("cannot find key '" + this.key + "' in the secret '" + this.name + "'");
-                } else {
-                  future.complete(Buffer.buffer(value));
-                }
-              }
+    retrieveToken
+      .compose(token -> {
+        String path = "/api/v1/namespaces/" + namespace;
+        if (secret) {
+          path += "/secrets/" + name;
+        } else {
+          path += "/configmaps/" + name;
+        }
+
+        Future<Buffer> future = Future.future();
+        client.get(path)
+          .putHeader("Authorization", "Bearer " + token)
+          .send(ar -> {
+            if (ar.failed()) {
+              completionHandler.handle(ar.mapEmpty());
+              return;
             }
-          } else {
-            ConfigMap map = client.configMaps().inNamespace(namespace).withName(name).get();
-            if (map == null) {
+            HttpResponse<Buffer> response = ar.result();
+            if (response.statusCode() == 404) {
               if (optional) {
                 future.complete(Buffer.buffer("{}"));
               } else {
                 future.fail("Cannot find the config map '" + name + "' in '" + namespace + "'");
               }
-            } else {
-              if (this.key == null) {
-                Map<String, Object> cm = asObjectMap(map.getData());
-                future.complete(Buffer.buffer(new JsonObject(cm).encode()));
+            } else if (response.statusCode() == 403) {
+              completionHandler.handle(Future.failedFuture("Access denied to configmap or secret in namespace "
+                + namespace + ": " + name));
+            } else if (response.statusCode() != 200) {
+              if (optional) {
+                future.complete(Buffer.buffer("{}"));
               } else {
-                String value = map.getData().get(this.key);
-                if (value == null) {
-                  future.fail("cannot find key '" + this.key + "' in the config map '" + this.name + "'");
+                completionHandler.handle(Future.failedFuture("Cannot retrieve the configmap or secret in namespace "
+                  + namespace + ": " + name + ", status code: " + response.statusCode() + ", error: "
+                  + response.bodyAsString()));
+              }
+            } else {
+              JsonObject data = response.bodyAsJsonObject().getJsonObject("data");
+              if (data == null) {
+                future.fail("Invalid secret of configmap in namespace " + namespace + " " + name + ", the data " +
+                  "entry is empty");
+                return;
+              }
+              if (this.key == null) {
+                future.complete(new JsonObject(asObjectMap(data.getMap())).toBuffer());
+              } else {
+                String string = data.getString(this.key);
+                if (string == null) {
+                  future.fail("Cannot find key '" + this.key + "' in the configmap or secret '" + this.name + "'");
                 } else {
-                  future.complete(Buffer.buffer(value));
+                  future.complete(Buffer.buffer(string));
                 }
               }
             }
-          }
-        },
-        json.completer()
-      );
-      return json;
-    }).setHandler(completionHandler);
+          });
+        return future;
+      }).setHandler(completionHandler);
   }
 
-  private static Map<String, Object> asObjectMap(Map<String, String> source) {
+  private static Map<String, Object> asObjectMap(Map<String, Object> source) {
     if (source == null) {
       return new HashMap<>();
     }
     return source.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
-      entry -> JsonObjectHelper.convert(entry.getValue())));
+      entry -> JsonObjectHelper.convert(entry.getValue().toString())));
   }
 
 }
