@@ -136,7 +136,7 @@ public class ConfigMapStore implements ConfigStore {
           .putHeader("Authorization", "Bearer " + token)
           .send(ar -> {
             if (ar.failed()) {
-              completionHandler.handle(Future.failedFuture(ar.cause()));
+              completionHandler.handle(ar.mapEmpty());
               return;
             }
             HttpResponse<Buffer> response = ar.result();
