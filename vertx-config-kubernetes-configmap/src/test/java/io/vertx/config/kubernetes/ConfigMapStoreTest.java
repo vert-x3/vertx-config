@@ -96,6 +96,11 @@ public class ConfigMapStoreTest {
   }
 
   private JsonObject config() {
+    String token = client.getConfiguration().getOauthToken();
+    if (token == null  || token.trim().isEmpty()) {
+      token = "some-token";
+    }
+    System.out.println("Configuring client token to " + token);
     return new JsonObject()
       .put("token", client.getConfiguration().getOauthToken())
       .put("host", "localhost")
