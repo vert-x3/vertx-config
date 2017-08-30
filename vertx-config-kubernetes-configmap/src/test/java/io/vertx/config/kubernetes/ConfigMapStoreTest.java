@@ -102,7 +102,7 @@ public class ConfigMapStoreTest {
     }
     System.out.println("Configuring client token to " + token);
     return new JsonObject()
-      .put("token", client.getConfiguration().getOauthToken())
+      .put("token", token)
       .put("host", "localhost")
       .put("ssl", false)
       .put("port", port);
