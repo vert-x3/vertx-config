@@ -262,6 +262,9 @@ public class ConfigMapStoreTest {
       .put("name", "my-config-map-2"));
 
     store.get(ar -> {
+      if (! ar.succeeded()) {
+        ar.cause().printStackTrace();
+      }
       tc.assertTrue(ar.succeeded());
 
       JsonObject json = ar.result().toJsonObject();
