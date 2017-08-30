@@ -100,7 +100,6 @@ public class ConfigMapStoreTest {
     if (token == null  || token.trim().isEmpty()) {
       token = "some-token";
     }
-    System.out.println("Configuring client token to " + token);
     return new JsonObject()
       .put("token", token)
       .put("host", "localhost")

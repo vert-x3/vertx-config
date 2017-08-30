@@ -66,7 +66,6 @@ public class SpringConfigServerStoreTest {
 
 
     retriever.getConfig(json -> {
-      System.out.println(json.result().encodePrettily());
       assertThat(json.succeeded()).isTrue();
       JsonObject config = json.result();
 

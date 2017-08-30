@@ -197,7 +197,6 @@ public class YamlProcessorTest {
 
       // Anchors
       // TODO Anchors are not supported yet.
-//      System.out.println(json.getJsonArray("anchors").encodePrettily());
 //      JsonArray anchors = json.getJsonArray("anchors");
 //      assertThat(anchors.getJsonObject(0).getJsonObject("step")).contains(entry("instrument", "Lasik 2000"), entry
 //              ("spotSize", "1mm"),

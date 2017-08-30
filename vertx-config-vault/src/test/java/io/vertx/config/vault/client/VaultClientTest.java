@@ -221,7 +221,6 @@ public class VaultClientTest {
     Async async = tc.async();
 
     client.createToken(new TokenRequest().setTTL("1h"), ar -> {
-      System.out.println(ar.result());
       tc.assertTrue(ar.succeeded());
       tc.assertNotNull(ar.result().getToken());
       tc.assertNotNull(ar.result().getAccessor());

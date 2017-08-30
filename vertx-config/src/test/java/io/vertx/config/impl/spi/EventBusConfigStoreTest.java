@@ -103,7 +103,6 @@ public class EventBusConfigStoreTest extends ConfigStoreTestBase {
           getJsonConfiguration(vertx, store, handler);
           return;
         }
-        System.out.println(ar2.result());
         ConfigChecker.check(ar2.result());
         async.complete();
       };
