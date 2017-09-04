@@ -201,7 +201,8 @@ public class RawProcessorTest {
 
     retriever.getConfig(ar -> {
       assertThat(ar.failed());
-      assertThat(ar.cause().getMessage()).contains("'admin'");
+      // Before we had the json content, it's not the case anymore (when using Jackson 2.9.0+)
+      assertThat(ar.cause().getMessage()).contains("Failed to decode");
       async.complete();
     });
   }
