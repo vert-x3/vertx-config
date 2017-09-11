@@ -46,15 +46,15 @@ public class ConsulConfigStore implements ConfigStore {
   public void get(Handler<AsyncResult<Buffer>> completionHandler) {
     client.getValues(prefix, kv -> {
       if (kv.succeeded()) {
-        JsonObject tree = getTree(kv.result(), prefix.length(), delimiter);
-        completionHandler.handle(Future.succeededFuture(Buffer.buffer(tree.toString())));
-      } else {
-        String message = kv.cause().getMessage();
-        if ("not found".equals(message.toLowerCase())) {
-          completionHandler.handle(Future.succeededFuture(Buffer.buffer("{}")));
+        KeyValueList list = kv.result();
+        if (list.isPresent()) {
+          JsonObject tree = getTree(list, prefix.length(), delimiter);
+          completionHandler.handle(Future.succeededFuture(Buffer.buffer(tree.toString())));
         } else {
-          completionHandler.handle(Future.failedFuture(kv.cause()));
+          completionHandler.handle(Future.succeededFuture(Buffer.buffer("{}")));
         }
+      } else {
+        completionHandler.handle(Future.failedFuture(kv.cause()));
       }
     });
   }
