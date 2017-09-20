@@ -41,7 +41,7 @@ public class SlimVaultClient {
     Objects.requireNonNull(host, "The Vault host must be set");
 
     client = WebClient.create(vertx, new WebClientOptions(configuration)
-      .setDefaultPort(port)
+      .setDefaultPort(port).setDefaultHost(host)
     );
 
     setToken(configuration.getString("token"));
