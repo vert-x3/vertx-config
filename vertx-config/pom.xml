@@ -13,7 +13,7 @@
 
   <properties>
     <doc.skip>false</doc.skip>
-    <powermock.version>1.7.0</powermock.version>
+    <powermock.version>2.0.0-beta.5</powermock.version>
   </properties>
 
   <dependencies>
