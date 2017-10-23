@@ -78,10 +78,6 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
       }
       providers.add(new ConfigurationProvider(store, processor, option.getConfig()));
     }
-
-    getConfig(x -> {
-      // Ignored.
-    });
   }
 
   public synchronized void initializePeriodicScan() {
