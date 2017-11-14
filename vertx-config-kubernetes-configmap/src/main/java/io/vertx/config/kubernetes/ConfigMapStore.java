@@ -3,6 +3,7 @@ package io.vertx.config.kubernetes;
 import io.vertx.config.spi.ConfigStore;
 import io.vertx.config.spi.utils.JsonObjectHelper;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -30,6 +31,7 @@ public class ConfigMapStore implements ConfigStore {
   private final boolean secret;
   private final boolean optional;
 
+  private final Context ctx;
   private final WebClient client;
   private String token;
 
@@ -37,6 +39,8 @@ public class ConfigMapStore implements ConfigStore {
   public ConfigMapStore(Vertx vertx, JsonObject configuration) {
     this.vertx = vertx;
     this.configuration = configuration;
+    this.ctx = vertx.getOrCreateContext();
+
     String ns = configuration.getString("namespace");
     if (ns == null) {
       if (KUBERNETES_NAMESPACE != null) {
@@ -89,6 +93,14 @@ public class ConfigMapStore implements ConfigStore {
     }
   }
 
+  private void runOnContext(Handler<Void> action) {
+    if (Vertx.currentContext() == this.ctx) {
+      action.handle(null);
+    }
+    else {
+      ctx.runOnContext(action);
+    }
+  }
 
   private Future<String> getToken() {
     Future<String> result = Future.future();
@@ -114,7 +126,11 @@ public class ConfigMapStore implements ConfigStore {
   }
 
   @Override
-  public synchronized void get(Handler<AsyncResult<Buffer>> completionHandler) {
+  public void get(Handler<AsyncResult<Buffer>> completionHandler) {
+    runOnContext(v -> getOnContext(completionHandler));
+  }
+
+  private synchronized void getOnContext(Handler<AsyncResult<Buffer>> completionHandler) {
     Future<String> retrieveToken;
     if (token == null) {
       retrieveToken = getToken();
