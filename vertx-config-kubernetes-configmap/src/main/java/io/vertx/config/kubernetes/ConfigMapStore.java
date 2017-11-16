@@ -12,16 +12,20 @@ import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.WebClientOptions;
 
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * An implementation of configuration store reading config map from Kubernetes.
  */
 public class ConfigMapStore implements ConfigStore {
   private static final String KUBERNETES_NAMESPACE = System.getenv("KUBERNETES_NAMESPACE");
+  private static final Base64.Decoder DECODER = Base64.getDecoder();
   private final Vertx vertx;
   private final JsonObject configuration;
   private final String namespace;
@@ -165,13 +169,24 @@ public class ConfigMapStore implements ConfigStore {
                 return;
               }
               if (this.key == null) {
-                future.complete(new JsonObject(asObjectMap(data.getMap())).toBuffer());
+                if (secret) {
+                  future.complete(new JsonObject(asSecretObjectMap(data.getMap())).toBuffer());
+                }
+                else {
+                  future.complete(new JsonObject(asObjectMap(data.getMap())).toBuffer());
+                }
+
               } else {
                 String string = data.getString(this.key);
                 if (string == null) {
                   future.fail("Cannot find key '" + this.key + "' in the configmap or secret '" + this.name + "'");
                 } else {
-                  future.complete(Buffer.buffer(string));
+                  if (secret) {
+                    future.complete(Buffer.buffer(DECODER.decode(string)));
+                  }
+                  else {
+                    future.complete(Buffer.buffer(string));
+                  }
                 }
               }
             }
@@ -188,4 +203,17 @@ public class ConfigMapStore implements ConfigStore {
       entry -> JsonObjectHelper.convert(entry.getValue().toString())));
   }
 
+
+  private static Map<String, Object> asSecretObjectMap(Map<String, Object> source) {
+    if (source == null) {
+      return new HashMap<>();
+    }
+    return source.entrySet().stream()
+      .collect(Collectors.toMap(Map.Entry::getKey,
+        entry -> {
+          String encodedString = entry.getValue().toString();
+          String decodedString = new String(DECODER.decode(encodedString), UTF_8);
+          return JsonObjectHelper.convert(decodedString);
+        }));
+  }
 }
