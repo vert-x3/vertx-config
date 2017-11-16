@@ -88,6 +88,10 @@ public class ConfigMapStore implements ConfigStore {
 
   @Override
   public synchronized void close(Handler<Void> completionHandler) {
+    runOnContext(v -> closeOnContext(completionHandler));
+  }
+
+  private synchronized void closeOnContext(Handler<Void> completionHandler) {
     if (client != null) {
       client.close();
     }
