@@ -516,7 +516,7 @@ public class GitConfigStoreTest {
     Async async = tc.async();
     retriever.getConfig(ar -> {
       assertThat(ar.succeeded()).isFalse();
-      assertThat(ar.cause().getMessage()).contains("conflict");
+      assertThat(ar.cause().getMessage()).containsIgnoringCase("conflict");
       async.complete();
     });
   }
@@ -562,7 +562,7 @@ public class GitConfigStoreTest {
     Async async = tc.async();
     retriever.getConfig(ar -> {
       assertThat(ar.succeeded()).isFalse();
-      assertThat(ar.cause().getMessage()).contains("conflict");
+      assertThat(ar.cause().getMessage()).containsIgnoringCase("conflict");
       async.complete();
     });
   }
