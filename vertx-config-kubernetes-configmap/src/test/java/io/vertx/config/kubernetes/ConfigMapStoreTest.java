@@ -17,10 +17,12 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -63,7 +65,7 @@ public class ConfigMapStoreTest {
       .build();
 
     Secret secret = new SecretBuilder().withMetadata(new ObjectMetaBuilder().withName("my-secret").build())
-      .addToData("password", "secret")
+      .addToData("password", Base64.getEncoder().encodeToString("secret".getBytes(UTF_8)))
       .build();
 
     server = new KubernetesMockServer(false);
