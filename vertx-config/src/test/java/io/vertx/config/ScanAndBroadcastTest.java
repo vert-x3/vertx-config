@@ -21,9 +21,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.jayway.awaitility.Awaitility.*;
-import static org.assertj.core.api.Assertions.*;
-import static org.hamcrest.CoreMatchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.CoreMatchers.is;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -45,12 +45,12 @@ public class ScanAndBroadcastTest {
 
     AtomicBoolean done = new AtomicBoolean();
     server = vertx.createHttpServer()
-        .requestHandler(request -> {
-          if (request.path().endsWith("/conf")) {
-            request.response().end(http.encodePrettily());
-          }
-        })
-        .listen(8080, s -> done.set(true));
+      .requestHandler(request -> {
+        if (request.path().endsWith("/conf")) {
+          request.response().end(http.encodePrettily());
+        }
+      })
+      .listen(8080, s -> done.set(true));
 
     await().untilAtomic(done, is(true));
   }
@@ -69,14 +69,14 @@ public class ScanAndBroadcastTest {
   private static List<ConfigStoreOptions> stores() {
     List<ConfigStoreOptions> options = new ArrayList<>();
     options.add(new ConfigStoreOptions().setType("file")
-        .setConfig(new JsonObject().put("path", "src/test/resources/file/regular.json")));
+      .setConfig(new JsonObject().put("path", "src/test/resources/file/regular.json")));
     options.add(new ConfigStoreOptions().setType("sys")
-        .setConfig(new JsonObject().put("cache", false)));
+      .setConfig(new JsonObject().put("cache", false)));
     options.add(new ConfigStoreOptions().setType("http")
-        .setConfig(new JsonObject()
-            .put("host", "localhost")
-            .put("port", 8080)
-            .put("path", "/conf")));
+      .setConfig(new JsonObject()
+        .put("host", "localhost")
+        .put("port", 8080)
+        .put("path", "/conf")));
     return options;
   }
 
@@ -85,12 +85,12 @@ public class ScanAndBroadcastTest {
     AtomicBoolean done = new AtomicBoolean();
     vertx.runOnContext(v -> {
       retriever = ConfigRetriever.create(vertx,
-          new ConfigRetrieverOptions().setScanPeriod(1000).setStores(stores()));
+        new ConfigRetrieverOptions().setScanPeriod(1000).setStores(stores()));
 
       AtomicReference<JsonObject> current = new AtomicReference<>();
       retriever.getConfig(json -> {
         retriever.listen(change -> {
-          if (current.get() != null  && ! current.get().equals(change.getPreviousConfiguration())) {
+          if (current.get() != null && !current.get().equals(change.getPreviousConfiguration())) {
             throw new IllegalStateException("Previous configuration not correct");
           }
           current.set(change.getNewConfiguration());
@@ -139,12 +139,12 @@ public class ScanAndBroadcastTest {
     Async async = tc.async();
     vertx.runOnContext(v -> {
       retriever = ConfigRetriever.create(vertx,
-          new ConfigRetrieverOptions().setScanPeriod(500).setStores(stores()));
+        new ConfigRetrieverOptions().setScanPeriod(500).setStores(stores()));
 
       AtomicReference<JsonObject> current = new AtomicReference<>();
       retriever.getConfig(json -> {
         retriever.listen(change -> {
-          if (current.get() != null  && ! current.get().equals(change.getPreviousConfiguration())) {
+          if (current.get() != null && !current.get().equals(change.getPreviousConfiguration())) {
             throw new IllegalStateException("Previous configuration not correct");
           }
           current.set(change.getNewConfiguration());

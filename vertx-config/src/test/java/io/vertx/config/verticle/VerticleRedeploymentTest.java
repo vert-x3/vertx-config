@@ -12,8 +12,8 @@ import org.junit.runner.RunWith;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.jayway.awaitility.Awaitility.await;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
 
 /**
@@ -44,9 +44,7 @@ public class VerticleRedeploymentTest {
     await().untilAtomic(done, is(true));
     done.set(false);
 
-    vertx.deployVerticle(MyMainVerticle.class.getName(), deployed -> {
-      done.set(deployed.succeeded());
-    });
+    vertx.deployVerticle(MyMainVerticle.class.getName(), deployed -> done.set(deployed.succeeded()));
 
     await().untilAtomic(done, is(true));
   }

@@ -11,8 +11,8 @@ import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.jayway.awaitility.Awaitility.await;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 
@@ -30,7 +30,7 @@ public class EventBusConfigStoreTest extends ConfigStoreTestBase {
   public void testWithSend(TestContext tc) {
     Async async = tc.async();
     store = factory.create(vertx, new JsonObject()
-        .put("address", "config")
+      .put("address", "config")
     );
 
     getJsonConfiguration(vertx, store, ar -> {
@@ -57,7 +57,7 @@ public class EventBusConfigStoreTest extends ConfigStoreTestBase {
   public void testWithSendWithBuffer(TestContext tc) {
     Async async = tc.async();
     store = factory.create(vertx, new JsonObject()
-        .put("address", "config")
+      .put("address", "config")
     );
 
     getJsonConfiguration(vertx, store, ar -> {
@@ -80,13 +80,13 @@ public class EventBusConfigStoreTest extends ConfigStoreTestBase {
     });
   }
 
-  Handler<AsyncResult<JsonObject>> handler;
+  private Handler<AsyncResult<JsonObject>> handler;
 
   @Test
   public void testWithPublish(TestContext tc) {
     Async async = tc.async();
     store = factory.create(vertx, new JsonObject()
-        .put("address", "config")
+      .put("address", "config")
     );
 
     getJsonConfiguration(vertx, store, ar -> {

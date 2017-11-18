@@ -2,15 +2,14 @@ package io.vertx.config.git;
 
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
+import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.config.ConfigStoreOptions;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -23,10 +22,11 @@ import org.junit.runner.RunWith;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.jayway.awaitility.Awaitility.await;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
 
 /**
@@ -497,7 +497,7 @@ public class GitConfigStoreTest {
     File a = new File("target/junk/work/dir/a.json");
     assertThat(a).isFile();
     FileUtils.write(a, new JsonObject().put("a.name", "A").put("conflict", "A").put("added", "added")
-            .encodePrettily(), Charsets.UTF_8);
+            .encodePrettily(), StandardCharsets.UTF_8);
     git.add().addFilepattern("dir/a.json").call();
     git.commit().setMessage("update A").setAuthor("clement", "clement@apache.org")
         .setCommitter("clement", "clement@apache.org").call();
@@ -547,7 +547,7 @@ public class GitConfigStoreTest {
     // Edit the file in the work dir
     File a = new File("target/junk/work/dir/a.json");
     assertThat(a).isFile();
-    FileUtils.write(a, new JsonObject().put("a.name", "A-modified").put("conflict", "A").encodePrettily(), Charsets.UTF_8);
+    FileUtils.write(a, new JsonObject().put("a.name", "A-modified").put("conflict", "A").encodePrettily(), StandardCharsets.UTF_8);
 
     done.set(false);
     retriever.getConfig(ar -> {

@@ -15,8 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.jayway.awaitility.Awaitility.await;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
@@ -47,32 +47,32 @@ public class ConfigurationRetrieverTest {
 
   private static ConfigRetrieverOptions addStores(ConfigRetrieverOptions options) {
     return options
-        .addStore(
-            new ConfigStoreOptions()
-                .setType("file")
-                .setConfig(new JsonObject().put("path", "src/test/resources/file/regular.json")))
-        .addStore(
-            new ConfigStoreOptions()
-                .setType("sys")
-                .setConfig(new JsonObject().put("cache", false)));
+      .addStore(
+        new ConfigStoreOptions()
+          .setType("file")
+          .setConfig(new JsonObject().put("path", "src/test/resources/file/regular.json")))
+      .addStore(
+        new ConfigStoreOptions()
+          .setType("sys")
+          .setConfig(new JsonObject().put("cache", false)));
   }
 
   private static ConfigRetrieverOptions addReversedStores(ConfigRetrieverOptions options) {
     return options
-        .addStore(
-            new ConfigStoreOptions()
-                .setType("sys")
-                .setConfig(new JsonObject().put("cache", false)))
-        .addStore(
-            new ConfigStoreOptions()
-                .setType("file")
-                .setConfig(new JsonObject().put("path", "src/test/resources/file/regular.json")));
+      .addStore(
+        new ConfigStoreOptions()
+          .setType("sys")
+          .setConfig(new JsonObject().put("cache", false)))
+      .addStore(
+        new ConfigStoreOptions()
+          .setType("file")
+          .setConfig(new JsonObject().put("path", "src/test/resources/file/regular.json")));
   }
 
   @Test
   public void testLoading(TestContext tc) {
     retriever = ConfigRetriever.create(vertx,
-        addStores(new ConfigRetrieverOptions()));
+      addStores(new ConfigRetrieverOptions()));
     Async async = tc.async();
 
     retriever.getConfig(ar -> {
@@ -86,7 +86,7 @@ public class ConfigurationRetrieverTest {
   @Test
   public void testLoadingWithFuturePolyglotVersion(TestContext tc) {
     retriever = ConfigRetriever.create(vertx,
-        addStores(new ConfigRetrieverOptions()));
+      addStores(new ConfigRetrieverOptions()));
     Async async = tc.async();
 
     ConfigRetriever.getConfigAsFuture(retriever).setHandler(ar -> {
@@ -100,7 +100,7 @@ public class ConfigurationRetrieverTest {
   @Test
   public void testLoadingWithFutureJAvaVersion(TestContext tc) {
     retriever = ConfigRetriever.create(vertx,
-        addStores(new ConfigRetrieverOptions()));
+      addStores(new ConfigRetrieverOptions()));
     Async async = tc.async();
 
     ConfigRetriever.getConfigAsFuture(retriever).setHandler(ar -> {
@@ -133,8 +133,8 @@ public class ConfigurationRetrieverTest {
     Async async = tc.async();
     vertx.runOnContext(v -> {
       vertx.getOrCreateContext().config()
-          .put("hello", "hello")
-          .put("foo", "bar");
+        .put("hello", "hello")
+        .put("foo", "bar");
       System.setProperty("foo", "baz");
       retriever = ConfigRetriever.create(vertx);
 
@@ -151,7 +151,7 @@ public class ConfigurationRetrieverTest {
   public void testOverloading(TestContext tc) {
     System.setProperty("key", "new-value");
     retriever = ConfigRetriever.create(vertx,
-        addStores(new ConfigRetrieverOptions()));
+      addStores(new ConfigRetrieverOptions()));
     Async async = tc.async();
 
     retriever.getConfig(ar -> {

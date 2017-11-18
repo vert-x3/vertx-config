@@ -8,8 +8,8 @@ import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.jayway.awaitility.Awaitility.await;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
 
 /**
@@ -18,20 +18,20 @@ import static org.hamcrest.CoreMatchers.is;
 public class HttpConfigStoreTest extends ConfigStoreTestBase {
 
   public static final String JSON = "{\n" +
-      "  \"key\": \"value\",\n" +
-      "  \"sub\": {\n" +
-      "    \"foo\": \"bar\"\n" +
-      "  },\n" +
-      "  \"array\": [\n" +
-      "    1,\n" +
-      "    2,\n" +
-      "    3\n" +
-      "  ],\n" +
-      "  \"int\": 5,\n" +
-      "  \"float\": 25.3,\n" +
-      "  \"true\": true,\n" +
-      "  \"false\": false\n" +
-      "}";
+    "  \"key\": \"value\",\n" +
+    "  \"sub\": {\n" +
+    "    \"foo\": \"bar\"\n" +
+    "  },\n" +
+    "  \"array\": [\n" +
+    "    1,\n" +
+    "    2,\n" +
+    "    3\n" +
+    "  ],\n" +
+    "  \"int\": 5,\n" +
+    "  \"float\": 25.3,\n" +
+    "  \"true\": true,\n" +
+    "  \"false\": false\n" +
+    "}";
 
   @Before
   public void init() {
@@ -39,21 +39,21 @@ public class HttpConfigStoreTest extends ConfigStoreTestBase {
 
     AtomicBoolean done = new AtomicBoolean();
     vertx.createHttpServer()
-        .requestHandler(request -> {
-          if (request.path().endsWith("/A")) {
-            request.response().end(new JsonObject(JSON).encodePrettily());
-          }
-          if (request.path().endsWith("/B")) {
-            request.response().end(new JsonObject().put("key", "http-value").encodePrettily());
-          }
-          if (request.path().endsWith("/C")) {
-            // Properties
-            request.response().end("#some properties\nfoo=bar\nkey=value");
-          }
-        })
-        .listen(8080, s -> {
-          done.set(true);
-        });
+      .requestHandler(request -> {
+        if (request.path().endsWith("/A")) {
+          request.response().end(new JsonObject(JSON).encodePrettily());
+        }
+        if (request.path().endsWith("/B")) {
+          request.response().end(new JsonObject().put("key", "http-value").encodePrettily());
+        }
+        if (request.path().endsWith("/C")) {
+          // Properties
+          request.response().end("#some properties\nfoo=bar\nkey=value");
+        }
+      })
+      .listen(8080, s -> {
+        done.set(true);
+      });
 
     await().untilAtomic(done, is(true));
   }
@@ -63,9 +63,9 @@ public class HttpConfigStoreTest extends ConfigStoreTestBase {
   public void testJsonConf(TestContext tc) {
     Async async = tc.async();
     store = factory.create(vertx, new JsonObject()
-        .put("host", "localhost")
-        .put("port", 8080)
-        .put("path", "/A")
+      .put("host", "localhost")
+      .put("port", 8080)
+      .put("path", "/A")
     );
 
     getJsonConfiguration(vertx, store, ar -> {
@@ -78,9 +78,9 @@ public class HttpConfigStoreTest extends ConfigStoreTestBase {
   public void testPropertiesConf(TestContext tc) {
     Async async = tc.async();
     store = factory.create(vertx, new JsonObject()
-        .put("host", "localhost")
-        .put("port", 8080)
-        .put("path", "/C")
+      .put("host", "localhost")
+      .put("port", 8080)
+      .put("path", "/C")
     );
 
     getPropertiesConfiguration(vertx, store, ar -> {
@@ -101,9 +101,9 @@ public class HttpConfigStoreTest extends ConfigStoreTestBase {
   public void testWrongServer(TestContext tc) {
     Async async = tc.async();
     store = factory.create(vertx, new JsonObject()
-        .put("host", "localhost")
-        .put("port", 8085)
-        .put("path", "/B")
+      .put("host", "localhost")
+      .put("port", 8085)
+      .put("path", "/B")
     );
 
     getJsonConfiguration(vertx, store, ar -> {
