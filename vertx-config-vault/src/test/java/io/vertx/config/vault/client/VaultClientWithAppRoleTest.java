@@ -10,7 +10,8 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 
-import static com.jayway.awaitility.Awaitility.await;
+import static org.awaitility.Awaitility.await;
+
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
