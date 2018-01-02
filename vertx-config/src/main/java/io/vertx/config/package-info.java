@@ -150,6 +150,14 @@
  * You can configure the `raw-data` attribute (`false` by default). If `raw-data` is `true` no attempts to convert
  * values will be made and you'll be able to get raw values using `config.getString(key)`.
  *
+ * If you want to select the set of keys to import, use the `keys` attributes. It filters out all non selected keys. Keys
+ * must be listed individually:
+ *
+ * [source, $lang]
+ * ----
+ * {@link examples.Examples#env3()}
+ * ----
+ *
  * === System Properties
  *
  * This configuration store maps system properties to a Json Object contributed to the

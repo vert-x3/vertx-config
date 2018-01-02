@@ -88,6 +88,12 @@ public class Examples {
       .setConfig(new JsonObject().put("raw-data", true));
   }
 
+  public void env3() {
+    ConfigStoreOptions json = new ConfigStoreOptions()
+      .setType("env")
+      .setConfig(new JsonObject().put("keys", new JsonArray().add("SERVICE1_HOST").add("SERVICE2_HOST")));
+  }
+
 
 
   public void http() {

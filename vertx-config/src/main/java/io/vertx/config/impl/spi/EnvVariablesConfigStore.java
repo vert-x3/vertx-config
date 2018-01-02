@@ -7,10 +7,11 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.config.spi.ConfigStoreFactory;
 
-import java.util.Map;
+import java.util.*;
 
 /**
  * An implementation of configuration store loading the content from the environment variables.
@@ -21,15 +22,17 @@ import java.util.Map;
  */
 public class EnvVariablesConfigStore implements ConfigStoreFactory, ConfigStore {
   private final boolean rawData;
+  private final Set<String> keys;
 
   private JsonObject cached;
 
   public EnvVariablesConfigStore() {
-    this(false);
+    this(false, null);
   }
 
-  public EnvVariablesConfigStore(boolean rawData) {
+  public EnvVariablesConfigStore(boolean rawData, JsonArray keys) {
     this.rawData = rawData;
+    this.keys = (keys == null) ? null : new HashSet<>(keys.getList());
   }
 
   @Override
@@ -39,21 +42,25 @@ public class EnvVariablesConfigStore implements ConfigStoreFactory, ConfigStore 
 
   @Override
   public ConfigStore create(Vertx vertx, JsonObject configuration) {
-    return new EnvVariablesConfigStore(configuration.getBoolean("raw-data", false));
+    return new EnvVariablesConfigStore(configuration.getBoolean("raw-data", false), configuration.getJsonArray("keys"));
   }
 
   @Override
   public void get(Handler<AsyncResult<Buffer>> completionHandler) {
     if (cached == null) {
-      cached = all(System.getenv(), rawData);
+      cached = all(System.getenv(), rawData, keys);
     }
     completionHandler.handle(Future.succeededFuture(Buffer.buffer(cached.encode())));
   }
 
-  private static JsonObject all(Map<String, String> env, boolean rawData) {
+  private static JsonObject all(Map<String, String> env, boolean rawData, Set<String> keys) {
     JsonObject json = new JsonObject();
-    env.entrySet().stream()
-        .forEach(entry -> JsonObjectHelper.put(json, entry.getKey(), entry.getValue(), rawData));
+    Collection localKeys = keys == null ? env.keySet() : keys;
+    env.forEach((key, value) -> {
+      if (localKeys.contains(key)) {
+        JsonObjectHelper.put(json, key, value, rawData);
+      }
+    });
     return json;
   }
 
