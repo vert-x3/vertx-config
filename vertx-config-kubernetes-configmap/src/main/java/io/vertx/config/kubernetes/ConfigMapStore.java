@@ -116,6 +116,9 @@ public class ConfigMapStore implements ConfigStore {
     if (client != null) {
       client.close();
     }
+    if (completionHandler != null) {
+      completionHandler.handle(null);
+    }
   }
 
   private void runOnContext(Handler<Void> action) {
@@ -142,7 +145,7 @@ public class ConfigMapStore implements ConfigStore {
       if (ar.failed()) {
         if (optional) {
           this.token = "";
-          result.tryComplete(token);
+          result.tryComplete(this.token);
         } else {
           result.tryFail(ar.cause());
         }
