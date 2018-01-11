@@ -60,9 +60,8 @@ public class ConfigurationProvider {
     store.get(maybeBuffer -> {
       if (maybeBuffer.failed()) {
         if (optional) {
-          logger.warn("Unable to retrieve the configuration " + maybeBuffer.cause().getMessage());
           if (logger.isDebugEnabled()) {
-            logger.debug("Failure caught when retrieving the configuration", maybeBuffer.cause());
+            logger.debug("Unable to retrieve the configuration", maybeBuffer.cause());
           }
           completionHandler.handle(Future.succeededFuture(new JsonObject()));
         } else {
