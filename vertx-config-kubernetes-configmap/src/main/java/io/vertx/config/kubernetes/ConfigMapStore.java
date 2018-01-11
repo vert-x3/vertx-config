@@ -140,7 +140,12 @@ public class ConfigMapStore implements ConfigStore {
     // Read from file
     vertx.fileSystem().readFile(KubernetesUtils.OPENSHIFT_KUBERNETES_TOKEN_FILE, ar -> {
       if (ar.failed()) {
-        result.tryFail(ar.cause());
+        if (optional) {
+          this.token = "";
+          result.tryComplete(token);
+        } else {
+          result.tryFail(ar.cause());
+        }
       } else {
         this.token = ar.result().toString();
         result.tryComplete(ar.result().toString());
@@ -165,6 +170,12 @@ public class ConfigMapStore implements ConfigStore {
 
     retrieveToken
       .compose(token -> {
+        Future<Buffer> future = Future.future();
+        if (token.isEmpty()) {
+          future.complete(Buffer.buffer("{}"));
+          return future;
+        }
+
         String path = "/api/v1/namespaces/" + namespace;
         if (secret) {
           path += "/secrets/" + name;
@@ -172,7 +183,6 @@ public class ConfigMapStore implements ConfigStore {
           path += "/configmaps/" + name;
         }
 
-        Future<Buffer> future = Future.future();
         client.get(path)
           .putHeader("Authorization", "Bearer " + token)
           .send(ar -> {
