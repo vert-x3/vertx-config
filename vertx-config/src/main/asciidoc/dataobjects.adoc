@@ -33,6 +33,7 @@ Sets the previous configuration.
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
+|[[includeDefaultStores]]`includeDefaultStores`|`Boolean`|-
 |[[scanPeriod]]`scanPeriod`|`Number (long)`|-
 |[[stores]]`stores`|`Array of link:dataobjects.html#ConfigStoreOptions[ConfigStoreOptions]`|-
 |===

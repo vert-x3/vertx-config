@@ -27,6 +27,9 @@ import io.vertx.core.json.JsonArray;
 public class ConfigRetrieverOptionsConverter {
 
   public static void fromJson(JsonObject json, ConfigRetrieverOptions obj) {
+    if (json.getValue("includeDefaultStores") instanceof Boolean) {
+      obj.setIncludeDefaultStores((Boolean)json.getValue("includeDefaultStores"));
+    }
     if (json.getValue("scanPeriod") instanceof Number) {
       obj.setScanPeriod(((Number)json.getValue("scanPeriod")).longValue());
     }
@@ -39,6 +42,7 @@ public class ConfigRetrieverOptionsConverter {
   }
 
   public static void toJson(ConfigRetrieverOptions obj, JsonObject json) {
+    json.put("includeDefaultStores", obj.isIncludeDefaultStores());
     json.put("scanPeriod", obj.getScanPeriod());
     if (obj.getStores() != null) {
       JsonArray array = new JsonArray();

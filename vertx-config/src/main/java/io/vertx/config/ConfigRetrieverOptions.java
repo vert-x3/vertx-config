@@ -34,6 +34,7 @@ public class ConfigRetrieverOptions {
   private long scanPeriod = SCAN_PERIOD_DEFAULT;
 
   private List<ConfigStoreOptions> stores = new ArrayList<>();
+  private boolean includeDefaultStores = false;
 
   public ConfigRetrieverOptions() {
     // Empty constructor
@@ -52,6 +53,15 @@ public class ConfigRetrieverOptions {
     JsonObject json = new JsonObject();
     ConfigRetrieverOptionsConverter.toJson(this, json);
     return json;
+  }
+
+  public boolean isIncludeDefaultStores() {
+    return includeDefaultStores;
+  }
+
+  public ConfigRetrieverOptions setIncludeDefaultStores(boolean includeDefaultStores) {
+    this.includeDefaultStores = includeDefaultStores;
+    return this;
   }
 
   public long getScanPeriod() {

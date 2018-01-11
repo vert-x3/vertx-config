@@ -59,17 +59,7 @@ public interface ConfigRetriever {
    * @return the created instance.
    */
   static ConfigRetriever create(Vertx vertx) {
-    ConfigRetrieverOptions options = new ConfigRetrieverOptions();
-    options
-      .addStore(
-        new ConfigStoreOptions().setType("json")
-          .setConfig(vertx.getOrCreateContext().config()))
-      .addStore(
-        new ConfigStoreOptions().setType("sys")
-      )
-      .addStore(new ConfigStoreOptions().setType("env")
-      );
-    return create(vertx, options);
+    return create(vertx, new ConfigRetrieverOptions().setIncludeDefaultStores(true));
   }
 
   /**

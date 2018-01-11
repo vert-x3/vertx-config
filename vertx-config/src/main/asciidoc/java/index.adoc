@@ -58,7 +58,8 @@ this order):
 * The Vert.x verticle `config()`
 * The system properties
 * The environment variables
-
+* A `conf/config.json` file. This path can be overridden using the `vertx-config-path` system property or
+`VERTX_CONFIG_PATH` environment variable.
 
 You can configure your own stores:
 

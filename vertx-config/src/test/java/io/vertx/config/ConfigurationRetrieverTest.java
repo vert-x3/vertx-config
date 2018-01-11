@@ -28,6 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -60,6 +61,7 @@ public class ConfigurationRetrieverTest {
     vertx.close();
     System.clearProperty("key");
     System.clearProperty("foo");
+    System.clearProperty("vertx-config-path");
   }
 
   private static ConfigRetrieverOptions addStores(ConfigRetrieverOptions options) {
@@ -142,6 +144,38 @@ public class ConfigurationRetrieverTest {
         assertThat(ar.result().getString("PATH")).isNotNull();
         async.complete();
       });
+    });
+  }
+
+  @Test
+  public void testDefaultStoreWithVertxConfigPath(TestContext tc) {
+    Async async = tc.async();
+    System.setProperty("vertx-config-path", "src/test/resources/file/regular.json");
+    retriever = ConfigRetriever.create(vertx);
+    retriever.getConfig(ar -> {
+      assertThat(ar.result().getString("key")).isEqualToIgnoringCase("value");
+      assertThat(ar.result().getString("PATH")).isNotNull();
+      async.complete();
+    });
+  }
+
+  @Test
+  public void testDefaultStoreWithDefaultConfig(TestContext tc) {
+    Async async = tc.async();
+    File conf = new File("conf");
+    conf.mkdirs();
+
+    vertx.fileSystem()
+      .writeFileBlocking("conf" + File.separator + "config.json",
+        new JsonObject().put("some-key", "some-message").toBuffer());
+
+    retriever = ConfigRetriever.create(vertx);
+    retriever.getConfig(ar -> {
+      assertThat(ar.result().getString("some-key")).isEqualToIgnoringCase("some-message");
+      assertThat(ar.result().getString("foo")).isEqualToIgnoringCase("bar");
+      assertThat(ar.result().getString("PATH")).isNotNull();
+      vertx.fileSystem().deleteRecursiveBlocking("conf", true);
+      async.complete();
     });
   }
 

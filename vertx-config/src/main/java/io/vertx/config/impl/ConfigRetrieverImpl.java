@@ -32,6 +32,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.streams.ReadStream;
 
+import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -42,6 +43,8 @@ import java.util.stream.Collectors;
  */
 public class ConfigRetrieverImpl implements ConfigRetriever {
   private static final Logger LOGGER = LoggerFactory.getLogger(ConfigRetrieverImpl.class);
+
+  private static final String DEFAULT_CONFIG_PATH = "conf" + File.separator + "config.json";
 
   private final Vertx vertx;
   private final List<ConfigurationProvider> providers;
@@ -66,9 +69,31 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
       throw new IllegalStateException("No configuration store implementations found on the classpath");
     }
 
+    List<ConfigStoreOptions> stores = options.getStores();
+    if (options.isIncludeDefaultStores()) {
+      stores = new ArrayList<>();
+      stores.add(
+        new ConfigStoreOptions().setType("json")
+          .setConfig(vertx.getOrCreateContext().config()));
+      stores.add(new ConfigStoreOptions().setType("sys"));
+      stores.add(new ConfigStoreOptions().setType("env"));
+
+      // Insert the default config if configured.
+      String defaultConfigPath = getDefaultConfigPath();
+      if (defaultConfigPath != null  && ! defaultConfigPath.trim().isEmpty()) {
+        String format = extractFormatFromFileExtension(defaultConfigPath);
+        LOGGER.info("Config file path: " + defaultConfigPath + ", format:" + format);
+        stores.add(new ConfigStoreOptions()
+          .setType("file").setFormat(format)
+          .setOptional(true)
+          .setConfig(new JsonObject().put("path", defaultConfigPath)));
+      }
+      stores.addAll(options.getStores());
+    }
+
     // Iterate over the configured `stores` to configuration the stores
     providers = new ArrayList<>();
-    for (ConfigStoreOptions option : options.getStores()) {
+    for (ConfigStoreOptions option : stores) {
       String type = option.getType();
       if (type == null) {
         throw new IllegalArgumentException(
@@ -95,6 +120,39 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
       }
       providers.add(new ConfigurationProvider(store, processor, option.getConfig(), option.isOptional()));
     }
+  }
+
+  static String extractFormatFromFileExtension(String path) {
+    int index = path.lastIndexOf(".");
+    if (index == -1) {
+      // Default format
+      return "json";
+    } else {
+      String ext = path.substring(index + 1);
+      if (ext.trim().isEmpty()) {
+        return "json";
+      }
+
+      if ("yml".equalsIgnoreCase(ext)) {
+        ext = "yaml";
+      }
+      return ext.toLowerCase();
+    }
+  }
+
+  private String getDefaultConfigPath() {
+    String value = System.getenv("VERTX_CONFIG_PATH");
+    if (value == null  || value.trim().isEmpty()) {
+      value = System.getProperty("vertx-config-path");
+    }
+    if (value != null  && ! value.trim().isEmpty()) {
+      return value.trim();
+    }
+    boolean exists = vertx.fileSystem().existsBlocking(DEFAULT_CONFIG_PATH);
+    if (exists) {
+      return DEFAULT_CONFIG_PATH;
+    }
+    return null;
   }
 
   public synchronized void initializePeriodicScan() {
