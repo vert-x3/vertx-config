@@ -37,6 +37,7 @@ public class ConfigStoreOptions {
 
   private JsonObject config;
   private String format;
+  private boolean optional;
 
   public ConfigStoreOptions() {
     // Empty constructor
@@ -50,6 +51,7 @@ public class ConfigStoreOptions {
   public ConfigStoreOptions(JsonObject json) {
     type = json.getString("type");
     config = json.getJsonObject("config");
+    optional = json.getBoolean("optional");
     format = json.getString("format", "json");
   }
 
@@ -65,6 +67,7 @@ public class ConfigStoreOptions {
     if (format != null) {
       json.put("format", format);
     }
+    json.put("optional", optional);
     return json;
   }
 
@@ -110,6 +113,26 @@ public class ConfigStoreOptions {
    */
   public String getFormat() {
     return format;
+  }
+
+  /**
+   * @return whether or not the store is considered as optional. When the configuration is retrieve, if an optional store
+   * returns a failure, the failure is ignored and an empty json object is used instead (for this store).
+   */
+  public boolean isOptional() {
+    return optional;
+  }
+
+  /**
+   * Sets whether or not the store is optional. When the configuration is retrieve, if an optional store
+   * returns a failure, the failure is ignored and an empty json object is used instead (for this store).
+   *
+   * @param optional whether or not the store is optional.
+   * @return the current instance of {@link ConfigStoreOptions}
+   */
+  public ConfigStoreOptions setOptional(boolean optional) {
+    this.optional = optional;
+    return this;
   }
 
   /**

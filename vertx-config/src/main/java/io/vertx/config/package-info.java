@@ -84,7 +84,15 @@
  * {@link examples.Examples#example2(io.vertx.core.Vertx)}
  * ----
  *
- * More details about the overloading rules and available stores are available below.
+ * More details about the overloading rules and available stores are available below. Each store can be marked as
+ * `optional`. If a failure is caught while retrieving (or processing) the configuration from an optional store, the failure
+ * is logged but the processing does not fail. Instead an empty JSON object is returned (`{}`). To mark a store as
+ * optional, use the `optional` attribute:
+ *
+ * [source]
+ * ----
+ * {@link examples.Examples#example2_optional(io.vertx.core.Vertx)}
+ * ----
  *
  * Once you have the instance of the Config Retriever, _retrieve_ the configuration
  * as follows:

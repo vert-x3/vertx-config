@@ -98,7 +98,34 @@ def retriever = ConfigRetriever.create(vertx, options)
 
 ----
 
-More details about the overloading rules and available stores are available below.
+More details about the overloading rules and available stores are available below. Each store can be marked as
+`optional`. If a failure is caught while retrieving (or processing) the configuration from an optional store, the failure
+is logged but the processing does not fail. Instead an empty JSON object is returned (`{}`). To mark a store as
+optional, use the `optional` attribute:
+
+[source]
+----
+def fileStore = [
+  type:"file",
+  optional:true,
+  config:[
+    path:"my-config.json"
+  ]
+]
+def sysPropsStore = [
+  type:"sys"
+]
+
+def options = [
+  stores:[
+    fileStore,
+    sysPropsStore
+  ]
+]
+
+def retriever = ConfigRetriever.create(vertx, options)
+
+----
 
 Once you have the instance of the Config Retriever, _retrieve_ the configuration
 as follows:

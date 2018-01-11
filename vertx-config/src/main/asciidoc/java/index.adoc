@@ -82,7 +82,23 @@ ConfigRetrieverOptions options = new ConfigRetrieverOptions()
 ConfigRetriever retriever = ConfigRetriever.create(vertx, options);
 ----
 
-More details about the overloading rules and available stores are available below.
+More details about the overloading rules and available stores are available below. Each store can be marked as
+`optional`. If a failure is caught while retrieving (or processing) the configuration from an optional store, the failure
+is logged but the processing does not fail. Instead an empty JSON object is returned (`{}`). To mark a store as
+optional, use the `optional` attribute:
+
+[source]
+----
+ConfigStoreOptions fileStore = new ConfigStoreOptions()
+  .setType("file")
+  .setOptional(true)
+  .setConfig(new JsonObject().put("path", "my-config.json"));
+ConfigStoreOptions sysPropsStore = new ConfigStoreOptions().setType("sys");
+
+ConfigRetrieverOptions options = new ConfigRetrieverOptions().addStore(fileStore).addStore(sysPropsStore);
+
+ConfigRetriever retriever = ConfigRetriever.create(vertx, options);
+----
 
 Once you have the instance of the Config Retriever, _retrieve_ the configuration
 as follows:

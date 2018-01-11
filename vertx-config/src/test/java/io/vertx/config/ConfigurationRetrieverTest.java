@@ -210,4 +210,60 @@ public class ConfigurationRetrieverTest {
     assertThat(reference.get()).isInstanceOf(ClassCastException.class).hasMessageContaining("java.lang.Integer");
   }
 
+  @Test
+  public void testWithOptionalAndSuccess(TestContext tc) {
+    List<ConfigStoreOptions> options = new ArrayList<>();
+    options.add(new ConfigStoreOptions().setType("file")
+      .setConfig(new JsonObject().put("path", "src/test/resources/file/regular.json")).setOptional(true));
+    retriever = ConfigRetriever.create(vertx, new ConfigRetrieverOptions().setStores(options));
+
+    AtomicReference<Throwable> reference = new AtomicReference<>();
+    vertx.exceptionHandler(reference::set);
+
+    retriever.getConfig(ar -> {
+      tc.assertTrue(ar.succeeded());
+      tc.assertNotNull(ar.result());
+      assertThat(ar.result().getString("key")).isEqualTo("value");
+    });
+  }
+
+  @Test
+  public void testWithOptionalAndRetrieveFailure(TestContext tc) {
+    List<ConfigStoreOptions> options = new ArrayList<>();
+    options.add(new ConfigStoreOptions().setType("file")
+      .setConfig(new JsonObject().put("path", "src/test/resources/file/missing.json")).setOptional(true));
+    retriever = ConfigRetriever.create(vertx, new ConfigRetrieverOptions().setStores(options));
+
+    AtomicReference<Throwable> reference = new AtomicReference<>();
+    vertx.exceptionHandler(reference::set);
+
+    retriever.getConfig(ar -> {
+      if (ar.failed()) {
+        ar.cause().printStackTrace();
+      }
+      tc.assertTrue(ar.succeeded());
+      tc.assertNotNull(ar.result());
+      assertThat(ar.result()).isEmpty();
+    });
+  }
+
+  @Test
+  public void testWithOptionalAndProcessingFailure(TestContext tc) {
+    List<ConfigStoreOptions> options = new ArrayList<>();
+    options.add(new ConfigStoreOptions().setType("file")
+      .setConfig(new JsonObject().put("path", "src/test/resources/file/regular.json"))
+      .setOptional(true)
+      .setFormat("properties"));
+    retriever = ConfigRetriever.create(vertx, new ConfigRetrieverOptions().setStores(options));
+
+    AtomicReference<Throwable> reference = new AtomicReference<>();
+    vertx.exceptionHandler(reference::set);
+
+    retriever.getConfig(ar -> {
+      tc.assertTrue(ar.succeeded());
+      tc.assertNotNull(ar.result());
+      assertThat(ar.result()).isEmpty();
+    });
+  }
+
 }

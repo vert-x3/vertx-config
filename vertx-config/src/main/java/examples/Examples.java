@@ -54,6 +54,18 @@ public class Examples {
     ConfigRetriever retriever = ConfigRetriever.create(vertx, options);
   }
 
+  public void example2_optional(Vertx vertx) {
+    ConfigStoreOptions fileStore = new ConfigStoreOptions()
+      .setType("file")
+      .setOptional(true)
+      .setConfig(new JsonObject().put("path", "my-config.json"));
+    ConfigStoreOptions sysPropsStore = new ConfigStoreOptions().setType("sys");
+
+    ConfigRetrieverOptions options = new ConfigRetrieverOptions().addStore(fileStore).addStore(sysPropsStore);
+
+    ConfigRetriever retriever = ConfigRetriever.create(vertx, options);
+  }
+
   public void example3(ConfigRetriever retriever) {
     retriever.getConfig(ar -> {
       if (ar.failed()) {

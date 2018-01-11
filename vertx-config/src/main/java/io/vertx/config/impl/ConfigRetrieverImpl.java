@@ -93,7 +93,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
         throw new IllegalArgumentException("unknown configuration format: " + format + " (supported formats are: " +
             Processors.getSupportedFormats());
       }
-      providers.add(new ConfigurationProvider(store, processor, option.getConfig()));
+      providers.add(new ConfigurationProvider(store, processor, option.getConfig(), option.isOptional()));
     }
   }
 

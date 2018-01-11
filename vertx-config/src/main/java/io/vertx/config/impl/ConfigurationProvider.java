@@ -17,13 +17,15 @@
 
 package io.vertx.config.impl;
 
+import io.vertx.config.spi.ConfigProcessor;
 import io.vertx.config.spi.ConfigStore;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.config.spi.ConfigProcessor;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 /**
  * A configuration provider retrieve the configuration from a store and transform it to Json.
@@ -34,28 +36,50 @@ public class ConfigurationProvider {
 
   private final JsonObject configuration;
 
+  private final boolean optional;
+
   private final ConfigStore store;
 
   private final ConfigProcessor processor;
 
-  public ConfigurationProvider(ConfigStore store, ConfigProcessor processor, JsonObject config) {
+  private final Logger logger;
+
+  public ConfigurationProvider(ConfigStore store, ConfigProcessor processor, JsonObject config, boolean optional) {
     this.store = store;
     this.processor = processor;
+    this.optional = optional;
     if (config == null) {
       this.configuration = new JsonObject();
     } else {
       this.configuration = config;
     }
+    this.logger = LoggerFactory.getLogger("ConfigurationProvider#" + store);
   }
 
   void get(Vertx vertx, Handler<AsyncResult<JsonObject>> completionHandler) {
     store.get(maybeBuffer -> {
       if (maybeBuffer.failed()) {
-        completionHandler.handle(Future.failedFuture(maybeBuffer.cause()));
+        if (optional) {
+          logger.warn("Unable to retrieve the configuration " + maybeBuffer.cause().getMessage());
+          if (logger.isDebugEnabled()) {
+            logger.debug("Failure caught when retrieving the configuration", maybeBuffer.cause());
+          }
+          completionHandler.handle(Future.succeededFuture(new JsonObject()));
+        } else {
+          completionHandler.handle(Future.failedFuture(maybeBuffer.cause()));
+        }
       } else {
         processor.process(vertx, configuration, maybeBuffer.result(), maybeJson -> {
           if (maybeJson.failed()) {
-            completionHandler.handle(Future.failedFuture(maybeJson.cause()));
+            if (optional) {
+              logger.warn("Unable to process the retrieve the configuration " + maybeJson.cause().getMessage());
+              if (logger.isDebugEnabled()) {
+                logger.debug("Failure caught when processing the configuration", maybeJson.cause());
+              }
+              completionHandler.handle(Future.succeededFuture(new JsonObject()));
+            } else {
+              completionHandler.handle(Future.failedFuture(maybeJson.cause()));
+            }
           } else {
             completionHandler.handle(Future.succeededFuture(maybeJson.result()));
           }
