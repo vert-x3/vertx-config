@@ -61,7 +61,7 @@
     <dependency>
       <groupId>org.apache.zookeeper</groupId>
       <artifactId>zookeeper</artifactId>
-      <version>3.4.9</version>
+      <version>3.4.10</version>
     </dependency>
 
     <!-- ZK requires these dependencies: declare this dependency to force vertx-config-zookeeper to use this one. These are the versions used by vert.x -->
