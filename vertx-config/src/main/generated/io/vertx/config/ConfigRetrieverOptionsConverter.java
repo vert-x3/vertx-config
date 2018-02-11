@@ -34,10 +34,12 @@ public class ConfigRetrieverOptionsConverter {
       obj.setScanPeriod(((Number)json.getValue("scanPeriod")).longValue());
     }
     if (json.getValue("stores") instanceof JsonArray) {
-      json.getJsonArray("stores").forEach(item -> {
+      java.util.ArrayList<io.vertx.config.ConfigStoreOptions> list = new java.util.ArrayList<>();
+      json.getJsonArray("stores").forEach( item -> {
         if (item instanceof JsonObject)
-          obj.addStore(new io.vertx.config.ConfigStoreOptions((JsonObject)item));
+          list.add(new io.vertx.config.ConfigStoreOptions((JsonObject)item));
       });
+      obj.setStores(list);
     }
   }
 
