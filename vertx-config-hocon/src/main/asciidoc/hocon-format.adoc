@@ -15,14 +15,24 @@ _dependencies_ section of your build descriptor:
 [source,xml,subs="+attributes"]
 ----
 <dependency>
+<<<<<<< HEAD:vertx-config-hocon/src/main/asciidoc/groovy/hocon-format.adoc
   <groupId>io.vertx</groupId>
   <artifactId>vertx-config-hocon</artifactId>
   <version>3.5.1</version>
+=======
+  <groupId>${maven.groupId}</groupId>
+  <artifactId>${maven.artifactId}</artifactId>
+  <version>${maven.version}</version>
+>>>>>>> Use plain adocs:vertx-config-hocon/src/main/asciidoc/index.adoc
 </dependency>
 <dependency>
-  <groupId>io.vertx</groupId>
+  <groupId>${maven.groupId}</groupId>
   <artifactId>vertx-config</artifactId>
+<<<<<<< HEAD:vertx-config-hocon/src/main/asciidoc/groovy/hocon-format.adoc
   <version>3.5.1</version>
+=======
+  <version>${maven.version}</version>
+>>>>>>> Use plain adocs:vertx-config-hocon/src/main/asciidoc/index.adoc
 </dependency>
 ----
 
@@ -30,31 +40,23 @@ _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
+<<<<<<< HEAD:vertx-config-hocon/src/main/asciidoc/groovy/hocon-format.adoc
 compile 'io.vertx:vertx-config:3.5.1'
 compile 'io.vertx:vertx-config-hocon:3.5.1'
+=======
+compile '${maven.groupId}:vertx-config:${maven.version}'
+compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
+>>>>>>> Use plain adocs:vertx-config-hocon/src/main/asciidoc/index.adoc
 ----
 
 ==== Configuring the store to use HOCON
 
 Once added to your classpath or dependencies, you need to configure the
-`link:../../apidocs/io/vertx/config/ConfigRetriever.html[ConfigRetriever]` to use this format:
+{@link io.vertx.config.ConfigRetriever} to use this format:
 
-[source, groovy]
+[source, $lang]
 ----
-def store = [
-  type:"file",
-  format:"hocon",
-  config:[
-    path:"my-config.conf"
-  ]
-]
-
-def retriever = ConfigRetriever.create(vertx, [
-  stores:[
-    store
-  ]
-])
-
+{@link examples.Examples#example1(io.vertx.core.Vertx)}
 ----
 
 You just need to set `format` to `hocon`.

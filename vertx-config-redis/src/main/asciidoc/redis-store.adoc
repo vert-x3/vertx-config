@@ -13,14 +13,24 @@ _dependencies_ section of your build descriptor:
 [source,xml,subs="+attributes"]
 ----
 <dependency>
+<<<<<<< HEAD:vertx-config-redis/src/main/asciidoc/groovy/redis-store.adoc
   <groupId>io.vertx</groupId>
   <artifactId>vertx-config-redis</artifactId>
   <version>3.5.1</version>
+=======
+  <groupId>${maven.groupId}</groupId>
+  <artifactId>${maven.artifactId}</artifactId>
+  <version>${maven.version}</version>
+>>>>>>> Use plain adocs:vertx-config-redis/src/main/asciidoc/index.adoc
 </dependency>
 <dependency>
-  <groupId>io.vertx</groupId>
+  <groupId>${maven.groupId}</groupId>
   <artifactId>vertx-config</artifactId>
+<<<<<<< HEAD:vertx-config-redis/src/main/asciidoc/groovy/redis-store.adoc
   <version>3.5.1</version>
+=======
+  <version>${maven.version}</version>
+>>>>>>> Use plain adocs:vertx-config-redis/src/main/asciidoc/index.adoc
 </dependency>
 ----
 
@@ -28,37 +38,27 @@ _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
+<<<<<<< HEAD:vertx-config-redis/src/main/asciidoc/groovy/redis-store.adoc
 compile 'io.vertx:vertx-config:3.5.1'
 compile 'io.vertx:vertx-config-redis:3.5.1'
+=======
+compile '${maven.groupId}:vertx-config:${maven.version}'
+compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
+>>>>>>> Use plain adocs:vertx-config-redis/src/main/asciidoc/index.adoc
 ----
 
 ==== Configuring the store
 
 Once added to your classpath or dependencies, you need to configure the
-`link:../../yardoc/VertxConfig/ConfigRetriever.html[ConfigRetriever]` to use this store:
+{@link io.vertx.config.ConfigRetriever} to use this store:
 
-[source, ruby]
+[source, $lang]
 ----
-require 'vertx-config/config_retriever'
-store = {
-  'type' => "redis",
-  'config' => {
-    'host' => "localhost",
-    'port' => 6379,
-    'key' => "my-configuration"
-  }
-}
-
-retriever = VertxConfig::ConfigRetriever.create(vertx, {
-  'stores' => [
-    store
-  ]
-})
-
+{@link examples.Examples#example1(io.vertx.core.Vertx)}
 ----
 
 The store configuration is used to create an instance of
-`link:../../yardoc/VertxRedis/RedisClient.html[RedisClient]`. check the documentation of the Vert.x Redis Client
+{@link io.vertx.redis.RedisClient}. check the documentation of the Vert.x Redis Client
 for further details.
 
 In addition, you can set the `key` instructing the store in which _field_ the configuration

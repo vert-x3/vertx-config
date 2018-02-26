@@ -1,7 +1,6 @@
 = Vert.x Config
 
 Vert.x Config provides a way to configure your Vert.x application.
-
 It:
 
 * offers multiple configuration syntaxes (json, properties, yaml (extension), hocon
@@ -15,9 +14,9 @@ It:
 
 The library is structured around:
 
-* a **Config Retriever** instantiated and used by the Vert.x application. It
+* a*Config Retriever** instantiated and used by the Vert.x application. It
 configures a set of configuration store
-* **Configuration store** defines a location from where the configuration data is read
+**Configuration store** defines a location from where the configuration data is read
 and and a syntax (json by default)
 
 The configuration is retrieved as a JSON Object.
@@ -32,9 +31,15 @@ _dependencies_ section of your build descriptor:
 [source,xml,subs="+attributes"]
 ----
 <dependency>
+<<<<<<< HEAD:vertx-config/src/main/asciidoc/groovy/index.adoc
   <groupId>io.vertx</groupId>
   <artifactId>vertx-config</artifactId>
   <version>3.5.1</version>
+=======
+  <groupId>${maven.groupId}</groupId>
+  <artifactId>${maven.artifactId}</artifactId>
+  <version>${maven.version}</version>
+>>>>>>> Use plain adocs:vertx-config/src/main/asciidoc/index.adoc
 </dependency>
 ----
 
@@ -42,16 +47,18 @@ _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
+<<<<<<< HEAD:vertx-config/src/main/asciidoc/groovy/index.adoc
 compile 'io.vertx:vertx-config:3.5.1'
+=======
+compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
+>>>>>>> Use plain adocs:vertx-config/src/main/asciidoc/index.adoc
 ----
 
-Once done, you first need to instantiate the `link:../../jsdoc/module-vertx-config-js_config_retriever-ConfigRetriever.html[ConfigRetriever]`:
+Once done, you first need to instantiate the {@link io.vertx.config.ConfigRetriever}:
 
 [source]
 ----
-var ConfigRetriever = require("vertx-config-js/config_retriever");
-var retriever = ConfigRetriever.create(vertx);
-
+{@link examples.Examples#example1(io.vertx.core.Vertx)}
 ----
 
 By default the Config Retriever is configured with the following stores (in
@@ -67,38 +74,7 @@ You can configure your own stores:
 
 [source]
 ----
-var ConfigRetriever = require("vertx-config-js/config_retriever");
-var httpStore = {
-  "type" : "http",
-  "config" : {
-    "host" : "localhost",
-    "port" : 8080,
-    "path" : "/conf"
-  }
-};
-
-var fileStore = {
-  "type" : "file",
-  "config" : {
-    "path" : "my-config.json"
-  }
-};
-
-var sysPropsStore = {
-  "type" : "sys"
-};
-
-
-var options = {
-  "stores" : [
-    httpStore,
-    fileStore,
-    sysPropsStore
-  ]
-};
-
-var retriever = ConfigRetriever.create(vertx, options);
-
+{@link examples.Examples#example2(io.vertx.core.Vertx)}
 ----
 
 More details about the overloading rules and available stores are available below. Each store can be marked as
@@ -108,27 +84,7 @@ optional, use the `optional` attribute:
 
 [source]
 ----
-var ConfigRetriever = require("vertx-config-js/config_retriever");
-var fileStore = {
-  "type" : "file",
-  "optional" : true,
-  "config" : {
-    "path" : "my-config.json"
-  }
-};
-var sysPropsStore = {
-  "type" : "sys"
-};
-
-var options = {
-  "stores" : [
-    fileStore,
-    sysPropsStore
-  ]
-};
-
-var retriever = ConfigRetriever.create(vertx, options);
-
+{@link examples.Examples#example2_optional(io.vertx.core.Vertx)}
 ----
 
 Once you have the instance of the Config Retriever, _retrieve_ the configuration
@@ -136,14 +92,7 @@ as follows:
 
 [source]
 ----
-retriever.getConfig(function (ar, ar_err) {
-  if (ar_err != null) {
-    // Failed to retrieve the configuration
-  } else {
-    var config = ar;
-  }
-});
-
+{@link examples.Examples#example3(ConfigRetriever)}
 ----
 
 == Overloading rules
@@ -159,7 +108,7 @@ configuration stores:
 Declared in this order (A, B), the resulting configuration would be:
 `{a:value2, b:1, c:2}`.
 
-If you declare them in the reverse order (B, A), you would get: * `{a:value, b:1, c:2}`.
+If you declare them in the reverse order (B, A), you would get:`{a:value, b:1, c:2}`.
 
 == Available configuration stores
 
@@ -172,23 +121,16 @@ Each declared data store must specify the `type`. It can also define the `format
 not set JSON is used.
 
 Some configurations tore requires additional configuration (such a path...). This
-configuration is passed as a Json Object using `link:../dataobjects.html#ConfigStoreOptions#setConfig[config]`
+configuration is passed as a Json Object using {@link io.vertx.config.ConfigStoreOptions#setConfig(io.vertx.core.json.JsonObject)}
 
 === File
 
 This configuration store just read the configuration from a file. It supports all
 supported formats.
 
-[source, js]
+[source, $lang]
 ----
-var file = {
-  "type" : "file",
-  "format" : "properties",
-  "config" : {
-    "path" : "path-to-file.properties"
-  }
-};
-
+{@link examples.Examples#file()}
 ----
 
 The `path` configuration is required.
@@ -197,15 +139,9 @@ The `path` configuration is required.
 
 The JSON configuration store just serves the given JSON config as it is.
 
-[source, js]
+[source, $lang]
 ----
-var json = {
-  "type" : "json",
-  "config" : {
-    "key" : "value"
-  }
-};
-
+{@link examples.Examples#json()}
 ----
 
 The only supported format for this configuration store is JSON.
@@ -215,27 +151,18 @@ The only supported format for this configuration store is JSON.
 This configuration store maps environment variables to a Json Object contributed to
 the global configuration.
 
-[source, js]
+[source, $lang]
 ----
-var json = {
-  "type" : "env"
-};
-
+{@link examples.Examples#env()}
 ----
 
 This configuration store does not support the `format` configuration. By default, the retrieved value are
 transformed into JSON compatible structures (number, string, boolean, json object and json array). To avoid this
 conversion, configure the `raw-data` attribute:
 
-[source, js]
+[source, $lang]
 ----
-var json = {
-  "type" : "env",
-  "config" : {
-    "raw-data" : true
-  }
-};
-
+{@link examples.Examples#env2()}
 ----
 
 You can configure the `raw-data` attribute (`false` by default). If `raw-data` is `true` no attempts to convert
@@ -244,18 +171,9 @@ values will be made and you'll be able to get raw values using `config.getString
 If you want to select the set of keys to import, use the `keys` attributes. It filters out all non selected keys. Keys
 must be listed individually:
 
-[source, js]
+[source, $lang]
 ----
-var json = {
-  "type" : "env",
-  "config" : {
-    "keys" : [
-      "SERVICE1_HOST",
-      "SERVICE2_HOST"
-    ]
-  }
-};
-
+{@link examples.Examples#env3()}
 ----
 
 === System Properties
@@ -263,15 +181,9 @@ var json = {
 This configuration store maps system properties to a Json Object contributed to the
 global configuration.
 
-[source, js]
+[source, $lang]
 ----
-var json = {
-  "type" : "sys",
-  "config" : {
-    "cache" : "false"
-  }
-};
-
+{@link examples.Examples#sys()}
 ----
 
 This configuration store does not support the `format` configuration.
@@ -284,17 +196,9 @@ not it caches the system properties on the first access and does not reload them
 This configuration stores retrieves the configuration from a HTTP location. It can use
 any supported format.
 
-[source, js]
+[source, $lang]
 ----
-var http = {
-  "type" : "http",
-  "config" : {
-    "host" : "localhost",
-    "port" : 8080,
-    "path" : "/A"
-  }
-};
-
+{@link examples.Examples#http()}
 ----
 
 It creates a Vert.x HTTP Client with the store configuration (see next snippet). To
@@ -302,18 +206,9 @@ ease the configuration, you can also configure the `host`, `port` and `path` wit
 `host`, `port` and `path`
 properties.
 
-[source, js]
+[source, $lang]
 ----
-var http = {
-  "type" : "http",
-  "config" : {
-    "defaultHost" : "localhost",
-    "defaultPort" : 8080,
-    "ssl" : true,
-    "path" : "/A"
-  }
-};
-
+{@link examples.Examples#http2()}
 ----
 
 === Event Bus
@@ -321,15 +216,9 @@ var http = {
 This event bus configuration stores receives the configuration from the event bus. This
 stores let you distribute your configuration among your local and distributed components.
 
-[source, js]
+[source, $lang]
 ----
-var eb = {
-  "type" : "event-bus",
-  "config" : {
-    "address" : "address-getting-the-conf"
-  }
-};
-
+{@link examples.Examples#eb()}
 ----
 
 This configuration store supports any type of format.
@@ -350,24 +239,9 @@ relative path of the files location in the directory.
 * an optional `format` indicating the format of the files (each fileset can use a
 different format, BUT files in a fileset must share the same format).
 
-[source, js]
+[source, $lang]
 ----
-var dir = {
-  "type" : "directory",
-  "config" : {
-    "path" : "config",
-    "filesets" : [
-      {
-        "pattern" : "dir/*json"
-      },
-      {
-        "pattern" : "dir/*.properties",
-        "format" : "properties"
-      }
-    ]
-  }
-};
-
+{@link examples.Examples#dir()}
 ----
 
 == Listening for configuration changes
@@ -376,30 +250,9 @@ The Configuration Retriever periodically retrieve the configuration and if the o
 is different from the current one, your application can be reconfigured. By default the
 configuration is reloaded every 5 seconds.
 
-[source, js]
+[source, $lang]
 ----
-var Vertx = require("vertx-js/vertx");
-var ConfigRetriever = require("vertx-config-js/config_retriever");
-var options = {
-  "scanPeriod" : 2000,
-  "stores" : [
-    store1,
-    store2
-  ]
-};
-
-var retriever = ConfigRetriever.create(Vertx.vertx(), options);
-retriever.getConfig(function (json, json_err) {
-  // Initial retrieval of the configuration
-});
-
-retriever.listen(function (change) {
-  // Previous configuration
-  var previous = change.previousConfiguration;
-  // New configuration
-  var conf = change.newConfiguration;
-});
-
+{@link examples.Examples#period}
 ----
 
 == Retrieving the last retrieved configuration
@@ -407,73 +260,44 @@ retriever.listen(function (change) {
 You can retrieved the last retrieved configuration without "waiting" to be retrieved
 using:
 
-[source, js]
+[source, $lang]
 ----
-var last = retriever.getCachedConfig();
-
+{@link examples.Examples#cache(ConfigRetriever)}
 ----
 
 == Reading configuration as a stream
 
-The `link:../../jsdoc/module-vertx-config-js_config_retriever-ConfigRetriever.html[ConfigRetriever]` provide a way to access the stream of configuration.
-It's a `link:../../jsdoc/module-vertx-js_read_stream-ReadStream.html[ReadStream]` of `JsonObject`. By registering the right
+The {@link io.vertx.config.ConfigRetriever} provide a way to access the stream of configuration.
+It's a {@link io.vertx.core.streams.ReadStream} of {@link io.vertx.core.json.JsonObject}. By registering the right
 set of handlers you are notified:
 
 * when a new configuration is retrieved
 * when an error occur while retrieving a configuration
 * when the configuration retriever is closed (the
-`link:../../jsdoc/module-vertx-js_read_stream-ReadStream.html#endHandler[endHandler]` is called).
+{@link io.vertx.core.streams.ReadStream#endHandler(io.vertx.core.Handler)} is called).
 
-[source, js]
+[source, $lang]
 ----
-var Vertx = require("vertx-js/vertx");
-var ConfigRetriever = require("vertx-config-js/config_retriever");
-var options = {
-  "scanPeriod" : 2000,
-  "stores" : [
-    store1,
-    store2
-  ]
-};
-
-var retriever = ConfigRetriever.create(Vertx.vertx(), options);
-retriever.configStream().endHandler(function (v) {
-  // retriever closed
-}).exceptionHandler(function (t) {
-  // an error has been caught while retrieving the configuration
-}).handler(function (conf) {
-  // the configuration
-});
-
-
+{@link examples.Examples#stream}
 ----
 
 == Retrieving the configuration as a Future
 
-The `link:../../jsdoc/module-vertx-config-js_config_retriever-ConfigRetriever.html[ConfigRetriever]` provide a way to retrieve the configuration as a
-`link:../../jsdoc/module-vertx-js_future-Future.html[Future]`:
+The {@link io.vertx.config.ConfigRetriever} provide a way to retrieve the configuration as a
+{@link io.vertx.core.Future}:
 
-[source, js]
+[source, $lang]
 ----
-var ConfigRetriever = require("vertx-config-js/config_retriever");
-var future = ConfigRetriever.getConfigAsFuture(retriever);
-future.setHandler(function (ar, ar_err) {
-  if (ar_err != null) {
-    // Failed to retrieve the configuration
-  } else {
-    var config = ar;
-  }
-});
-
+{@link examples.Examples#future(io.vertx.config.ConfigRetriever)}
 ----
 
 == Extending the Config Retriever
 
 You can extend the configuration by implementing:
 
-* the `ConfigProcessor` SPI to add support for a
+* the {@link io.vertx.config.spi.ConfigProcessor} SPI to add support for a
 format
-* the `ConfigStoreFactory` SPI to add support for
+* the {@link io.vertx.config.spi.ConfigStoreFactory} SPI to add support for
 configuration store (place from where the configuration data is retrieved)
 
 == Additional formats

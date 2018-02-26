@@ -1,9 +1,7 @@
 === Zookeeper Configuration Store
 
 The Zookeeper Configuration Store extends the Vert.x Configuration Retriever and provides the
-way to retrieve configuration from a Zookeeper server.
-
-It uses Apache Curator as client.
+way to retrieve configuration from a Zookeeper server. It uses Apache Curator as client.
 
 ==== Using the Zookeeper Configuration Store
 
@@ -15,14 +13,24 @@ _dependencies_ section of your build descriptor:
 [source,xml,subs="+attributes"]
 ----
 <dependency>
+<<<<<<< HEAD:vertx-config-zookeeper/src/main/asciidoc/groovy/zookeeper-store.adoc
   <groupId>io.vertx</groupId>
   <artifactId>vertx-config-zookeeper</artifactId>
   <version>3.5.1</version>
+=======
+  <groupId>${maven.groupId}</groupId>
+  <artifactId>${maven.artifactId}</artifactId>
+  <version>${maven.version}</version>
+>>>>>>> Use plain adocs:vertx-config-zookeeper/src/main/asciidoc/index.adoc
 </dependency>
 <dependency>
-  <groupId>io.vertx</groupId>
+  <groupId>${maven.groupId}</groupId>
   <artifactId>vertx-config</artifactId>
+<<<<<<< HEAD:vertx-config-zookeeper/src/main/asciidoc/groovy/zookeeper-store.adoc
   <version>3.5.1</version>
+=======
+  <version>${maven.version}</version>
+>>>>>>> Use plain adocs:vertx-config-zookeeper/src/main/asciidoc/index.adoc
 </dependency>
 ----
 
@@ -30,26 +38,23 @@ _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
+<<<<<<< HEAD:vertx-config-zookeeper/src/main/asciidoc/groovy/zookeeper-store.adoc
 compile 'io.vertx:vertx-config:3.5.1'
 compile 'io.vertx:vertx-config-zookeeper:3.5.1'
+=======
+compile '${maven.groupId}:vertx-config:${maven.version}'
+compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
+>>>>>>> Use plain adocs:vertx-config-zookeeper/src/main/asciidoc/index.adoc
 ----
 
 ==== Configuring the store
 
 Once added to your classpath or dependencies, you need to configure the
-`link:../../apidocs/io/vertx/config/ConfigRetriever.html[ConfigRetriever]` to use this store:
+{@link io.vertx.config.ConfigRetriever} to use this store:
 
-[source, java]
+[source, $lang]
 ----
-ConfigStoreOptions store = new ConfigStoreOptions()
-    .setType("zookeeper")
-    .setConfig(new JsonObject()
-        .put("connection", "localhost:2181")
-        .put("path", "/path/to/my/conf")
-    );
-
-ConfigRetriever retriever = ConfigRetriever.create(vertx,
-    new ConfigRetrieverOptions().addStore(store));
+{@link examples.Examples#example1(io.vertx.core.Vertx)}
 ----
 
 The store configuration is used to configure the Apache Curator client and the _path_ of the Zookeeper node

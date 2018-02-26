@@ -13,14 +13,24 @@ _dependencies_ section of your build descriptor:
 [source,xml,subs="+attributes"]
 ----
 <dependency>
+<<<<<<< HEAD:vertx-config-spring-config-server/src/main/asciidoc/groovy/spring-store.adoc
   <groupId>io.vertx</groupId>
   <artifactId>vertx-config-spring-config-server</artifactId>
   <version>3.5.1</version>
+=======
+  <groupId>${maven.groupId}</groupId>
+  <artifactId>${maven.artifactId}</artifactId>
+  <version>${maven.version}</version>
+>>>>>>> Use plain adocs:vertx-config-spring-config-server/src/main/asciidoc/index.adoc
 </dependency>
 <dependency>
-  <groupId>io.vertx</groupId>
+  <groupId>${maven.groupId}</groupId>
   <artifactId>vertx-config</artifactId>
+<<<<<<< HEAD:vertx-config-spring-config-server/src/main/asciidoc/groovy/spring-store.adoc
   <version>3.5.1</version>
+=======
+  <version>${maven.version}</version>
+>>>>>>> Use plain adocs:vertx-config-spring-config-server/src/main/asciidoc/index.adoc
 </dependency>
 ----
 
@@ -28,30 +38,23 @@ _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
+<<<<<<< HEAD:vertx-config-spring-config-server/src/main/asciidoc/groovy/spring-store.adoc
 compile 'io.vertx:vertx-config:3.5.1'
 compile 'io.vertx:vertx-config-spring-config-server:3.5.1'
+=======
+compile '${maven.groupId}:vertx-config:${maven.version}'
+compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
+>>>>>>> Use plain adocs:vertx-config-spring-config-server/src/main/asciidoc/index.adoc
 ----
 
 ==== Configuring the store
 
 Once added to your classpath or dependencies, you need to configure the
-`link:../../apidocs/io/vertx/config/ConfigRetriever.html[ConfigRetriever]` to use this store:
+{@link io.vertx.config.ConfigRetriever} to use this store:
 
-[source, groovy]
+[source, $lang]
 ----
-def store = [
-  type:"spring-config-server",
-  config:[
-    url:"http://localhost:8888/foo/development"
-  ]
-]
-
-def retriever = ConfigRetriever.create(vertx, [
-  stores:[
-    store
-  ]
-])
-
+{@link examples.Examples#example1(io.vertx.core.Vertx)}
 ----
 
 

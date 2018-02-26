@@ -1,9 +1,7 @@
 === Kubernetes ConfigMap Store
 
 The Kubernetes ConfigMap Store extends the Vert.x Configuration Retriever and provides support Kubernetes Config Map
-and Secrets.
-
-So, configuration is retrieved by reading the config map or the secrets.
+and Secrets. So, configuration is retrieved by reading the config map or the secrets.
 
 ==== Using the Kubernetes ConfigMap Store
 
@@ -15,14 +13,24 @@ _dependencies_ section of your build descriptor:
 [source,xml,subs="+attributes"]
 ----
 <dependency>
+<<<<<<< HEAD:vertx-config-kubernetes-configmap/src/main/asciidoc/groovy/kubernetes-store.adoc
 <groupId>io.vertx</groupId>
 <artifactId>vertx-config-kubernetes-configmap</artifactId>
 <version>3.5.1</version>
+=======
+<groupId>${maven.groupId}</groupId>
+<artifactId>${maven.artifactId}</artifactId>
+<version>${maven.version}</version>
+>>>>>>> Use plain adocs:vertx-config-kubernetes-configmap/src/main/asciidoc/index.adoc
 </dependency>
 <dependency>
-<groupId>io.vertx</groupId>
+<groupId>${maven.groupId}</groupId>
 <artifactId>vertx-config</artifactId>
+<<<<<<< HEAD:vertx-config-kubernetes-configmap/src/main/asciidoc/groovy/kubernetes-store.adoc
 <version>3.5.1</version>
+=======
+<version>${maven.version}</version>
+>>>>>>> Use plain adocs:vertx-config-kubernetes-configmap/src/main/asciidoc/index.adoc
 </dependency>
 ----
 
@@ -30,32 +38,23 @@ _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
+<<<<<<< HEAD:vertx-config-kubernetes-configmap/src/main/asciidoc/groovy/kubernetes-store.adoc
 compile 'io.vertx:vertx-config:3.5.1'
 compile 'io.vertx:vertx-config-kubernetes-configmap:3.5.1'
+=======
+compile '${maven.groupId}:vertx-config:${maven.version}'
+compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
+>>>>>>> Use plain adocs:vertx-config-kubernetes-configmap/src/main/asciidoc/index.adoc
 ----
 
 ==== Configuring the store
 
 Once added to your classpath or dependencies, you need to configure the
-`link:../../jsdoc/module-vertx-config-js_config_retriever-ConfigRetriever.html[ConfigRetriever]` to use this store:
+{@link io.vertx.config.ConfigRetriever} to use this store:
 
-[source, js]
+[source, $lang]
 ----
-var ConfigRetriever = require("vertx-config-js/config_retriever");
-var store = {
-  "type" : "configmap",
-  "config" : {
-    "namespace" : "my-project-namespace",
-    "name" : "configmap-name"
-  }
-};
-
-var retriever = ConfigRetriever.create(vertx, {
-  "stores" : [
-    store
-  ]
-});
-
+{@link examples.Examples#example1(io.vertx.core.Vertx)}
 ----
 
 You need to configure the store to find the right configmap. this is done with:
@@ -72,24 +71,9 @@ The application must have the permissions to read the config map.
 
 To read data from a secret, just configure the `secret` property to `true`:
 
-[source, js]
+[source, $lang]
 ----
-var ConfigRetriever = require("vertx-config-js/config_retriever");
-var store = {
-  "type" : "configmap",
-  "config" : {
-    "namespace" : "my-project-namespace",
-    "name" : "my-secret",
-    "secret" : true
-  }
-};
-
-var retriever = ConfigRetriever.create(vertx, {
-  "stores" : [
-    store
-  ]
-});
-
+{@link examples.Examples#example2(io.vertx.core.Vertx)}
 ----
 
 If the config map is not available, an empty JSON object is passed as configuration chunk. To disable this
