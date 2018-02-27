@@ -19,29 +19,27 @@ package examples;
 
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
-import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.config.ConfigStoreOptions;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 
 /**
- * @author <a href="http://escoffier.me">Clement Escoffier</a>
+ * @author <a href="mailto:ruslan.sennov@gmail.com">Ruslan Sennov</a>
  */
-public class Examples {
+public class ConfigConsulExamples {
 
 
   public void example1(Vertx vertx) {
-
-    ConfigStoreOptions git = new ConfigStoreOptions()
-        .setType("git")
+    ConfigStoreOptions store = new ConfigStoreOptions()
+        .setType("consul")
         .setConfig(new JsonObject()
-            .put("url", "https://github.com/cescoffier/vertx-config-test.git")
-            .put("path", "local")
-            .put("filesets",
-                new JsonArray().add(new JsonObject().put("pattern", "*.json"))));
+          .put("host", "localhost")
+          .put("port", 8500)
+          .put("prefix", "foo")
+        );
 
     ConfigRetriever retriever = ConfigRetriever.create(vertx,
-        new ConfigRetrieverOptions().addStore(git));
+        new ConfigRetrieverOptions().addStore(store));
   }
 
 

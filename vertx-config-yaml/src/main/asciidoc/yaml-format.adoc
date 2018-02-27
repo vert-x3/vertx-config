@@ -13,24 +13,14 @@ _dependencies_ section of your build descriptor:
 [source,xml,subs="+attributes"]
 ----
 <dependency>
-<<<<<<< HEAD:vertx-config-yaml/src/main/asciidoc/groovy/yaml-format.adoc
-  <groupId>io.vertx</groupId>
-  <artifactId>vertx-config-yaml</artifactId>
-  <version>3.5.1</version>
-=======
   <groupId>${maven.groupId}</groupId>
   <artifactId>${maven.artifactId}</artifactId>
   <version>${maven.version}</version>
->>>>>>> Use plain adocs:vertx-config-yaml/src/main/asciidoc/index.adoc
 </dependency>
 <dependency>
   <groupId>${maven.groupId}</groupId>
   <artifactId>vertx-config</artifactId>
-<<<<<<< HEAD:vertx-config-yaml/src/main/asciidoc/groovy/yaml-format.adoc
-  <version>3.5.1</version>
-=======
   <version>${maven.version}</version>
->>>>>>> Use plain adocs:vertx-config-yaml/src/main/asciidoc/index.adoc
 </dependency>
 ----
 
@@ -38,13 +28,8 @@ _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-<<<<<<< HEAD:vertx-config-yaml/src/main/asciidoc/groovy/yaml-format.adoc
-compile 'io.vertx:vertx-config:3.5.1'
-compile 'io.vertx:vertx-config-yaml:3.5.1'
-=======
 compile '${maven.groupId}:vertx-config:${maven.version}'
 compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
->>>>>>> Use plain adocs:vertx-config-yaml/src/main/asciidoc/index.adoc
 ----
 
 ==== Configuring the store to use YAML
@@ -54,7 +39,7 @@ Once added to your classpath or dependencies, you need to configure the
 
 [source, $lang]
 ----
-{@link examples.Examples#example1(io.vertx.core.Vertx)}
+{@link examples.ConfigYamlExamples#example1(io.vertx.core.Vertx)}
 ----
 
 You just need to set `format` to `yaml`.

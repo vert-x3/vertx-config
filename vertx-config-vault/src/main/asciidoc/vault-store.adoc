@@ -13,24 +13,14 @@ _dependencies_ section of your build descriptor:
 [source,xml,subs="+attributes"]
 ----
 <dependency>
-<<<<<<< HEAD:vertx-config-vault/src/main/asciidoc/groovy/vault-store.adoc
-<groupId>io.vertx</groupId>
-<artifactId>vertx-config-vault</artifactId>
-<version>3.5.1</version>
-=======
-<groupId>${maven.groupId}</groupId>
-<artifactId>${maven.artifactId}</artifactId>
-<version>${maven.version}</version>
->>>>>>> Use plain adocs:vertx-config-vault/src/main/asciidoc/index.adoc
+  <groupId>${maven.groupId}</groupId>
+  <artifactId>${maven.artifactId}</artifactId>
+  <version>${maven.version}</version>
 </dependency>
 <dependency>
-<groupId>${maven.groupId}</groupId>
-<artifactId>vertx-config</artifactId>
-<<<<<<< HEAD:vertx-config-vault/src/main/asciidoc/groovy/vault-store.adoc
-<version>3.5.1</version>
-=======
-<version>${maven.version}</version>
->>>>>>> Use plain adocs:vertx-config-vault/src/main/asciidoc/index.adoc
+  <groupId>${maven.groupId}</groupId>
+  <artifactId>vertx-config</artifactId>
+  <version>${maven.version}</version>
 </dependency>
 ----
 
@@ -38,13 +28,8 @@ _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-<<<<<<< HEAD:vertx-config-vault/src/main/asciidoc/groovy/vault-store.adoc
-compile 'io.vertx:vertx-config:3.5.1'
-compile 'io.vertx:vertx-config-vault:3.5.1'
-=======
 compile '${maven.groupId}:vertx-config:${maven.version}'
 compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
->>>>>>> Use plain adocs:vertx-config-vault/src/main/asciidoc/index.adoc
 ----
 
 ==== Configuring the store
@@ -54,7 +39,7 @@ Once added to your classpath or dependencies, you need to configure the
 
 [source, $lang]
 ----
-{@link examples.Examples#example1}
+{@link examples.ConfigVaultExamples#example1}
 ----
 
 To use the Vault config store, set the `type` to `vault`. The configuration is provided as Json. It configures the
@@ -62,7 +47,7 @@ access to Vault, authentication and the path of the secret to retrieve:
 
 [source, $lang]
 ----
-{@link examples.Examples#example1WithConfig(io.vertx.core.Vertx)}}
+{@link examples.ConfigVaultExamples#example1WithConfig(io.vertx.core.Vertx)}}
 ----
 
 The `vault_config` object can contain the HTTP client / Web client configuration such as trust stores, timeout,
@@ -78,7 +63,7 @@ If you know the token to use, set the `token` entry in the configuration:
 
 [source, $lang]
 ----
-{@link examples.Examples#exampleWithToken}
+{@link examples.ConfigVaultExamples#exampleWithToken}
 ----
 
 You can use the root token, but it's not recommended. When the token is revoked, the access to the secret is
@@ -90,7 +75,7 @@ If you have a token allowing you to generate new token, you can request the toke
 
 [source, $lang]
 ----
-{@link examples.Examples#exampleWithTokenCreation}
+{@link examples.ConfigVaultExamples#exampleWithTokenCreation}
 ----
 
 When using this approach, no token must be provided in the root configuration, the the token use to request the
@@ -105,7 +90,7 @@ generated automatically.
 
 [source, $lang]
 ----
-{@link examples.Examples#exampleWithCerts(io.vertx.core.Vertx)}
+{@link examples.ConfigVaultExamples#exampleWithCerts(io.vertx.core.Vertx)}
 ----
 
 Check out the HTTP client and Web client configuration to pass the certificates. If the generated token is
@@ -118,7 +103,7 @@ need a token, the token being generated automatically:
 
 [source, $lang]
 ----
-{@link examples.Examples#exampleWithAppRole}
+{@link examples.ConfigVaultExamples#exampleWithAppRole}
 ----
 
 If the generated token is renewable, it will be renewed. If not, the store attempts to authenticate again.
@@ -130,7 +115,7 @@ token as the token is generated during the authentication process:
 
 [source, $lang]
 ----
-{@link examples.Examples#exampleWithUserPass}
+{@link examples.ConfigVaultExamples#exampleWithUserPass}
 ----
 
 If the generated token is renewable, it will be renewed. If not, the store attempts to authenticate again.

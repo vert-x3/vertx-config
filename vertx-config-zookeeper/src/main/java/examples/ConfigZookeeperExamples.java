@@ -26,16 +26,15 @@ import io.vertx.config.ConfigStoreOptions;
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class Examples {
+public class ConfigZookeeperExamples {
 
 
   public void example1(Vertx vertx) {
     ConfigStoreOptions store = new ConfigStoreOptions()
-        .setType("redis")
+        .setType("zookeeper")
         .setConfig(new JsonObject()
-            .put("host", "localhost")
-            .put("port", 6379)
-            .put("key", "my-configuration")
+            .put("connection", "localhost:2181")
+            .put("path", "/path/to/my/conf")
         );
 
     ConfigRetriever retriever = ConfigRetriever.create(vertx,

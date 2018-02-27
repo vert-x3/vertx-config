@@ -29,7 +29,7 @@ import io.vertx.core.net.PemTrustOptions;
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class Examples {
+public class ConfigVaultExamples {
 
 
   public void example1(Vertx vertx, JsonObject config) {

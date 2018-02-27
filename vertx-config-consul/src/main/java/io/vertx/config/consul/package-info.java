@@ -57,7 +57,7 @@
  *
  * [source, $lang]
  * ----
- * {@link examples.Examples#example1(io.vertx.core.Vertx)}
+ * {@link examples.ConfigConsulExamples#example1(io.vertx.core.Vertx)}
  * ----
  *
  * The store configuration is used to create an instance of

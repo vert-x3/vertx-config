@@ -28,7 +28,7 @@ import io.vertx.core.json.JsonObject;
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class Examples {
+public class ConfigExamples {
 
 
   public void example1(Vertx vertx) {
