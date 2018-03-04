@@ -118,6 +118,7 @@ public class ConfigStoreOptions {
   /**
    * @return whether or not the store is considered as optional. When the configuration is retrieve, if an optional store
    * returns a failure, the failure is ignored and an empty json object is used instead (for this store).
+   * The default value is false.
    */
   public boolean isOptional() {
     return optional;
