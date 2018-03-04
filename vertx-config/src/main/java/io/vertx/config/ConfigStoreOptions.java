@@ -51,7 +51,7 @@ public class ConfigStoreOptions {
   public ConfigStoreOptions(JsonObject json) {
     type = json.getString("type");
     config = json.getJsonObject("config");
-    optional = json.getBoolean("optional");
+    optional = json.getBoolean("optional", false);
     format = json.getString("format", "json");
   }
 
