@@ -34,7 +34,6 @@ import java.util.Objects;
 public class ConfigStoreOptions {
 
   private String type;
-
   private JsonObject config;
   private String format;
   private boolean optional;
@@ -46,6 +45,8 @@ public class ConfigStoreOptions {
   public ConfigStoreOptions(ConfigStoreOptions other) {
     this.type = other.type;
     this.config = other.config == null ? null : other.config.copy();
+    this.format = other.format;
+    this.optional = other.optional;
   }
 
   public ConfigStoreOptions(JsonObject json) {
