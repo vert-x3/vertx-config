@@ -5,9 +5,10 @@ Vert.x Config provide an extensible way to configure Vert.x applications:
 * retrieve configuration from anywhere (file, directory, HTTP location, Git repository, Zookeeper...)
 * write your configuration in any format (properties, json, yaml, hocon...)
 
-Please see the in source asciidoc documentation or the main documentation on the web-site for a full description
-of Vert.x Config:
+Please see the main documentation on the web-site for a full description:
 
-* link:vertx-config/src/main/asciidoc/java/index.adoc[Java in-source docs]
-* link:vertx-config/src/main/asciidoc/js/index.adoc[JavaScript in-source docs]
-* link:vertx-config/src/main/asciidoc/groovy/index.adoc[Groovy in-source docs]
+* https://vertx.io/docs/vertx-config/java/[Java documentation]
+* https://vertx.io/docs/vertx-config/js/[JavaScript documentation]
+* https://vertx.io/docs/vertx-config/kotlin/[Kotlin documentation]
+* https://vertx.io/docs/vertx-config/groovy/[Groovy documentation]
+* https://vertx.io/docs/vertx-config/ruby/[Ruby documentation]
