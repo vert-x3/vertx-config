@@ -29,6 +29,8 @@ import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.transport.CredentialsProvider;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,6 +54,7 @@ public class GitConfigStore implements ConfigStore {
   private final String branch;
   private final String remote;
   private final Git git;
+  private final CredentialsProvider credentialProvider;
 
   public GitConfigStore(Vertx vertx, JsonObject configuration) {
     this.vertx = vertx;
@@ -79,6 +82,14 @@ public class GitConfigStore implements ConfigStore {
     branch = configuration.getString("branch", "master");
     remote = configuration.getString("remote", "origin");
 
+    if (Objects.nonNull(configuration.getString("user")) &&
+	       Objects.nonNull(configuration.getString("password"))) {
+      credentialProvider = new UsernamePasswordCredentialsProvider(
+        configuration.getString("user"), configuration.getString("password"));
+    } else {
+      credentialProvider = null;
+    }
+
     try {
       git = initializeGit();
     } catch (Exception e) {
@@ -91,7 +102,7 @@ public class GitConfigStore implements ConfigStore {
       Git git = Git.open(path);
       String current = git.getRepository().getBranch();
       if (branch.equalsIgnoreCase(current)) {
-        PullResult pull = git.pull().setRemote(remote).call();
+        PullResult pull = git.pull().setRemote(remote).setCredentialsProvider(credentialProvider).call();
         if (!pull.isSuccessful()) {
           LOGGER.warn("Unable to pull the branch + '" + branch +
             "' from the remote repository '" + remote + "'");
@@ -111,6 +122,7 @@ public class GitConfigStore implements ConfigStore {
         .setBranch(branch)
         .setRemote(remote)
         .setDirectory(path)
+        .setCredentialsProvider(credentialProvider)
         .call();
     }
   }
