@@ -17,13 +17,12 @@
 
 package io.vertx.config.impl.spi;
 
-import io.vertx.config.spi.utils.JsonObjectHelper;
+import io.vertx.config.spi.ConfigStore;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
-import io.vertx.config.spi.ConfigStore;
 
 /**
  * An implementation of configuration store just retrieving the passed json object.
@@ -44,7 +43,7 @@ public class JsonConfigStore implements ConfigStore {
     if (config == null) {
       completionHandler.handle(Future.failedFuture("no configuration"));
     } else {
-      completionHandler.handle(Future.succeededFuture(JsonObjectHelper.toBuffer(config)));
+      completionHandler.handle(Future.succeededFuture(config.toBuffer()));
     }
   }
 }
