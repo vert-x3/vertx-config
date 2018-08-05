@@ -124,7 +124,6 @@ public class ConfigExamples {
   }
 
 
-
   public void http() {
     ConfigStoreOptions http = new ConfigStoreOptions()
       .setType("http")
@@ -161,6 +160,23 @@ public class ConfigExamples {
           .add(new JsonObject().put("pattern", "dir/*.properties")
             .put("format", "properties"))
         ));
+
+    ConfigStoreOptions dirWithRawData = new ConfigStoreOptions()
+      .setType("directory")
+      .setConfig(new JsonObject().put("path", "config")
+        .put("filesets", new JsonArray()
+          .add(new JsonObject().put("pattern", "dir/*json"))
+          .add(new JsonObject().put("pattern", "dir/*.properties")
+            .put("format", "properties").put("raw-data", true))
+        ));
+  }
+
+  public void propsWithRawData() {
+    ConfigStoreOptions propertyWithRawData = new ConfigStoreOptions()
+      .setFormat("properties")
+      .setType("file")
+      .setConfig(new JsonObject().put("path", "raw.properties").put("raw-data", true)
+      );
   }
 
   public void consul() {
