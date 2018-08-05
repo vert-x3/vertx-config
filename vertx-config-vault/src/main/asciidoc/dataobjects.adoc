@@ -8,18 +8,18 @@
 ++++
 '''
 
-[cols=">25%,^25%,50%"]
+[cols=">25%,75%"]
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
-|[[displayName]]`displayName`|`String`|-
-|[[id]]`id`|`String`|-
-|[[meta]]`meta`|`String`|-
-|[[noDefaultPolicy]]`noDefaultPolicy`|`Boolean`|-
-|[[noParent]]`noParent`|`Boolean`|-
-|[[numUses]]`numUses`|`Number (long)`|-
-|[[policies]]`policies`|`Array of String`|-
-|[[role]]`role`|`String`|-
-|[[ttl]]`ttl`|`String`|-
+|[[displayName]]`@displayName`|`String`|-
+|[[id]]`@id`|`String`|-
+|[[meta]]`@meta`|`String`|-
+|[[noDefaultPolicy]]`@noDefaultPolicy`|`Boolean`|-
+|[[noParent]]`@noParent`|`Boolean`|-
+|[[numUses]]`@numUses`|`Number (long)`|-
+|[[policies]]`@policies`|`Array of String`|-
+|[[role]]`@role`|`String`|-
+|[[ttl]]`@ttl`|`String`|-
 |===
 
