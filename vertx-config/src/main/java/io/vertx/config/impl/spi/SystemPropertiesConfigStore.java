@@ -37,6 +37,7 @@ import io.vertx.core.json.JsonObject;
 public class SystemPropertiesConfigStore implements ConfigStore, ConfigStoreFactory {
   private boolean cache;
   private JsonObject cached;
+  private Boolean rawData;
 
   @Override
   public String name() {
@@ -46,13 +47,14 @@ public class SystemPropertiesConfigStore implements ConfigStore, ConfigStoreFact
   @Override
   public ConfigStore create(Vertx vertx, JsonObject configuration) {
     cache = configuration.getBoolean("cache", true);
+    rawData = configuration.getBoolean("raw-data", false);
     return this;
   }
 
   @Override
   public void get(Handler<AsyncResult<Buffer>> completionHandler) {
     if (!cache || cached == null) {
-      cached = JsonObjectHelper.from(System.getProperties());
+      cached = JsonObjectHelper.from(System.getProperties(), rawData);
     }
     completionHandler.handle(Future.succeededFuture(Buffer.buffer(cached.encode())));
   }
