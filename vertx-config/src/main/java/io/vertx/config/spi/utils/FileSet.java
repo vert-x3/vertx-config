@@ -43,6 +43,7 @@ public class FileSet {
   private final ConfigProcessor processor;
   private final File root;
   private final Vertx vertx;
+  private final Boolean rawData;
 
   /**
    * Creates a new {@link FileSet} from a json object.
@@ -58,6 +59,7 @@ public class FileSet {
     if (this.pattern == null) {
       throw new IllegalArgumentException("Each file set needs to contain a `pattern`");
     }
+    this.rawData = set.getBoolean("raw-data", false);
     String format = set.getString("format", "json");
     this.processor = Processors.get(format);
     if (this.processor == null) {
@@ -105,7 +107,7 @@ public class FileSet {
               if (buffer.failed()) {
                 future.fail(buffer.cause());
               } else {
-                processor.process(vertx, null, buffer.result(), future.completer());
+                processor.process(vertx, new JsonObject().put("raw-data", rawData), buffer.result(), future.completer());
               }
             });
         } catch (RejectedExecutionException e) {

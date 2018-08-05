@@ -17,6 +17,9 @@
 
 package io.vertx.config.impl.spi;
 
+import io.vertx.config.ConfigRetriever;
+import io.vertx.config.ConfigRetrieverOptions;
+import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -100,6 +103,30 @@ public class FileConfigStoreTest extends ConfigStoreTestBase {
     store = factory.create(vertx, new JsonObject().put("path", "src/test/resources/file/array.json"));
     getJsonConfiguration(vertx, store, ar -> {
       assertThat(ar.failed()).isTrue();
+      async.complete();
+    });
+  }
+
+  @Test
+  public void testLoadingFromAPropertyFileUsingRawData(TestContext context) {
+    Async async = context.async();
+    retriever = ConfigRetriever.create(vertx, new ConfigRetrieverOptions()
+      .addStore(new ConfigStoreOptions()
+        .setFormat("properties")
+        .setType("file")
+        .setConfig(new JsonObject().put("path", "src/test/resources/file/raw.properties").put("raw-data", true))
+      )
+    );
+    retriever.getConfig(ar -> {
+      assertThat(ar.succeeded()).isTrue();
+      JsonObject json = ar.result();
+      assertThat(json.getString("key")).isEqualTo("value");
+      assertThat(json.getString("name")).isEqualTo("123456789012345678901234567890123456789012345678901234567890");
+      assertThat(json.getString("true")).isEqualTo("true");
+      assertThat(json.getString("false")).isEqualTo("false");
+      assertThat(json.getString("missing")).isNull();
+      assertThat(json.getString("int")).isEqualTo("5");
+      assertThat(json.getString("float")).isEqualTo("25.3");
       async.complete();
     });
   }

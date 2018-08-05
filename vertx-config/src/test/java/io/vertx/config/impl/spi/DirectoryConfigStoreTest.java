@@ -127,6 +127,32 @@ public class DirectoryConfigStoreTest extends ConfigStoreTestBase {
     });
   }
 
+  @Test
+  public void testLoadingASinglePropertiesFileWithRawData(TestContext context) {
+    Async async = context.async();
+    retriever = ConfigRetriever.create(vertx, new ConfigRetrieverOptions()
+      .addStore(new ConfigStoreOptions()
+        .setType("directory")
+        .setConfig(new JsonObject().put("path", "src/test/resources")
+          .put("filesets", new JsonArray().add(new JsonObject()
+            .put("format", "properties")
+            .put("pattern", "**/raw.properties")
+            .put("raw-data", true))))));
+
+    retriever.getConfig(ar -> {
+      assertThat(ar.succeeded()).isTrue();
+      JsonObject json = ar.result();
+      assertThat(json.getString("key")).isEqualTo("value");
+      assertThat(json.getString("name")).isEqualTo("123456789012345678901234567890123456789012345678901234567890");
+      assertThat(json.getString("true")).isEqualTo("true");
+      assertThat(json.getString("false")).isEqualTo("false");
+      assertThat(json.getString("missing")).isNull();
+      assertThat(json.getString("int")).isEqualTo("5");
+      assertThat(json.getString("float")).isEqualTo("25.3");
+      async.complete();
+    });
+  }
+
 
   @Test
   public void testWhenNoFileMatch(TestContext context) {

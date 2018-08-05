@@ -52,7 +52,7 @@ public class PropertiesConfigProcessor implements ConfigProcessor {
       Properties properties = new Properties();
       try {
         properties.load(stream);
-        JsonObject created = JsonObjectHelper.from(properties);
+        JsonObject created = JsonObjectHelper.from(properties, configuration.getBoolean("raw-data", false));
         future.complete(created);
       } catch (Exception e) {
         future.fail(e);

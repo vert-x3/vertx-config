@@ -90,7 +90,7 @@ public abstract class ConfigStoreTestBase {
       if (buffer.failed()) {
         handler.handle(Future.failedFuture(buffer.cause()));
       } else {
-        PROPERTIES.process(vertx, null, buffer.result(), handler);
+        PROPERTIES.process(vertx, new JsonObject(), buffer.result(), handler);
       }
     });
   }

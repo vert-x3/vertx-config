@@ -112,9 +112,13 @@ public class JsonObjectHelper {
   }
 
   public static JsonObject from(Properties props) {
+    return from(props, false);
+  }
+
+  public static JsonObject from(Properties props, boolean rawData) {
     JsonObject json = new JsonObject();
     props.stringPropertyNames()
-      .forEach(name -> put(json, name, props.getProperty(name), false));
+      .forEach(name -> put(json, name, props.getProperty(name), rawData));
     return json;
   }
 }
