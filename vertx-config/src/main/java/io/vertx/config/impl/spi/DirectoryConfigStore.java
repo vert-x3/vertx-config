@@ -42,21 +42,21 @@ public class DirectoryConfigStore implements ConfigStore {
 
   public DirectoryConfigStore(Vertx vertx, JsonObject configuration) {
     this.vertx = vertx;
-    String path = configuration.getString("path");
-    if (path == null) {
+    String thePath = configuration.getString("path");
+    if (thePath == null) {
       throw new IllegalArgumentException("The `path` configuration is required.");
     }
-    this.path = new File(path);
+    this.path = new File(thePath);
     if (this.path.isFile()) {
       throw new IllegalArgumentException("The `path` must not be a file");
     }
 
-    JsonArray filesets = configuration.getJsonArray("filesets");
-    if (filesets == null) {
+    JsonArray files = configuration.getJsonArray("filesets");
+    if (files == null) {
       throw new IllegalArgumentException("The `filesets` element is required.");
     }
 
-    for (Object o : filesets) {
+    for (Object o : files) {
       JsonObject json = (JsonObject) o;
       FileSet set = new FileSet(vertx, this.path, json);
       this.filesets.add(set);
