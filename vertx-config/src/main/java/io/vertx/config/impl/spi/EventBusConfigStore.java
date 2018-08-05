@@ -26,6 +26,8 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * An implementation of configuration store that receive the configuration from the event bus. It
  * listens on a given address and returns the last received configuration to the next enquiry.
@@ -35,18 +37,16 @@ import io.vertx.core.json.JsonObject;
 public class EventBusConfigStore implements ConfigStore {
 
   private final MessageConsumer<Object> consumer;
-  private Buffer last;
+  private AtomicReference<Buffer> last = new AtomicReference<>();
 
   public EventBusConfigStore(Vertx vertx, String address) {
     consumer = vertx.eventBus().consumer(address);
     consumer.handler(message -> {
       Object body = message.body();
-      synchronized (EventBusConfigStore.this) {
-        if (body instanceof JsonObject) {
-          last = Buffer.buffer(((JsonObject) body).encode());
-        } else if (body instanceof Buffer) {
-          last = (Buffer) body;
-        }
+      if (body instanceof JsonObject) {
+        last.set(((JsonObject) body).toBuffer());
+      } else if (body instanceof Buffer) {
+        last.set((Buffer) body);
       }
     });
   }
@@ -58,11 +58,7 @@ public class EventBusConfigStore implements ConfigStore {
 
   @Override
   public void get(Handler<AsyncResult<Buffer>> completionHandler) {
-    Buffer buffer;
-    synchronized (this) {
-      buffer = last;
-    }
-
+    Buffer buffer = last.get();
     if (buffer != null) {
       completionHandler.handle(Future.succeededFuture(buffer));
     } else {

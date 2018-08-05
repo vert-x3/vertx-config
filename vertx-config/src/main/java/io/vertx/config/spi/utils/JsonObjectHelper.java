@@ -31,8 +31,14 @@ import java.util.Properties;
  */
 public class JsonObjectHelper {
 
+  /**
+   * Deprecated. {@link JsonObject} now has a {@link JsonObject#toBuffer()} method.
+   *
+   * @deprecated use {@link JsonObject#toBuffer()} instead
+   */
+  @Deprecated
   public static Buffer toBuffer(JsonObject json) {
-    return Buffer.buffer(json.encode());
+    return json.toBuffer();
   }
 
   public static void put(JsonObject json, String name, String value, boolean rawData) {
