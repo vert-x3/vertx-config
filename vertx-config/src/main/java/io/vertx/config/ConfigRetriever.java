@@ -18,6 +18,7 @@
 package io.vertx.config;
 
 import io.vertx.codegen.annotations.CacheReturn;
+import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.config.impl.ConfigRetrieverImpl;
 import io.vertx.config.spi.ConfigStore;
@@ -27,6 +28,8 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.streams.ReadStream;
+
+import java.util.function.Function;
 
 /**
  * Defines a configuration retriever that read configuration from
@@ -104,6 +107,26 @@ public interface ConfigRetriever {
    * @param listener the listener
    */
   void listen(Handler<ConfigChange> listener);
+
+  /**
+   * Registers a handler called before every scan. This method is mostly used for logging purpose.
+   * @param function the function, must not be {@code null}
+   * @return the current config retriever
+   */
+  @Fluent
+  ConfigRetriever setBeforeScanHandler(Handler<Void> function);
+
+  /**
+   * Registers a handler that process the configuration before being injected into {@link #getConfig(Handler)} or {@link #listen(Handler)}. This allows
+   * the code to customize the configuration.
+   *
+   * @param processor the processor, must not be {@code null}. The method must not return {@code null}. The returned configuration is used. If the processor
+   *                  does not update the configuration, it must return the input configuration. If the processor throws an exception, the failure is passed
+   *                  to the {@link #getConfig(Handler)} handler.
+   * @return the current config retriever
+   */
+  @Fluent
+  ConfigRetriever setConfigurationProcessor(Function<JsonObject, JsonObject> processor);
 
   /**
    * @return the stream of configurations. It's single stream (unicast) and that delivers the last known config

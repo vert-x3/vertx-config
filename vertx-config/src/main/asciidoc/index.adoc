@@ -337,6 +337,15 @@ set of handlers you are notified:
 {@link examples.ConfigExamples#stream}
 ----
 
+== Processing the configuration
+
+You can configure a _processor_ that can validate and update the configuration. This is done using the
+{@link io.vertx.config.ConfigRetriever#setConfigurationProcessor(java.util.function.Function)} method.
+
+The prcessing must not return `null`. It takes the retrieved configuration and returns the processed one. If the processor
+does not update the configuration, it must return the input configuration. If the processor can throw an exception (for
+example for validation purpose).
+
 == Retrieving the configuration as a Future
 
 The {@link io.vertx.config.ConfigRetriever} provide a way to retrieve the configuration as a

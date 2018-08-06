@@ -34,6 +34,7 @@ import io.vertx.core.streams.ReadStream;
 
 import java.io.File;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -54,6 +55,9 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
   private final ConfigRetrieverOptions options;
 
   private JsonObject current = new JsonObject();
+
+  private Handler<Void> beforeScan;
+  private Function<JsonObject, JsonObject> processor;
 
   public ConfigRetrieverImpl(Vertx vertx, ConfigRetrieverOptions options) {
     this.vertx = vertx;
@@ -203,11 +207,26 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
   }
 
   @Override
+  public ConfigRetriever setBeforeScanHandler(Handler<Void> function) {
+    this.beforeScan = Objects.requireNonNull(function, "The function must not be `null`");
+    return this;
+  }
+
+  @Override
+  public ConfigRetriever setConfigurationProcessor(Function<JsonObject, JsonObject> processor) {
+    this.processor = Objects.requireNonNull(processor, "The processor must not be `null`");
+    return this;
+  }
+
+  @Override
   public ReadStream<JsonObject> configStream() {
     return streamOfConfiguration;
   }
 
   private void scan() {
+    if (beforeScan != null) {
+      beforeScan.handle(null);
+    }
     compute(ar -> {
       if (ar.failed()) {
         streamOfConfiguration.fail(ar.cause());
@@ -218,6 +237,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
           if (!current.equals(ar.result())) {
             JsonObject prev = current;
             current = ar.result();
+
             listeners.forEach(l -> l.handle(new ConfigChange(prev, current)));
             try {
               streamOfConfiguration.handle(current);
@@ -267,7 +287,12 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
         JsonObject json = new JsonObject();
         futures.forEach(future -> json.mergeIn((JsonObject) future.result(), true));
         try {
-          completionHandler.handle(Future.succeededFuture(json));
+          JsonObject computed = json;
+          if (processor != null) {
+            processConfigurationAndReport(completionHandler, json);
+          } else {
+            completionHandler.handle(Future.succeededFuture(computed));
+          }
         } catch (Throwable e) {
           // Report the error on the context exception handler.
           if (vertx.exceptionHandler() != null) {
@@ -278,6 +303,16 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
         }
       }
     });
+  }
+
+  private void processConfigurationAndReport(Handler<AsyncResult<JsonObject>> completionHandler, JsonObject json) {
+    JsonObject computed;
+    try {
+      computed = processor.apply(json);
+      completionHandler.handle(Future.succeededFuture(computed));
+    } catch (Throwable e) {
+      completionHandler.handle(Future.failedFuture(e));
+    }
   }
 
   /**

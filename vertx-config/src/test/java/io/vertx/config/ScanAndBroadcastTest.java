@@ -127,6 +127,45 @@ public class ScanAndBroadcastTest {
     await().untilAtomic(done, is(true));
   }
 
+  @Test
+  public void testScanningWithBeforeAndAfterFunctions() {
+    AtomicBoolean done = new AtomicBoolean();
+    AtomicInteger before = new AtomicInteger();
+    vertx.runOnContext(v -> {
+      retriever = ConfigRetriever.create(vertx,
+        new ConfigRetrieverOptions().setScanPeriod(1000).setStores(stores()))
+      .setBeforeScanHandler(x -> before.incrementAndGet())
+      .setConfigurationProcessor(json -> {
+        if (json.containsKey("some-key")) {
+          json.put("some-key", json.getString("some-key").toUpperCase());
+        }
+        return json;
+      });
+
+      AtomicReference<JsonObject> current = new AtomicReference<>();
+      retriever.getConfig(json -> {
+        retriever.listen(change -> {
+          if (current.get() != null && !current.get().equals(change.getPreviousConfiguration())) {
+            throw new IllegalStateException("Previous configuration not correct");
+          }
+          current.set(change.getNewConfiguration());
+        });
+        current.set(json.result());
+      });
+
+      assertWaitUntil(() -> current.get() != null, x -> {
+        current.set(null);
+        http.put("some-key", "some-value");
+        assertWaitUntil(() -> current.get() != null, x2 -> {
+          assertThat(current.get().getString("some-key")).isEqualTo("SOME-VALUE");
+          done.set(true);
+        });
+      });
+    });
+    await().untilAtomic(done, is(true));
+    assertThat(before.get()).isGreaterThanOrEqualTo(1);
+  }
+
   private void assertWaitUntil(Callable<Boolean> condition, Handler<AsyncResult<Void>> next) {
     assertWaitUntil(new AtomicInteger(), condition, next);
   }

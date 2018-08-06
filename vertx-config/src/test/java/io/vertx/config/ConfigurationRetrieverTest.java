@@ -103,6 +103,41 @@ public class ConfigurationRetrieverTest {
   }
 
   @Test
+  public void testLoadingWithProcessor(TestContext tc) {
+    retriever = ConfigRetriever.create(vertx,
+      addStores(new ConfigRetrieverOptions()))
+    .setConfigurationProcessor(json -> {
+      if (json.containsKey("foo")) {
+        json.put("foo", json.getString("foo").toUpperCase());
+      }
+      return json;
+    });
+    Async async = tc.async();
+
+    retriever.getConfig(ar -> {
+      ConfigChecker.check(ar);
+      assertThat(ar.result().getString("foo")).isEqualToIgnoringCase("BAR");
+      ConfigChecker.check(retriever.getCachedConfig());
+      async.complete();
+    });
+  }
+
+  @Test
+  public void testLoadingWithProcessorFailure(TestContext tc) {
+    retriever = ConfigRetriever.create(vertx,
+      addStores(new ConfigRetrieverOptions()))
+      .setConfigurationProcessor(json -> {
+        throw new RuntimeException("failed");
+      });
+    Async async = tc.async();
+
+    retriever.getConfig(ar -> {
+      tc.assertTrue(ar.failed());
+      async.complete();
+    });
+  }
+
+  @Test
   public void testLoadingWithFuturePolyglotVersion(TestContext tc) {
     retriever = ConfigRetriever.create(vertx,
       addStores(new ConfigRetrieverOptions()));
