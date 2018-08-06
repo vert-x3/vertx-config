@@ -98,6 +98,57 @@ Declared in this order (A, B), the resulting configuration would be:
 
 If you declare them in the reverse order (B, A), you will get: `{a:value, b:1, c:2}`.
 
+== Using the retrieve configuration
+
+The retrieve configuration allows:
+
+* configuring verticles,
+* configure ports, clients, locations and so on,
+* configuring Vert.x itself
+
+This section gives a few examples of usage.
+
+=== Configuring a single verticle
+
+The following example can be placed in the `start` method of a verticle. It retrieves the configuration (using the
+default stores), and configure an HTTP server with the content of the configuration.
+
+[source]
+----
+{@link examples.HttpGreetingVerticle#start()}
+----
+
+=== Configuring a set of verticles
+
+The following example configures 2 verticles using the configurations contained in the `verticles.json` file:
+
+[source]
+----
+{@link examples.VerticleDeployment#deploymentOfVerticles()}
+----
+
+=== Configuring Vert.x itself
+
+You can also configure Vert.x directly. For this, you need a temporary Vert.x instance used to retrieve the
+configuration. Then the actual instance is created:
+
+[source]
+----
+{@link examples.VerticleDeployment#configureVertx()}
+----
+
+=== Propagating configuration changes to the event bus
+
+Vert.x Config notifies you when the configuration changes. If you want to react to this event, you need to implement
+the reaction yourself. For instance, you can un-deploy and redeploy verticle or send the new configuration on the event bus.
+The following example shows this latter case. It sends the new configuration on the event bus. Interested verticles can
+listen for this address and update themselves:
+
+[source]
+----
+{@link examples.VerticleDeployment#propagateConfigurationInTheEventBus()}
+----
+
 == Available configuration stores
 
 The Config Retriever provides a set of configuration stores and formats.

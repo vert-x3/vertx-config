@@ -1,0 +1,10 @@
+{
+  "a": {
+    "message" : "hello",
+    "address": "greeting/hello"
+  },
+  "b": {
+    "message": "bonjour",
+    "address": "greeting/bonjour"
+  }
+}
