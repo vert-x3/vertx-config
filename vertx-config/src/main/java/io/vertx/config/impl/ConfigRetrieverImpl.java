@@ -329,7 +329,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
     private Handler<Void> endHandler;
 
     private JsonObject last;
-    private boolean paused = false;
+    private long demand = Long.MAX_VALUE;
 
     @Override
     public synchronized ReadStream<JsonObject> exceptionHandler(Handler<Throwable> handler) {
@@ -356,33 +356,45 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
 
     @Override
     public synchronized ReadStream<JsonObject> pause() {
-      paused = true;
+      demand = 0L;
       return this;
     }
 
     @Override
-    public ReadStream<JsonObject> resume() {
-      JsonObject conf;
-      Handler<JsonObject> succ;
-      synchronized (this) {
-        if (! paused) {
-          // Cannot resume a non paused stream
-          return this;
-        }
-
-        paused = false;
-        conf = last;
-        if (last != null) {
-          last = null;
-        }
-        succ = this.handler;
+    public synchronized ReadStream<JsonObject> resume() {
+      boolean check = demand == 0;
+      demand = Long.MAX_VALUE;
+      if (check) {
+        checkPending();
       }
-
-      if (conf != null && succ != null) {
-        vertx.runOnContext(v -> succ.handle(conf));
-      }
-
       return this;
+    }
+
+    @Override
+    public synchronized ReadStream<JsonObject> fetch(long amount) {
+      boolean check = demand == 0;
+      demand += amount;
+      if (demand < 0L) {
+        demand = Long.MAX_VALUE;
+      }
+      if (check) {
+        checkPending();
+      }
+      return this;
+    }
+
+    private void checkPending() {
+      Handler<JsonObject> succ = handler;
+      JsonObject conf = last;
+      last = null;
+      if (conf != null) {
+        if (demand != Long.MAX_VALUE) {
+          demand--;
+        }
+        if (succ != null) {
+          vertx.runOnContext(v -> succ.handle(conf));
+        }
+      }
     }
 
     @Override
@@ -392,15 +404,13 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
       return this;
     }
 
-    void handle(JsonObject conf) {
-      Handler<JsonObject> succ;
-      boolean isPaused;
-      synchronized (this) {
-        succ = handler;
-        isPaused = paused;
-        if (paused) {
-          last = conf;
-        }
+    synchronized void handle(JsonObject conf) {
+      Handler<JsonObject> succ = handler;
+      boolean isPaused = demand == 0;
+      if (isPaused) {
+        last = conf;
+      } else if (demand < Long.MAX_VALUE) {
+        demand--;
       }
 
       if (!isPaused && succ != null) {

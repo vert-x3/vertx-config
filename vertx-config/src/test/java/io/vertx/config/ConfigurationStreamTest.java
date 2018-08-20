@@ -20,6 +20,7 @@ package io.vertx.config;
 import io.vertx.config.impl.spi.ConfigChecker;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.streams.ReadStream;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RepeatRule;
@@ -30,6 +31,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -110,7 +112,7 @@ public class ConfigurationStreamTest {
   @Test
   public void testPauseResumeCycles(TestContext tc) {
     retriever = ConfigRetriever.create(vertx,
-        addStores(new ConfigRetrieverOptions()));
+        addStores(new ConfigRetrieverOptions().setScanPeriod(500)));
     Async async = tc.async();
     AtomicInteger steps = new AtomicInteger();
     retriever.configStream()
@@ -128,4 +130,37 @@ public class ConfigurationStreamTest {
         });
   }
 
+  @Test
+  public void testFetch(TestContext tc) {
+    retriever = ConfigRetriever.create(vertx,
+      addStores(new ConfigRetrieverOptions().setScanPeriod(500)));
+    Async async = tc.async();
+    AtomicInteger steps = new AtomicInteger();
+    ReadStream<JsonObject> stream = retriever.configStream();
+    stream.pause();
+    stream.fetch(3);
+    AtomicBoolean paused = new AtomicBoolean();
+    stream
+      .handler(conf -> {
+        String foo = conf.getString("foo");
+        tc.assertFalse(paused.get());
+        int step = steps.getAndIncrement();
+        if (step == 0) {
+          tc.assertEquals(foo, "bar");
+        } else {
+          tc.assertEquals(foo, "bar" + step);
+        }
+        if (step < 2) {
+        } else if (step < 6) {
+          paused.set(true);
+          vertx.setTimer(1000, id -> {
+            paused.set(false);
+            stream.fetch(1);
+          });
+        } else {
+          async.complete();
+        }
+        System.setProperty("foo", "bar" + (step + 1));
+      });
+  }
 }
