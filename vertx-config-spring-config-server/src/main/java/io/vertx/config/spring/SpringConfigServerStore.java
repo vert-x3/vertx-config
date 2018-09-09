@@ -121,7 +121,7 @@ class SpringConfigServerStore implements ConfigStore {
       handler.handle(Future.failedFuture("Invalid configuration server response, property sources missing"));
     } else {
       JsonObject configuration = new JsonObject();
-      for (int i = 0; i < sources.size(); i++) {
+      for (int i = sources.size() - 1; i >= 0; i--) {
         JsonObject source = sources.getJsonObject(i);
         JsonObject content = source.getJsonObject("source");
         configuration = configuration.mergeIn(content);

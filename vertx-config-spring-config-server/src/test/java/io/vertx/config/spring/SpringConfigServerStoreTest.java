@@ -87,7 +87,7 @@ public class SpringConfigServerStoreTest {
       JsonObject config = json.result();
 
       assertThat(config.getString("bar")).isEqualToIgnoringCase("spam");
-      assertThat(config.getString("foo")).isEqualToIgnoringCase("baz");
+      assertThat(config.getString("foo")).isEqualToIgnoringCase("from foo development");
       assertThat(config.getString("info.description")).isEqualToIgnoringCase("Spring Cloud Samples");
 
       async.complete();
@@ -116,7 +116,7 @@ public class SpringConfigServerStoreTest {
       assertThat(config.getString("eureka.password")).isEqualToIgnoringCase("password");
       assertThat(config.getString("spring.data.mongodb.uri")).isEqualToIgnoringCase("${vcap.services.${PREFIX:}mongodb.credentials.uri}");
       assertThat(config.getString("eureka.client.serviceUrl.defaultZone"))
-          .isEqualToIgnoringCase("http://localhost:8761/eureka/");
+        .isEqualToIgnoringCase("${vcap.services.${PREFIX:}eureka.credentials.uri:http://user:${eureka.password:}@${PREFIX:}eureka.${application.domain:cfapps.io}}/eureka/");
 
       async.complete();
     });
