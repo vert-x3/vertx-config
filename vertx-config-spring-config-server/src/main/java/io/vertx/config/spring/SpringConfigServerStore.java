@@ -116,17 +116,33 @@ class SpringConfigServerStore implements ConfigStore {
   }
 
   private void parse(JsonObject body, Handler<AsyncResult<Buffer>> handler) {
+    if (this.path.endsWith(".json")) {
+      parseFromJson(body, handler);
+    } else {
+      parseFromStandard(body, handler);
+    }
+  }
+
+  private void parseFromStandard(JsonObject body, Handler<AsyncResult<Buffer>> handler) {
     JsonArray sources = body.getJsonArray("propertySources");
     if (sources == null) {
       handler.handle(Future.failedFuture("Invalid configuration server response, property sources missing"));
     } else {
       JsonObject configuration = new JsonObject();
-      for (int i = 0; i < sources.size(); i++) {
+      for (int i = sources.size() - 1; i >= 0; i--) {
         JsonObject source = sources.getJsonObject(i);
         JsonObject content = source.getJsonObject("source");
         configuration = configuration.mergeIn(content);
       }
       handler.handle(Future.succeededFuture(Buffer.buffer(configuration.encode())));
+    }
+  }
+
+  private void parseFromJson(JsonObject body, Handler<AsyncResult<Buffer>> handler) {
+    if (body == null) {
+      handler.handle(Future.failedFuture("Invalid configuration server response, property sources missing"));
+    } else {
+      handler.handle(Future.succeededFuture(Buffer.buffer(body.encode())));
     }
   }
 }
