@@ -68,7 +68,6 @@ public class PropertiesAsJsonStoreProcessorTest {
 
     retriever.getConfig(ar -> {
       JsonObject config = ar.result();
-      System.out.println(config.encodePrettily());
       assertThat(config).isEqualTo(expected);
       async.complete();
     });
