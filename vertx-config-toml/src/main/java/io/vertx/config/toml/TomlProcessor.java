@@ -8,9 +8,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.util.Map;
@@ -35,8 +32,6 @@ public final class TomlProcessor implements ConfigProcessor {
   public TomlProcessor() {
   }
 
-  @NotNull
-  @Contract(pure = true)
   @Override
   public final String name() {
     return "toml";
@@ -44,10 +39,10 @@ public final class TomlProcessor implements ConfigProcessor {
 
   @Override
   public final void process(
-    @NotNull Vertx vertx,
-    @Nullable JsonObject configuration,
-    @NotNull Buffer input,
-    @NotNull Handler<AsyncResult<JsonObject>> handler
+    Vertx vertx,
+    JsonObject configuration,
+    Buffer input,
+    Handler<AsyncResult<JsonObject>> handler
   ) {
     Objects.requireNonNull(vertx, "vertx cannot be null");
     Objects.requireNonNull(input, "input cannot be null");

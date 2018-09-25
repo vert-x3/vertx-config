@@ -11,8 +11,6 @@ import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -28,17 +26,11 @@ import java.util.Objects;
 @RunWith(VertxUnitRunner.class)
 public final class TomlProcessorTest {
 
-  @NotNull
   private static final String EMPTY_FILE_PATH = "src/test/resources/empty.toml";
-  @NotNull
   private static final String NON_EXISTENT_PATH = "src/test/resources/does-not-exist.toml";
-  @NotNull
   private static final String EXAMPLE_PATH = "src/test/resources/example.toml";
-  @NotNull
   private static final JsonObject EXAMPLE_JSON = loadJson("src/test/resources/example.json");
-  @NotNull
   private static final String COMPLEX_EXAMPLE_PATH = "src/test/resources/complex-example.toml";
-  @NotNull
   private static final String BAD_FILE_PATH = "src/test/resources/bad.toml";
 
   @Rule
@@ -169,10 +161,8 @@ public final class TomlProcessorTest {
   }
 
 
-  @Contract(pure = true)
-  @NotNull
   private static ConfigStoreOptions createFileStoreOptions(
-          @NotNull String path
+          String path
   ) {
     Objects.requireNonNull(path);
     return new ConfigStoreOptions()
@@ -181,9 +171,7 @@ public final class TomlProcessorTest {
             .setConfig(new JsonObject().put("path", path));
   }
 
-  @Contract(pure = true)
-  @NotNull
-  private static JsonObject loadJson(@NotNull String path) {
+  private static JsonObject loadJson(String path) {
     Objects.requireNonNull(path);
     byte[] bytes;
     try {
