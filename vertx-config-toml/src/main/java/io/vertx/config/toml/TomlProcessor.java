@@ -29,9 +29,6 @@ import java.util.Objects;
  */
 public final class TomlProcessor implements ConfigProcessor {
 
-  public TomlProcessor() {
-  }
-
   @Override
   public final String name() {
     return "toml";
