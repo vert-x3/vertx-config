@@ -1,5 +1,7 @@
 = Vert.x Config
 
+image:https://travis-ci.org/vert-x3/vertx-config.svg?branch=master["Build Status",link="https://travis-ci.org/vert-x3/vertx-config"]
+
 Vert.x Config provide an extensible way to configure Vert.x applications:
 
 * retrieve configuration from anywhere (file, directory, HTTP location, Git repository, Zookeeper...)
