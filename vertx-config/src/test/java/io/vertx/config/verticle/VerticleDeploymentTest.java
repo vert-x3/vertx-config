@@ -8,9 +8,12 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.Repeat;
+import io.vertx.ext.unit.junit.RepeatRule;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -18,6 +21,9 @@ import org.junit.runner.RunWith;
 public class VerticleDeploymentTest {
 
   private Vertx vertx;
+
+  @Rule
+  public RepeatRule rule = new RepeatRule();
 
   @Before
   public void setUp() {
@@ -30,6 +36,7 @@ public class VerticleDeploymentTest {
   }
 
   @Test
+  @Repeat(100)
   public void testDeploymentOfVerticles(TestContext ctxt) {
     Async async1 = ctxt.async();
     Async async2 = ctxt.async();
@@ -40,22 +47,40 @@ public class VerticleDeploymentTest {
       ctxt.assertTrue(json.succeeded());
       JsonObject a = json.result().getJsonObject("a");
       JsonObject b = json.result().getJsonObject("b");
-      vertx.deployVerticle(GreetingVerticle.class.getName(), new DeploymentOptions().setConfig(a), ctxt.asyncAssertSuccess());
-      vertx.deployVerticle(GreetingVerticle.class.getName(), new DeploymentOptions().setConfig(b), ctxt.asyncAssertSuccess());
 
-      vertx.eventBus().<String>send("greeting/hello", "", response -> {
-        ctxt.assertTrue(response.succeeded());
-        String body = response.result().body();
-        ctxt.assertEquals(body, "hello");
-        async1.complete();
+      vertx.deployVerticle(GreetingVerticle.class.getName(), new DeploymentOptions().setConfig(a), d1 -> {
+        if (d1.failed()) {
+          ctxt.fail(d1.cause());
+        }
+        vertx.deployVerticle(GreetingVerticle.class.getName(), new DeploymentOptions().setConfig(b), d2 -> {
+          if (d2.failed()) {
+            ctxt.fail(d2.cause());
+          }
+
+          vertx.eventBus().<String>send("greeting/hello", "", response -> {
+            if (response.failed()) {
+              ctxt.fail(response.cause());
+              return;
+            }
+            ctxt.assertTrue(response.succeeded());
+            String body = response.result().body();
+            ctxt.assertEquals(body, "hello");
+            async1.complete();
+          });
+
+          vertx.eventBus().<String>send("greeting/bonjour", "", response -> {
+            if (response.failed()) {
+              ctxt.fail(response.cause());
+              return;
+            }
+            ctxt.assertTrue(response.succeeded());
+            String body = response.result().body();
+            ctxt.assertEquals(body, "bonjour");
+            async2.complete();
+          });
+        });
       });
 
-      vertx.eventBus().<String>send("greeting/bonjour", "", response -> {
-        ctxt.assertTrue(response.succeeded());
-        String body = response.result().body();
-        ctxt.assertEquals(body, "bonjour");
-        async2.complete();
-      });
     });
   }
 
