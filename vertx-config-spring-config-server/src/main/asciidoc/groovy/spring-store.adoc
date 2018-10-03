@@ -15,12 +15,12 @@ _dependencies_ section of your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-config-spring-config-server</artifactId>
-  <version>3.5.3</version>
+  <version>3.5.4</version>
 </dependency>
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-config</artifactId>
-  <version>3.5.3</version>
+  <version>3.5.4</version>
 </dependency>
 ----
 
@@ -28,8 +28,8 @@ _dependencies_ section of your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-config:3.5.3'
-compile 'io.vertx:vertx-config-spring-config-server:3.5.3'
+compile 'io.vertx:vertx-config:3.5.4'
+compile 'io.vertx:vertx-config-spring-config-server:3.5.4'
 ----
 
 ==== Configuring the store
@@ -57,9 +57,7 @@ def retriever = ConfigRetriever.create(vertx, [
 
 Configurable attributes are:
 
-* `url` - the `url` to retrieve the configuration (mandatory), supports two type of formats:
-** `/{application}/{environment}` which produces response with separated propertySources
-** `/{application}-{environment}.json` which produces response as JSON with unique fields and resolved Spring placeholders
+* `url` - the `url` to retrieve the configuration (mandatory)
 * `timeout` - the timeout (in milliseconds) to retrieve the configuration, 3000 by default
 * `user` - the `user` (no authentication by default)
 * `password` - the `password`
