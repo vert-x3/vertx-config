@@ -24,19 +24,15 @@ import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@RunWith(PowerMockRunner.class)
-@PowerMockRunnerDelegate(VertxUnitRunner.class)
-@PrepareForTest(EnvVariablesConfigStore.class)
+@RunWith(VertxUnitRunner.class)
 public class RawDataFalseEnvVariablesConfigStoreTest extends ConfigStoreTestBase {
   private static final Map<String, String> ENV = new HashMap<>();
   private static final String KEY_1 = "SOME_NUMBER";
@@ -44,15 +40,14 @@ public class RawDataFalseEnvVariablesConfigStoreTest extends ConfigStoreTestBase
   private static final String KEY_2 = "SOME_BOOLEAN";
   private static final String VAL_2 = "true";
 
-  static {
-    ENV.put(KEY_1, VAL_1);
-    ENV.put(KEY_2, VAL_2);
-  }
+  @Rule
+  public final EnvironmentVariables environmentVariables
+    = new EnvironmentVariables();
 
   @Before
   public void init() {
-    PowerMockito.mockStatic(System.class);
-    PowerMockito.when(System.getenv()).thenReturn(ENV);
+    environmentVariables.set(KEY_1, VAL_1);
+    environmentVariables.set(KEY_2, VAL_2);
     factory = new EnvVariablesConfigStore();
     store = factory.create(vertx, new JsonObject().put("raw-data", false));
   }
