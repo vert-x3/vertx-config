@@ -49,7 +49,7 @@ public class HierarchicalPropertiesStoreProcessorTest {
             .setFormat("properties")
             .setConfig(
               new JsonObject()
-                .put("hierarchical-data", false)
+                .put("hierarchical-data", true)
                 .put("path", "src/test/resources/file/hierarchical.properties")))
     );
 
