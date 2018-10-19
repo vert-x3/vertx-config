@@ -58,7 +58,7 @@ public class PropertiesConfigProcessor implements ConfigProcessor {
 
   @Override
   public void process(Vertx vertx, JsonObject configuration, Buffer input, Handler<AsyncResult<JsonObject>> handler) {
-    Boolean hierarchicalData = configuration.getBoolean("hierarchical");
+    Boolean hierarchicalData = configuration.getBoolean("hierarchical", false);
     PropertiesReader reader = hierarchicalData ? HIERARCHICAL_READER : FLAT_READER;
     // I'm not sure the executeBlocking is really required here as the
     // buffer is in memory,
