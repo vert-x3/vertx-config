@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Евгений Уткин (evgeny.utkin@mediascope.net)
  */
 @RunWith(VertxUnitRunner.class)
-public class PropertiesAsJsonStoreProcessorTest {
+public class HierarchicalPropertiesStoreProcessorTest {
 
   ConfigRetriever retriever;
   private Vertx vertx;
@@ -46,10 +46,10 @@ public class PropertiesAsJsonStoreProcessorTest {
         .addStore(
           new ConfigStoreOptions()
             .setType("file")
-            .setFormat("properties-as-json")
+            .setFormat("hierarchical-properties")
             .setConfig(
               new JsonObject()
-                .put("path", "src/test/resources/file/jsonable.properties")))
+                .put("path", "src/test/resources/file/hierarchical.properties")))
     );
 
     JsonObject expected = new JsonObject()
@@ -62,9 +62,6 @@ public class PropertiesAsJsonStoreProcessorTest {
         .put("integer", new JsonObject().put("values", new JsonArray().add(1).add(2).add(3)))
       )
       .put("single", 0);
-
-    System.out.println(expected.encodePrettily());
-
 
     retriever.getConfig(ar -> {
       JsonObject config = ar.result();
