@@ -179,6 +179,14 @@ public class ConfigExamples {
       );
   }
 
+  public void propsWitHierarchicalStructure() {
+    ConfigStoreOptions propertyWitHierarchical = new ConfigStoreOptions()
+      .setFormat("hierarchical-properties")
+      .setType("file")
+      .setConfig(new JsonObject().put("path", "hierarchical.properties")
+      );
+  }
+
   public void consul() {
     ConfigStoreOptions consul = new ConfigStoreOptions()
       .setType("consul")

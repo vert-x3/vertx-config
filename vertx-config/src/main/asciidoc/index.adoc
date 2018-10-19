@@ -300,6 +300,17 @@ retrieved using `config.getString(key)`.
 {@link examples.ConfigExamples#propsWithRawData()}
 ----
 
+=== Properties file with hierarchical structure
+
+Vert.x Config can read properties file. Some properties configuration maybe is hierarchical in nature.
+This type of store allows you to convert the configuration to a json object while maintaining this hierarchy,
+in contrast to the previous method with a flat structure
+
+[source, $lang]
+----
+{@link examples.ConfigExamples#propsWitHierarchicalStructure()}
+----
+
 == Listening for configuration changes
 
 The Configuration Retriever periodically retrieve the configuration, and if the outcome

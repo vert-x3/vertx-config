@@ -52,11 +52,11 @@ import static java.util.stream.Collectors.toList;
  *
  * @author Eugene Utkin (evgeny.utkin@mediascope.net)
  */
-public class PropertiesAsJsonStoreProcessor implements ConfigProcessor {
+public class HierarchicalPropertiesStoreProcessor implements ConfigProcessor {
 
   @Override
   public String name() {
-    return "properties-as-json";
+    return "hierarchical-properties";
   }
 
   @Override
