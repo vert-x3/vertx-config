@@ -300,10 +300,9 @@ retrieved using `config.getString(key)`.
 {@link examples.ConfigExamples#propsWithRawData()}
 ----
 
-=== Properties file with hierarchical structure
-
-Vert.x Config can read properties file. Some properties configuration maybe is hierarchical in nature.
-This type of store allows you to convert the configuration to a json object while maintaining this hierarchy,
+Some properties configuration maybe is hierarchical in nature.
+When reading such a file, you can pass the `hierarchical` attribute to
+indicate to Vert.x to convert the configuration to a json object while maintaining this hierarchy,
 in contrast to the previous method with a flat structure.
 
 Example:
