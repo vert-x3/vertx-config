@@ -179,6 +179,27 @@ public class ConfigExamples {
       );
   }
 
+  public void propsWitHierarchicalStructure() {
+    ConfigStoreOptions propertyWitHierarchical = new ConfigStoreOptions()
+      .setFormat("properties")
+      .setType("file")
+      .setConfig(new JsonObject().put("path", "hierarchical.properties").put("hierarchical", true)
+      );
+    ConfigRetrieverOptions options = new ConfigRetrieverOptions()
+      .addStore(propertyWitHierarchical);
+
+    ConfigRetriever configRetriever = ConfigRetriever.create(Vertx.vertx(), options);
+
+    configRetriever.configStream().handler(config -> {
+      String host = config.getJsonObject("server").getString("host");
+      Integer port = config.getJsonObject("server").getInteger("port");
+      JsonArray multiple = config.getJsonObject("multiple").getJsonArray("values");
+      for (int i = 0; i < multiple.size(); i++) {
+        Integer value = multiple.getInteger(i);
+      }
+    });
+  }
+
   public void consul() {
     ConfigStoreOptions consul = new ConfigStoreOptions()
       .setType("consul")
