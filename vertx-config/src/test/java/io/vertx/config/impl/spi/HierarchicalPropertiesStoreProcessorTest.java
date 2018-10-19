@@ -46,9 +46,10 @@ public class HierarchicalPropertiesStoreProcessorTest {
         .addStore(
           new ConfigStoreOptions()
             .setType("file")
-            .setFormat("hierarchical-properties")
+            .setFormat("properties")
             .setConfig(
               new JsonObject()
+                .put("hierarchical-data", false)
                 .put("path", "src/test/resources/file/hierarchical.properties")))
     );
 

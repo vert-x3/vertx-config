@@ -181,9 +181,9 @@ public class ConfigExamples {
 
   public void propsWitHierarchicalStructure() {
     ConfigStoreOptions propertyWitHierarchical = new ConfigStoreOptions()
-      .setFormat("hierarchical-properties")
+      .setFormat("properties")
       .setType("file")
-      .setConfig(new JsonObject().put("path", "hierarchical.properties")
+      .setConfig(new JsonObject().put("path", "hierarchical.properties").put("hierarchical", true)
       );
     ConfigRetrieverOptions options = new ConfigRetrieverOptions()
       .addStore(propertyWitHierarchical);
