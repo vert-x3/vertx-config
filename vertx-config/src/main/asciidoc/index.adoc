@@ -304,7 +304,17 @@ retrieved using `config.getString(key)`.
 
 Vert.x Config can read properties file. Some properties configuration maybe is hierarchical in nature.
 This type of store allows you to convert the configuration to a json object while maintaining this hierarchy,
-in contrast to the previous method with a flat structure
+in contrast to the previous method with a flat structure.
+
+Example:
+
+....
+server.host=localhost
+server.port=8080
+multiple.values=1,2,3
+....
+
+Get values:
 
 [source, $lang]
 ----
