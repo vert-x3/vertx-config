@@ -24,16 +24,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Options to configure the {@code ConfigRetriever}.
+ *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 @DataObject(generateConverter = true)
 public class ConfigRetrieverOptions {
 
+  /**
+   * The default scan period in ms.
+   */
   private static final long SCAN_PERIOD_DEFAULT = 5000L;
 
   private long scanPeriod = SCAN_PERIOD_DEFAULT;
 
   private List<ConfigStoreOptions> stores = new ArrayList<>();
+
   private boolean includeDefaultStores = false;
 
   public ConfigRetrieverOptions() {
@@ -55,28 +61,55 @@ public class ConfigRetrieverOptions {
     return json;
   }
 
+  /**
+   * @return whether or not the default stored are included in the configuration.
+   */
   public boolean isIncludeDefaultStores() {
     return includeDefaultStores;
   }
 
+  /**
+   * Enables or disables the inclusion of the default stored in the configuration.
+   *
+   * @param includeDefaultStores {@code true} to include the default stores.
+   * @return the current {@link ConfigStoreOptions}
+   */
   public ConfigRetrieverOptions setIncludeDefaultStores(boolean includeDefaultStores) {
     this.includeDefaultStores = includeDefaultStores;
     return this;
   }
 
+  /**
+   * @return the scan period in ms.
+   */
   public long getScanPeriod() {
     return scanPeriod;
   }
 
+  /**
+   * Configures the scan period, in ms. This is the time amount between two checks of the configuration updates.
+   *
+   * @param scanPeriod the scan period in ms
+   * @return the current {@link ConfigStoreOptions}
+   */
   public ConfigRetrieverOptions setScanPeriod(long scanPeriod) {
     this.scanPeriod = scanPeriod;
     return this;
   }
 
+  /**
+   * @return the current list of stores.
+   */
   public List<ConfigStoreOptions> getStores() {
     return stores;
   }
 
+  /**
+   * Sets the configuration stores.
+   *
+   * @param stores the list of stores.
+   * @return the current {@link ConfigStoreOptions}
+   */
   public ConfigRetrieverOptions setStores(List<ConfigStoreOptions> stores) {
     if (stores == null) {
       this.stores = new ArrayList<>();
@@ -86,6 +119,12 @@ public class ConfigRetrieverOptions {
     return this;
   }
 
+  /**
+   * Adds a store to the list of stores.
+   *
+   * @param options the store configuration
+   * @return the current {@link ConfigStoreOptions}
+   */
   public ConfigRetrieverOptions addStore(ConfigStoreOptions options) {
     getStores().add(options);
     return this;
