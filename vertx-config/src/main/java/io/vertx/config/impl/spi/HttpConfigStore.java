@@ -23,6 +23,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientResponse;
 
 /**
  * A configuration store retrieving the configuration from a HTTP location
@@ -45,13 +46,16 @@ public class HttpConfigStore implements ConfigStore {
 
   @Override
   public void get(Handler<AsyncResult<Buffer>> completionHandler) {
-    client.get(port, host, path, response ->
+    client.getNow(port, host, path, ar -> {
+      if (ar.succeeded()) {
+        HttpClientResponse response = ar.result();
         response
-            .exceptionHandler(t -> completionHandler.handle(Future.failedFuture(t)))
-            .bodyHandler(buffer -> completionHandler.handle(Future.succeededFuture(buffer)))
-    )
-        .exceptionHandler(t -> completionHandler.handle(Future.failedFuture(t)))
-        .end();
+          .exceptionHandler(t -> completionHandler.handle(Future.failedFuture(t)))
+          .bodyHandler(buffer -> completionHandler.handle(Future.succeededFuture(buffer)));
+      } else {
+        completionHandler.handle(Future.failedFuture(ar.cause()));
+      }
+    });
   }
 
   @Override
