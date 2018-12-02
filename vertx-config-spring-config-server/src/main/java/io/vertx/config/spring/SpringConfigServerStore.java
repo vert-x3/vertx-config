@@ -25,6 +25,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
+import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.config.spi.ConfigStore;
@@ -95,18 +96,22 @@ class SpringConfigServerStore implements ConfigStore {
 
   @Override
   public void get(Handler<AsyncResult<Buffer>> completionHandler) {
-    HttpClientRequest request = client.get(path, response -> {
-      if (response.statusCode() != 200) {
-        completionHandler.handle(Future.failedFuture("Invalid response from server: " + response.statusCode() + " - "
+    HttpClientRequest request = client.get(path, ar -> {
+      if (ar.succeeded()) {
+        HttpClientResponse response = ar.result();
+        if (response.statusCode() != 200) {
+          completionHandler.handle(Future.failedFuture("Invalid response from server: " + response.statusCode() + " - "
             + response.statusMessage()));
-      } else {
-        response
+        } else {
+          response
             .exceptionHandler(t -> completionHandler.handle(Future.failedFuture(t)))
             .bodyHandler(buffer -> parse(buffer.toJsonObject(), completionHandler));
+        }
+      } else {
+        completionHandler.handle(Future.failedFuture(ar.cause()));
       }
     })
-        .setTimeout(timeout)
-        .exceptionHandler(t -> completionHandler.handle(Future.failedFuture(t)));
+      .setTimeout(timeout);
 
     if (authHeaderValue != null) {
       request.putHeader("Authorization", authHeaderValue);
