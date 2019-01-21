@@ -207,8 +207,8 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
   }
 
   @Override
-  public ConfigRetriever setBeforeScanHandler(Handler<Void> function) {
-    this.beforeScan = Objects.requireNonNull(function, "The function must not be `null`");
+  public ConfigRetriever setBeforeScanHandler(Handler<Void> handler) {
+    this.beforeScan = Objects.requireNonNull(handler, "The handler must not be `null`");
     return this;
   }
 
