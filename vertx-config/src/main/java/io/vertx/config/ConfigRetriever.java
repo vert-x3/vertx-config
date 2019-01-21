@@ -110,11 +110,11 @@ public interface ConfigRetriever {
 
   /**
    * Registers a handler called before every scan. This method is mostly used for logging purpose.
-   * @param function the function, must not be {@code null}
+   * @param handler the handler, must not be {@code null}
    * @return the current config retriever
    */
   @Fluent
-  ConfigRetriever setBeforeScanHandler(Handler<Void> function);
+  ConfigRetriever setBeforeScanHandler(Handler<Void> handler);
 
   /**
    * Registers a handler that process the configuration before being injected into {@link #getConfig(Handler)} or {@link #listen(Handler)}. This allows
