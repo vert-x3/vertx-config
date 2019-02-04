@@ -14,9 +14,9 @@ It:
 
 The library is structured around:
 
-* a*Config Retriever** instantiated and used by the Vert.x application. It
+* a **Config Retriever** instantiated and used by the Vert.x application. It
 configures a set of configuration store
-**Configuration store** defines a location from where the configuration data is read and also a format (JSON by default)
+* a **Configuration store** defines a location from where the configuration data is read and also a format (JSON by default)
 
 The configuration is retrieved as a JSON Object.
 
@@ -253,6 +253,31 @@ properties.
 [source, $lang]
 ----
 {@link examples.ConfigExamples#http2()}
+----
+
+If ssl/tls connection is used, trust-relations must be specified in the HTTP configuration store properties. Either one trusts all servers ore a trus store is specified.
+
+==== Trust all
+
+This configuration is not recommended and only mentioned for completeness.
+
+[source, $lang]
+----
+put("trustAll", true)
+----
+
+==== Usage of JKS trust store
+
+[source, $lang]
+----
+put("trustStoreOptions", new JsonObject().put("path", path).put("password", password))
+----
+
+==== Usage of Pfx trust store
+
+[source, $lang]
+----
+put("pfxTrustStoreOptions", new JsonObject().put("path", path).put("password",password))
 ----
 
 === Event Bus
