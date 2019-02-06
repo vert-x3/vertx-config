@@ -26,11 +26,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Stream;
@@ -46,9 +42,9 @@ import static java.util.stream.Collectors.toList;
  */
 public class PropertiesConfigProcessor implements ConfigProcessor {
 
-  private final static PropertiesReader FLAT_READER = new FlatPropertiesReader();
+  private static final PropertiesReader FLAT_READER = new FlatPropertiesReader();
 
-  private final static PropertiesReader HIERARCHICAL_READER = new HierarchicalPropertiesReader();
+  private static final PropertiesReader HIERARCHICAL_READER = new HierarchicalPropertiesReader();
 
   @Override
   public String name() {
@@ -102,6 +98,12 @@ public class PropertiesConfigProcessor implements ConfigProcessor {
 
     private JsonObject toJson(Stream<String> stream) {
       return stream
+        .filter(line -> {
+          line = line.trim();
+          return !line.isEmpty()
+            && !line.startsWith("#")
+            && !line.startsWith("!");
+        })
         .map(line -> line.split("="))
         .map(raw -> {
           String property = raw[0].trim();
@@ -119,7 +121,9 @@ public class PropertiesConfigProcessor implements ConfigProcessor {
     }
 
     private JsonObject toJson(List<String> paths, Object value) {
-      if (paths.size() == 0) return new JsonObject();
+      if (paths.size() == 0) {
+        return new JsonObject();
+      }
       if (paths.size() == 1) {
         return new JsonObject().put(paths.get(0), value);
       }
