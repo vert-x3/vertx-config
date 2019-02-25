@@ -202,7 +202,7 @@ public class GitConfigStore implements ConfigStore {
       future -> {
         PullResult call;
         try {
-          call = git.pull().setRemote(remote).setRemoteBranchName(branch).call();
+          call = git.pull().setRemote(remote).setRemoteBranchName(branch).setCredentialsProvider(credentialProvider).call();
         } catch (GitAPIException e) {
           future.fail(e);
           return;
