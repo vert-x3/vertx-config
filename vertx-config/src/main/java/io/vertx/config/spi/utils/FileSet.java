@@ -21,8 +21,8 @@ import io.vertx.config.spi.ConfigProcessor;
 import io.vertx.core.*;
 import io.vertx.core.impl.launcher.commands.FileSelector;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import io.vertx.core.impl.logging.Logger;
+import io.vertx.core.impl.logging.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
