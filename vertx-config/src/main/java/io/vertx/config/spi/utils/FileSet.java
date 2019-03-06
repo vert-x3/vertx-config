@@ -107,7 +107,7 @@ public class FileSet {
               if (buffer.failed()) {
                 future.fail(buffer.cause());
               } else {
-                processor.process(vertx, new JsonObject().put("raw-data", rawData), buffer.result(), future.completer());
+                processor.process(vertx, new JsonObject().put("raw-data", rawData), buffer.result(), future);
               }
             });
         } catch (RejectedExecutionException e) {
