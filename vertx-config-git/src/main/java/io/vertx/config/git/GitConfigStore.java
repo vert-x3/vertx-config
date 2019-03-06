@@ -219,7 +219,7 @@ public class GitConfigStore implements ConfigStore {
           }
         }
       },
-      result.completer()
+      result
     );
     return result;
   }
@@ -234,7 +234,7 @@ public class GitConfigStore implements ConfigStore {
           fut.fail(e);
         }
       },
-      result.completer());
+      result);
     return result;
   }
 

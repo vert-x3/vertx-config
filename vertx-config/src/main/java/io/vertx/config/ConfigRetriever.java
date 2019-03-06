@@ -74,7 +74,7 @@ public interface ConfigRetriever {
    */
   static Future<JsonObject> getConfigAsFuture(ConfigRetriever retriever) {
     Future<JsonObject> future = Future.future();
-    retriever.getConfig(future.completer());
+    retriever.getConfig(future);
     return future;
   }
 
