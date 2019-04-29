@@ -116,6 +116,12 @@ public class PropertiesConfigProcessor implements ConfigProcessor {
 
     private JsonObject toJson(Stream<String> stream) {
       return stream
+        .filter( line -> {
+        	line.trim();
+        	return  !line.isEmpty()
+        			&& !line.startsWith("#")
+        			&& !line.startsWith("!");
+          })
         .map(line -> line.split("="))
         .map(raw -> {
           String property = raw[0].trim();
