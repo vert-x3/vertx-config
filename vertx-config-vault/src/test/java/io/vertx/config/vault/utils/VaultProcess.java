@@ -40,7 +40,7 @@ import static org.hamcrest.core.Is.is;
 public class VaultProcess {
 
 
-  public static final String VAULT_VERSION = "0.7.3";
+  public static final String VAULT_VERSION = "1.1.2";
   public static final String CA_CERT_ARG = "-ca-cert=target/vault/config/ssl/cert.pem";
   private File executable;
   private String unseal;
@@ -65,10 +65,12 @@ public class VaultProcess {
     startServer();
     init();
     unseal();
+    login();
+    enableSecretEngineKvV1();
   }
 
   private void init() {
-    String line = executable.getAbsolutePath() + " init -key-shares=1 -key-threshold=1 " + CA_CERT_ARG;
+    String line = executable.getAbsolutePath() + " operator init -key-shares=1 -key-threshold=1 " + CA_CERT_ARG;
     System.out.println(">> " + line);
     CommandLine parse = CommandLine.parse(line);
     DefaultExecutor executor = new DefaultExecutor();
@@ -100,8 +102,18 @@ public class VaultProcess {
   }
 
   public void unseal() {
-    run("unseal " + CA_CERT_ARG + " " + unseal);
+    run("operator unseal " + CA_CERT_ARG + " " + unseal);
     System.out.println("Vault Server ready !");
+  }
+
+  public void login() {
+    run("login " + CA_CERT_ARG + " " + token );
+    System.out.println("Vault secret engine V1 is enabled !");
+  }
+
+  public void enableSecretEngineKvV1() {
+    run("secrets enable " + CA_CERT_ARG + " -path=secret kv");
+    System.out.println("Vault secret engine V1 is enabled !");
   }
 
   private void startServer() {
@@ -188,10 +200,9 @@ public class VaultProcess {
     if ("appRole".equals(backend)) {
       return;
     }
-    run("auth " + CA_CERT_ARG + " " + token);
     // Add a "user" policy for testing purpose.
-    run("policy-write " + CA_CERT_ARG + " user src/test/resources/acl.hcl");
-    run("auth-enable " + CA_CERT_ARG + " approle");
+    run("policy write " + CA_CERT_ARG + " user src/test/resources/acl.hcl");
+    run("auth enable " + CA_CERT_ARG + " approle");
     run("write " + CA_CERT_ARG + " auth/approle/role/testrole secret_id_ttl=10m token_ttlc=20m " +
       "token_max_ttl=30m secret_id_num_users=40 policies=user");
     backend = "appRole";
@@ -201,12 +212,10 @@ public class VaultProcess {
     if ("cert".equalsIgnoreCase(backend)) {
       return;
     }
-
-    run("auth " + CA_CERT_ARG + " " + token);
     // Add a "user" policy for testing purpose.
-    run("policy-write " + CA_CERT_ARG + " user src/test/resources/acl.hcl");
+    run("policy write " + CA_CERT_ARG + " user src/test/resources/acl.hcl");
 
-    run("auth-enable " + CA_CERT_ARG + " cert");
+    run("auth enable " + CA_CERT_ARG + " cert");
     run("write " + CA_CERT_ARG + " auth/cert/certs/web display_name=web " +
       "policies=web,prod,user certificate=@target/vault/config/ssl/client-cert.pem ttl=3600");
 
@@ -218,11 +227,10 @@ public class VaultProcess {
       return;
     }
 
-    run("auth " + CA_CERT_ARG + " " + token);
     // Add a "user" policy for testing purpose.
-    run("policy-write " + CA_CERT_ARG + " user src/test/resources/acl.hcl");
+    run("policy write " + CA_CERT_ARG + " user src/test/resources/acl.hcl");
 
-    run("auth-enable " + CA_CERT_ARG + " userpass");
+    run("auth enable " + CA_CERT_ARG + " userpass");
     run("write " + CA_CERT_ARG + " auth/userpass/users/fake-user password=fake-password policies=user");
 
     backend = "userpass";

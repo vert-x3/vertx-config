@@ -336,8 +336,8 @@ public abstract class VaultConfigStoreTestBase {
       tc.assertEquals("hello", content.getString("message"));
       // Step 2 - revoke the (here it's the root token) token
       vertx.executeBlocking(future -> {
-        process.run("auth " + VaultProcess.CA_CERT_ARG + " " + process.getToken());
-        process.run("seal " + VaultProcess.CA_CERT_ARG);
+        process.run("login " + VaultProcess.CA_CERT_ARG + " " + process.getToken());
+        process.run("operator seal " + VaultProcess.CA_CERT_ARG);
         future.complete();
       }, step2 -> {
         // Step 3 - attempt to retrieve the config
@@ -378,8 +378,8 @@ public abstract class VaultConfigStoreTestBase {
       tc.assertEquals("hello", content.getString("message"));
       // Step 2 - revoke the (here it's the root token) token
       vertx.executeBlocking(future -> {
-        process.run("auth " + VaultProcess.CA_CERT_ARG + " " + process.getToken());
-        process.run("token-revoke " + VaultProcess.CA_CERT_ARG + " " + extractCurrentToken());
+        process.run("login " + VaultProcess.CA_CERT_ARG + " " + process.getToken());
+        process.run("token revoke " + VaultProcess.CA_CERT_ARG + " " + extractCurrentToken());
         future.complete();
       }, step2 -> {
         // Step 3 - attempt to retrieve the config
