@@ -24,6 +24,8 @@ import io.vertx.config.impl.ConfigRetrieverImpl;
 import io.vertx.config.impl.ConfigurationProvider;
 import io.vertx.config.vault.client.SlimVaultClient;
 import io.vertx.config.vault.utils.VaultProcess;
+import io.vertx.core.CompositeFuture;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
@@ -70,6 +72,8 @@ public abstract class VaultConfigStoreTestBase {
       .put("nested", new JsonObject().put("foo", "bar"))
       .put("props", "key=val\nkey2=5\n");
 
+    Future<Void> keyValueV1Future = Future.future();
+
     client.write("secret/app/foo", secret, ar -> {
       if (ar.failed()) {
         ar.cause().printStackTrace();
@@ -77,12 +81,28 @@ public abstract class VaultConfigStoreTestBase {
       tc.assertTrue(ar.succeeded());
       client.write("secret/app/update", secret, ar2 -> {
         tc.assertTrue(ar.succeeded());
-
-        vertx.executeBlocking(future -> {
-          configureVault();
-          future.complete();
-        }, x -> async.complete());
+        keyValueV1Future.complete();
       });
+    });
+
+    Future<Void> keyValueV2Future = Future.future();
+
+    client.write("secret-v2/data/app/foo", new JsonObject().put("data", secret), ar -> {
+      if (ar.failed()) {
+        ar.cause().printStackTrace();
+      }
+      tc.assertTrue(ar.succeeded());
+      client.write("secret-v2/data/app/update", new JsonObject().put("data", secret), ar2 -> {
+        tc.assertTrue(ar.succeeded());
+        keyValueV2Future.complete();
+      });
+    });
+
+    CompositeFuture.all(keyValueV1Future, keyValueV2Future).setHandler(h -> {
+      vertx.executeBlocking(future -> {
+        configureVault();
+        future.complete();
+      }, x -> async.complete());
     });
   }
 
@@ -102,10 +122,10 @@ public abstract class VaultConfigStoreTestBase {
   }
 
   /**
-   * Tests the access to a secret.
+   * Tests the access to a secret with KV-v1 engine.
    */
   @Test
-  public void testAccessToSecret(TestContext tc) {
+  public void testAccessToSecretV1(TestContext tc) {
     JsonObject additionalConfig = getRetrieverConfiguration();
     JsonObject config = additionalConfig.copy().put("path", "secret/app/foo");
 
@@ -125,10 +145,33 @@ public abstract class VaultConfigStoreTestBase {
   }
 
   /**
-   * Tests the access to a specific key of a secret.
+   * Tests the access to a secret with KV-v2 engine.
    */
   @Test
-  public void testAccessToNestedContentFromSecret(TestContext tc) {
+  public void testAccessToSecretV2(TestContext tc) {
+    JsonObject additionalConfig = getRetrieverConfiguration();
+    JsonObject config = additionalConfig.copy().put("path", "secret-v2/data/app/foo");
+
+    retriever = ConfigRetriever.create(vertx, new ConfigRetrieverOptions()
+      .addStore(new ConfigStoreOptions().setType("vault").setConfig(config)));
+
+    Async async = tc.async();
+
+    retriever.getConfig(json -> {
+      tc.assertTrue(json.succeeded());
+      JsonObject content = json.result();
+      tc.assertEquals("hello", content.getString("message"));
+      tc.assertEquals(10, content.getInteger("counter"));
+
+      async.complete();
+    });
+  }
+
+  /**
+   * Tests the access to a specific key of a secret in KV-v1 engine.
+   */
+  @Test
+  public void testAccessToNestedContentFromSecretV1(TestContext tc) {
     JsonObject additionalConfig = getRetrieverConfiguration();
     JsonObject config = additionalConfig.copy()
       .put("path", "secret/app/foo").put("key", "nested");
@@ -151,12 +194,62 @@ public abstract class VaultConfigStoreTestBase {
   }
 
   /**
-   * Tests the access to secret data encoded as properties.
+   * Tests the access to a specific key of a secret in KV-v2 engine.
    */
   @Test
-  public void testAccessToNestedContentAsPropertiesFromSecret(TestContext tc) {
+  public void testAccessToNestedContentFromSecretV2(TestContext tc) {
+    JsonObject additionalConfig = getRetrieverConfiguration();
+    JsonObject config = additionalConfig.copy()
+      .put("path", "secret-v2/data/app/foo").put("key", "nested");
+
+    retriever = ConfigRetriever.create(vertx, new ConfigRetrieverOptions()
+      .addStore(new ConfigStoreOptions().setType("vault")
+        .setConfig(config)));
+
+    Async async = tc.async();
+
+    retriever.getConfig(json -> {
+      if (json.failed()) {
+        json.cause().printStackTrace();
+      }
+      tc.assertTrue(json.succeeded());
+      JsonObject content = json.result();
+      tc.assertEquals(content.getString("foo"), "bar");
+      async.complete();
+    });
+  }
+
+  /**
+   * Tests the access to secret data encoded as properties with KV-v1 engine.
+   */
+  @Test
+  public void testAccessToNestedContentAsPropertiesFromSecretV1(TestContext tc) {
     JsonObject additionalConfig = getRetrieverConfiguration();
     JsonObject config = additionalConfig.copy().put("path", "secret/app/foo").put("key", "props");
+
+    retriever = ConfigRetriever.create(vertx, new ConfigRetrieverOptions()
+      .addStore(new ConfigStoreOptions().setType("vault")
+        .setFormat("properties")
+        .setConfig(config)));
+
+    Async async = tc.async();
+
+    retriever.getConfig(json -> {
+      tc.assertTrue(json.succeeded());
+      JsonObject content = json.result();
+      tc.assertEquals(content.getString("key"), "val");
+      tc.assertEquals(content.getInteger("key2"), 5);
+      async.complete();
+    });
+  }
+
+  /**
+   * Tests the access to secret data encoded as properties with KV-v2 engine.
+   */
+  @Test
+  public void testAccessToNestedContentAsPropertiesFromSecretV2(TestContext tc) {
+    JsonObject additionalConfig = getRetrieverConfiguration();
+    JsonObject config = additionalConfig.copy().put("path", "secret-v2/data/app/foo").put("key", "props");
 
     retriever = ConfigRetriever.create(vertx, new ConfigRetrieverOptions()
       .addStore(new ConfigStoreOptions().setType("vault")
