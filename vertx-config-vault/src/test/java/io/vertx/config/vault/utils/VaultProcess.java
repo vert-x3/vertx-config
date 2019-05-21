@@ -67,6 +67,7 @@ public class VaultProcess {
     unseal();
     login();
     enableSecretEngineKvV1();
+    enableSecretEngineKvV2();
   }
 
   private void init() {
@@ -114,6 +115,11 @@ public class VaultProcess {
   public void enableSecretEngineKvV1() {
     run("secrets enable " + CA_CERT_ARG + " -path=secret kv");
     System.out.println("Vault secret engine V1 is enabled !");
+  }
+
+  public void enableSecretEngineKvV2() {
+    run("secrets enable " + CA_CERT_ARG + " -path=secret-v2 kv-v2");
+    System.out.println("Vault secret engine V2 is enabled !");
   }
 
   private void startServer() {

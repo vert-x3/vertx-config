@@ -207,8 +207,6 @@ public abstract class VaultConfigStoreTestBase {
     });
 
     await().untilAtomic(done, is(true));
-
-    process.run("auth " + VaultProcess.CA_CERT_ARG + " " + process.getToken());
     process.run("write " + VaultProcess.CA_CERT_ARG + " secret/app/update @src/test/resources/some-secret.json");
   }
 
@@ -299,8 +297,7 @@ public abstract class VaultConfigStoreTestBase {
       tc.assertEquals("hello", content.getString("message"));
       // Step 2 - revoke the (here it's the root token) token
       vertx.executeBlocking(future -> {
-        process.run("auth " + VaultProcess.CA_CERT_ARG + " " + process.getToken());
-        process.run("token-revoke " + VaultProcess.CA_CERT_ARG + " -self");
+        process.run("token revoke " + VaultProcess.CA_CERT_ARG + " -self");
         // Generate another token - restart vault.
         process.shutdown();
         process.initAndUnsealVault();
@@ -336,7 +333,6 @@ public abstract class VaultConfigStoreTestBase {
       tc.assertEquals("hello", content.getString("message"));
       // Step 2 - revoke the (here it's the root token) token
       vertx.executeBlocking(future -> {
-        process.run("login " + VaultProcess.CA_CERT_ARG + " " + process.getToken());
         process.run("operator seal " + VaultProcess.CA_CERT_ARG);
         future.complete();
       }, step2 -> {
@@ -378,7 +374,6 @@ public abstract class VaultConfigStoreTestBase {
       tc.assertEquals("hello", content.getString("message"));
       // Step 2 - revoke the (here it's the root token) token
       vertx.executeBlocking(future -> {
-        process.run("login " + VaultProcess.CA_CERT_ARG + " " + process.getToken());
         process.run("token revoke " + VaultProcess.CA_CERT_ARG + " " + extractCurrentToken());
         future.complete();
       }, step2 -> {
