@@ -3,6 +3,8 @@
 The Vault Store extends the Vert.x Configuration Retriever and provides support for Vault (https://www.vaultproject.io/).
 So, configuration (secrets) is retrieved from Vault.
 
+> The secrets engines supported by this store are Key/Value version 1 and version 2 (https://www.vaultproject.io/docs/secrets/kv/index.html). Other secrets engine are not supported.
+
 ==== Using the Vault Config Store
 
 To use the Vault Config Store, add the following dependency to the
