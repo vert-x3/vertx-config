@@ -65,7 +65,12 @@ public class Secret {
 
   @JsonProperty("data")
   private void setData(Map<String, Object> data) {
-    this.data = new JsonObject(data);
+    if (data.containsKey("data")) {
+      this.data = JsonObject.mapFrom(data).getJsonObject("data");
+    }
+    else {
+      this.data = new JsonObject(data);
+    }
   }
 
   public String getRequestId() {
