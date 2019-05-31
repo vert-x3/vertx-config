@@ -124,7 +124,7 @@ public class FileSet {
         JsonObject result = new JsonObject();
         futures.stream()
           .map(future -> (JsonObject) future.result())
-          .forEach(result::mergeIn);
+          .forEach(config -> result.mergeIn(config, true));
         handler.handle(Future.succeededFuture(result));
       }
     });
