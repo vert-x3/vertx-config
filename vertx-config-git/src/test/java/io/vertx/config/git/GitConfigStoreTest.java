@@ -411,6 +411,31 @@ public class GitConfigStoreTest {
   }
 
   @Test
+  public void testWithDeepConfigMerge(TestContext tc) throws GitAPIException, IOException {
+    Async async = tc.async();
+    add(git, root, new File("src/test/resources/files/b.json"), "dir");
+    add(git, root, new File("src/test/resources/files/a.json"), "dir");
+    push(git);
+
+    retriever = ConfigRetriever.create(vertx, new ConfigRetrieverOptions().addStore(new
+      ConfigStoreOptions().setType("git").setConfig(new JsonObject()
+      .put("url", bareRoot.getAbsolutePath())
+      .put("path", "target/junk/work")
+      .put("filesets", new JsonArray()
+        .add(new JsonObject().put("pattern", "dir/b.json"))
+        .add(new JsonObject().put("pattern", "dir/a.*son"))
+      ))));
+
+    retriever.getConfig(ar -> {
+      // Both level-3 objects must exist.
+      assertThat(ar.result().getJsonObject("parent").getJsonObject("level_2").getString("key1")).isEqualTo("A");
+      assertThat(ar.result().getJsonObject("parent").getJsonObject("level_2").getString("key2")).isEqualTo("B");
+      async.complete();
+    });
+
+  }
+
+  @Test
   public void testWithAFileSetMatching2FilesWithConflict(TestContext tc) throws GitAPIException, IOException {
     Async async = tc.async();
     add(git, root, new File("src/test/resources/files/b.json"), "dir");
