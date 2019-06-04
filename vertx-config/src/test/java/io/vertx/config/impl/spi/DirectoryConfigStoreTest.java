@@ -249,6 +249,24 @@ public class DirectoryConfigStoreTest extends ConfigStoreTestBase {
   }
 
   @Test
+  public void testWithDeepConfigMerge(TestContext context) {
+    Async async = context.async();
+    retriever = ConfigRetriever.create(vertx, new ConfigRetrieverOptions()
+      .addStore(new ConfigStoreOptions()
+        .setType("directory")
+        .setConfig(new JsonObject().put("path", "src/test/resources")
+          .put("filesets", new JsonArray()
+            .add(new JsonObject().put("pattern", "dir/?.json"))
+          ))));
+    retriever.getConfig(ar -> {
+      // Both level-3 objects must exist.
+      assertThat(ar.result().getJsonObject("parent").getJsonObject("level_2").getString("key1")).isEqualTo("A");
+      assertThat(ar.result().getJsonObject("parent").getJsonObject("level_2").getString("key2")).isEqualTo("B");
+      async.complete();
+    });
+  }
+
+  @Test
   public void testWithAFileSetMatching2FilesWithoutConflict(TestContext context) {
     Async async = context.async();
     retriever = ConfigRetriever.create(vertx, new ConfigRetrieverOptions()
