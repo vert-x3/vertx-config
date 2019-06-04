@@ -132,7 +132,7 @@ class SpringConfigServerStore implements ConfigStore {
       for (int i = sources.size() - 1; i >= 0; i--) {
         JsonObject source = sources.getJsonObject(i);
         JsonObject content = source.getJsonObject("source");
-        configuration = configuration.mergeIn(content);
+        configuration = configuration.mergeIn(content, true);
       }
       handler.handle(Future.succeededFuture(Buffer.buffer(configuration.encode())));
     }

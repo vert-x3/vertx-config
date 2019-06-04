@@ -1,4 +1,9 @@
 {
   "b.name" : "B",
-  "conflict": "B"
+  "conflict": "B",
+  "parent": {
+    "level_2": {
+      "key2": "B"
+    }
+  }
 }
