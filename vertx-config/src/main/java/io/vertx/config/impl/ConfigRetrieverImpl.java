@@ -258,7 +258,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
   private void compute(Handler<AsyncResult<JsonObject>> completionHandler) {
     List<Future> futures = providers.stream()
         .map(s -> {
-          Future<JsonObject> conf = Future.future();
+          Promise<JsonObject> conf = Promise.promise();
           s.get(vertx, ar -> {
             if (ar.succeeded()) {
               conf.tryComplete(ar.result());
@@ -266,7 +266,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
               conf.tryFail(ar.cause());
             }
           });
-          return conf;
+          return conf.future();
         })
         .collect(Collectors.toList());
 

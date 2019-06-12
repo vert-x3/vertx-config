@@ -82,15 +82,15 @@ public class DirectoryConfigStore implements ConfigStore {
           } else {
             List<Future> futures = new ArrayList<>();
             for (FileSet set : filesets) {
-              Future<JsonObject> future = Future.future();
+              Promise<JsonObject> promise = Promise.promise();
               set.buildConfiguration(ar.result(), json -> {
                 if (json.failed()) {
-                  future.fail(json.cause());
+                  promise.fail(json.cause());
                 } else {
-                  future.complete(json.result());
+                  promise.complete(json.result());
                 }
               });
-              futures.add(future);
+              futures.add(promise.future());
             }
 
             CompositeFuture.all(futures).setHandler(cf -> {

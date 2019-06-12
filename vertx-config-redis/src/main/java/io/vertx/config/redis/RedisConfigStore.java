@@ -22,6 +22,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
@@ -79,7 +80,8 @@ public class RedisConfigStore implements ConfigStore {
         if (closed) {
           completionHandler.handle(CLOSED_FUTURE);
         } else {
-          fut = Future.future();
+          Promise<Redis> promise = Promise.promise();
+          fut = promise.future();
           waiters = new ArrayList<>();
           waiters.add(completionHandler);
           fut.setHandler(ar -> {
@@ -102,7 +104,7 @@ public class RedisConfigStore implements ConfigStore {
             }
           });
           Redis redis = Redis.createClient(ctx.owner(), options);
-          redis.connect(fut);
+          redis.connect(promise);
         }
       } else {
         if (fut.succeeded()) {

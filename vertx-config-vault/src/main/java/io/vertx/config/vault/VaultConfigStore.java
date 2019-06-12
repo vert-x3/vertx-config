@@ -90,50 +90,50 @@ public class VaultConfigStore implements ConfigStore {
   }
 
   private Future<Buffer> extract(JsonObject json) {
-    Future<Buffer> future = Future.future();
+    Promise<Buffer> promise = Promise.promise();
     if (json == null) {
-      future.complete(new JsonObject().toBuffer());
+      promise.complete(new JsonObject().toBuffer());
     } else if (config.getString("key") != null) {
       Object value = json.getValue(config.getString("key"));
       if (value == null) {
-        future.complete(new JsonObject().toBuffer());
+        promise.complete(new JsonObject().toBuffer());
       } else if (value instanceof String) {
-        future.complete(Buffer.buffer((String) value));
+        promise.complete(Buffer.buffer((String) value));
       } else if (value instanceof JsonObject) {
-        future.complete(((JsonObject) value).toBuffer());
+        promise.complete(((JsonObject) value).toBuffer());
       }
     } else {
-      future.complete(json.toBuffer());
+      promise.complete(json.toBuffer());
     }
-    return future;
+    return promise.future();
   }
 
   private Future<JsonObject> retrieve() {
-    Future<JsonObject> future = Future.future();
+    Promise<JsonObject> promise = Promise.promise();
     client.read(path, ar -> {
       if (ar.failed() && !(ar.cause() instanceof VaultException)) {
-        future.fail(ar.cause());
+        promise.fail(ar.cause());
       } else if (ar.failed() && ((VaultException) ar.cause()).getStatusCode() == 404) {
-        future.complete(null);
+        promise.complete(null);
       } else if (ar.failed()) {
-        future.fail(ar.cause());
+        promise.fail(ar.cause());
       } else {
         Secret result = ar.result();
         JsonObject copy = result.getData().copy();
         copy.put("vault-lease-id", result.getLeaseId());
         copy.put("vault-lease-duration", result.getLeaseDuration());
         copy.put("vault-renewable", result.isRenewable());
-        future.complete(copy);
+        promise.complete(copy);
       }
     });
-    return future;
+    return promise.future();
   }
 
   private Future<Void> renew() {
-    Future<Void> future = Future.future();
+    Promise<Void> promise = Promise.promise();
     if (validity == 0) {
       // Using a root token - should not expire
-      future.complete();
+      promise.complete();
     } else {
       if (shouldBeRenewed() && renewable) {
         return renewToken();
@@ -141,26 +141,26 @@ public class VaultConfigStore implements ConfigStore {
         // The token cannot be renewed, attempt to authenticate again
         return authenticate(true);
       } else {
-        future.complete();
+        promise.complete();
       }
     }
-    return future;
+    return promise.future();
   }
 
   private Future<Void> renewToken() {
-    Future<Void> future = Future.future();
+    Promise<Void> promise = Promise.promise();
     client.renewSelf(config.getLong("lease-duration", 3600L), auth -> {
-      manageAuthenticationResult(future, auth);
+      manageAuthenticationResult(promise, auth);
     });
-    return future;
+    return promise.future();
   }
 
 
   private Future<Void> authenticate(boolean renew) {
-    Future<Void> future = Future.future();
+    Promise<Void> promise = Promise.promise();
     if (!renew && client.getToken() != null) {
-      future.complete();
-      return future;
+      promise.complete();
+      return promise.future();
     }
 
     String policy = config.getString("auth-backend");
@@ -180,7 +180,7 @@ public class VaultConfigStore implements ConfigStore {
   }
 
   private Future<Void> loginWithUserName() {
-    Future<Void> future = Future.future();
+    Promise<Void> promise = Promise.promise();
     JsonObject req = config.getJsonObject("user-credentials");
     Objects.requireNonNull(req, "When using username, the `user-credentials` must be set in the " +
       "configuration");
@@ -195,20 +195,20 @@ public class VaultConfigStore implements ConfigStore {
 
 
     client
-      .loginWithUserCredentials(username, password, auth -> manageAuthenticationResult(future, auth));
-    return future;
+      .loginWithUserCredentials(username, password, auth -> manageAuthenticationResult(promise, auth));
+    return promise.future();
   }
 
   private Future<Void> loginWithCert() {
-    Future<Void> future = Future.future();
+    Promise<Void> promise = Promise.promise();
     // No validation, certs are configured on the client itself
-    client.loginWithCert(auth -> manageAuthenticationResult(future, auth));
-    return future;
+    client.loginWithCert(auth -> manageAuthenticationResult(promise, auth));
+    return promise.future();
   }
 
 
   private Future<Void> loginWithAppRole() {
-    Future<Void> future = Future.future();
+    Promise<Void> promise = Promise.promise();
     JsonObject req = config.getJsonObject("approle");
     Objects.requireNonNull(req, "When using approle, the `app-role` must be set in the " +
       "configuration");
@@ -218,12 +218,12 @@ public class VaultConfigStore implements ConfigStore {
     Objects.requireNonNull(roleId, "When using approle, the role-id must be set in the `approle` configuration");
     Objects.requireNonNull(secretId, "When using approle, the secret-id must be set in the `approle` configuration");
 
-    client.loginWithAppRole(roleId, secretId, auth -> manageAuthenticationResult(future, auth));
-    return future;
+    client.loginWithAppRole(roleId, secretId, auth -> manageAuthenticationResult(promise, auth));
+    return promise.future();
   }
 
   private Future<Void> loginWithToken() {
-    Future<Void> future = Future.future();
+    Promise<Void> promise = Promise.promise();
     JsonObject req = config.getJsonObject("token-request");
     Objects.requireNonNull(req, "When using a token creation policy, the `token-request` must be set in the " +
       "configuration");
@@ -233,11 +233,11 @@ public class VaultConfigStore implements ConfigStore {
       "configuration and contains the `token` entry with the original token");
     client
       .setToken(token)
-      .createToken(new TokenRequest(req), auth -> manageAuthenticationResult(future, auth));
-    return future;
+      .createToken(new TokenRequest(req), auth -> manageAuthenticationResult(promise, auth));
+    return promise.future();
   }
 
-  private void manageAuthenticationResult(Future<Void> future, AsyncResult<Auth> auth) {
+  private void manageAuthenticationResult(Promise<Void> future, AsyncResult<Auth> auth) {
     if (auth.failed()) {
       future.fail(auth.cause());
     } else {

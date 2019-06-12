@@ -167,11 +167,11 @@ public class GitConfigStore implements ConfigStore {
   }
 
   private Future<Buffer> compute(List<File> files) {
-    Future<Buffer> result = Future.future();
+    Promise<Buffer> result = Promise.promise();
 
     List<Future> futures = new ArrayList<>();
     for (FileSet set : filesets) {
-      Future<JsonObject> future = Future.future();
+      Promise<JsonObject> future = Promise.promise();
       set.buildConfiguration(files, json -> {
         if (json.failed()) {
           future.fail(json.cause());
@@ -179,7 +179,7 @@ public class GitConfigStore implements ConfigStore {
           future.complete(json.result());
         }
       });
-      futures.add(future);
+      futures.add(future.future());
     }
 
     CompositeFuture.all(futures).setHandler(cf -> {
@@ -193,11 +193,11 @@ public class GitConfigStore implements ConfigStore {
       }
     });
 
-    return result;
+    return result.future();
   }
 
   private Future<Void> update() {
-    Future<Void> result = Future.future();
+    Promise<Void> result = Promise.promise();
     vertx.executeBlocking(
       future -> {
         PullResult call;
@@ -221,11 +221,11 @@ public class GitConfigStore implements ConfigStore {
       },
       result
     );
-    return result;
+    return result.future();
   }
 
   private Future<List<File>> read() {
-    Future<List<File>> result = Future.future();
+    Promise<List<File>> result = Promise.promise();
     vertx.executeBlocking(
       fut -> {
         try {
@@ -235,7 +235,7 @@ public class GitConfigStore implements ConfigStore {
         }
       },
       result);
-    return result;
+    return result.future();
   }
 
   @Override

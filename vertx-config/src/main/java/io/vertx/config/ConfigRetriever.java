@@ -25,6 +25,7 @@ import io.vertx.config.spi.ConfigStore;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.streams.ReadStream;
@@ -73,9 +74,9 @@ public interface ConfigRetriever {
    * @return the future completed when the configuration is retrieved
    */
   static Future<JsonObject> getConfigAsFuture(ConfigRetriever retriever) {
-    Future<JsonObject> future = Future.future();
-    retriever.getConfig(future);
-    return future;
+    Promise<JsonObject> promise = Promise.promise();
+    retriever.getConfig(promise);
+    return promise.future();
   }
 
   /**

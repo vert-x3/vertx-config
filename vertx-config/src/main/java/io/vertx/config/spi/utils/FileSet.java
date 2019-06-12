@@ -99,20 +99,20 @@ public class FileSet {
       .filter(this::matches)
       .map(s -> new File(root, s))
       .forEach(file -> {
-        Future<JsonObject> future = Future.future();
-        futures.add(future);
+        Promise<JsonObject> promise = Promise.promise();
+        futures.add(promise.future());
         try {
           vertx.fileSystem().readFile(file.getAbsolutePath(),
             buffer -> {
               if (buffer.failed()) {
-                future.fail(buffer.cause());
+                promise.fail(buffer.cause());
               } else {
-                processor.process(vertx, new JsonObject().put("raw-data", rawData), buffer.result(), future);
+                processor.process(vertx, new JsonObject().put("raw-data", rawData), buffer.result(), promise);
               }
             });
         } catch (RejectedExecutionException e) {
           // May happen because ot the internal thread pool used in the async file system.
-          future.fail(e);
+          promise.fail(e);
         }
       });
 
