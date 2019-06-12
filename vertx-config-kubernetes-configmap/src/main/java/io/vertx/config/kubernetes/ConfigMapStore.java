@@ -23,6 +23,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
@@ -131,13 +132,13 @@ public class ConfigMapStore implements ConfigStore {
   }
 
   private Future<String> getToken() {
-    Future<String> result = Future.future();
+    Promise<String> result = Promise.promise();
 
     String token = configuration.getString("token");
     if (token != null && !token.trim().isEmpty()) {
       this.token = token;
       result.complete(token);
-      return result;
+      return result.future();
     }
 
     // Read from file
@@ -155,7 +156,7 @@ public class ConfigMapStore implements ConfigStore {
       }
     });
 
-    return result;
+    return result.future();
   }
 
   @Override
@@ -173,10 +174,10 @@ public class ConfigMapStore implements ConfigStore {
 
     retrieveToken
       .compose(token -> {
-        Future<Buffer> future = Future.future();
+        Promise<Buffer> promise = Promise.promise();
         if (token.isEmpty()) {
-          future.complete(Buffer.buffer("{}"));
-          return future;
+          promise.complete(Buffer.buffer("{}"));
+          return promise.future();
         }
 
         String path = "/api/v1/namespaces/" + namespace;
@@ -196,16 +197,16 @@ public class ConfigMapStore implements ConfigStore {
             HttpResponse<Buffer> response = ar.result();
             if (response.statusCode() == 404) {
               if (optional) {
-                future.complete(Buffer.buffer("{}"));
+                promise.complete(Buffer.buffer("{}"));
               } else {
-                future.fail("Cannot find the config map '" + name + "' in '" + namespace + "'");
+                promise.fail("Cannot find the config map '" + name + "' in '" + namespace + "'");
               }
             } else if (response.statusCode() == 403) {
               completionHandler.handle(Future.failedFuture("Access denied to configmap or secret in namespace "
                 + namespace + ": " + name));
             } else if (response.statusCode() != 200) {
               if (optional) {
-                future.complete(Buffer.buffer("{}"));
+                promise.complete(Buffer.buffer("{}"));
               } else {
                 completionHandler.handle(Future.failedFuture("Cannot retrieve the configmap or secret in namespace "
                   + namespace + ": " + name + ", status code: " + response.statusCode() + ", error: "
@@ -214,34 +215,34 @@ public class ConfigMapStore implements ConfigStore {
             } else {
               JsonObject data = response.bodyAsJsonObject().getJsonObject("data");
               if (data == null) {
-                future.fail("Invalid secret of configmap in namespace " + namespace + " " + name + ", the data " +
+                promise.fail("Invalid secret of configmap in namespace " + namespace + " " + name + ", the data " +
                   "entry is empty");
                 return;
               }
               if (this.key == null) {
                 if (secret) {
-                  future.complete(new JsonObject(asSecretObjectMap(data.getMap())).toBuffer());
+                  promise.complete(new JsonObject(asSecretObjectMap(data.getMap())).toBuffer());
                 }
                 else {
-                  future.complete(new JsonObject(asObjectMap(data.getMap())).toBuffer());
+                  promise.complete(new JsonObject(asObjectMap(data.getMap())).toBuffer());
                 }
 
               } else {
                 String string = data.getString(this.key);
                 if (string == null) {
-                  future.fail("Cannot find key '" + this.key + "' in the configmap or secret '" + this.name + "'");
+                  promise.fail("Cannot find key '" + this.key + "' in the configmap or secret '" + this.name + "'");
                 } else {
                   if (secret) {
-                    future.complete(Buffer.buffer(DECODER.decode(string)));
+                    promise.complete(Buffer.buffer(DECODER.decode(string)));
                   }
                   else {
-                    future.complete(Buffer.buffer(string));
+                    promise.complete(Buffer.buffer(string));
                   }
                 }
               }
             }
           });
-        return future;
+        return promise.future();
       }).setHandler(completionHandler);
   }
 

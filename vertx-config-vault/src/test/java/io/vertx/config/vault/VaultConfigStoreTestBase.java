@@ -26,6 +26,7 @@ import io.vertx.config.vault.client.SlimVaultClient;
 import io.vertx.config.vault.utils.VaultProcess;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
@@ -72,7 +73,7 @@ public abstract class VaultConfigStoreTestBase {
       .put("nested", new JsonObject().put("foo", "bar"))
       .put("props", "key=val\nkey2=5\n");
 
-    Future<Void> keyValueV1Future = Future.future();
+    Promise<Void> keyValueV1Promise = Promise.promise();
 
     client.write("secret/app/foo", secret, ar -> {
       if (ar.failed()) {
@@ -81,11 +82,11 @@ public abstract class VaultConfigStoreTestBase {
       tc.assertTrue(ar.succeeded());
       client.write("secret/app/update", secret, ar2 -> {
         tc.assertTrue(ar.succeeded());
-        keyValueV1Future.complete();
+        keyValueV1Promise.complete();
       });
     });
 
-    Future<Void> keyValueV2Future = Future.future();
+    Promise<Void> keyValueV2Promise = Promise.promise();
 
     client.write("secret-v2/data/app/foo", new JsonObject().put("data", secret), ar -> {
       if (ar.failed()) {
@@ -94,11 +95,11 @@ public abstract class VaultConfigStoreTestBase {
       tc.assertTrue(ar.succeeded());
       client.write("secret-v2/data/app/update", new JsonObject().put("data", secret), ar2 -> {
         tc.assertTrue(ar.succeeded());
-        keyValueV2Future.complete();
+        keyValueV2Promise.complete();
       });
     });
 
-    CompositeFuture.all(keyValueV1Future, keyValueV2Future).setHandler(h -> {
+    CompositeFuture.all(keyValueV1Promise.future(), keyValueV2Promise.future()).setHandler(h -> {
       vertx.executeBlocking(future -> {
         configureVault();
         future.complete();

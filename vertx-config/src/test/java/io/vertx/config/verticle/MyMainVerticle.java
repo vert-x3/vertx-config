@@ -20,7 +20,7 @@ package io.vertx.config.verticle;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
@@ -34,7 +34,7 @@ public class MyMainVerticle extends AbstractVerticle {
   private ConfigRetriever configurationRetriever;
 
   @Override
-  public void start(Future<Void> future) throws Exception {
+  public void start(Promise<Void> future) throws Exception {
     configurationRetriever = ConfigRetriever.create(vertx,
         new ConfigRetrieverOptions()
             .setScanPeriod(500)
@@ -59,7 +59,7 @@ public class MyMainVerticle extends AbstractVerticle {
     });
   }
 
-  private void deployMyVerticle(JsonObject conf, Future<Void> completion) {
+  private void deployMyVerticle(JsonObject conf, Promise<Void> completion) {
     vertx.deployVerticle(MyVerticle.class.getName(),
         new DeploymentOptions().setConfig(conf),
         deployed -> {

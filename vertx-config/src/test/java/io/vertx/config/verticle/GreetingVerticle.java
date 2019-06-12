@@ -2,7 +2,7 @@ package io.vertx.config.verticle;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.CompositeFuture;
-import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 
 
@@ -11,12 +11,12 @@ public class GreetingVerticle extends AbstractVerticle {
   private String message;
 
   @Override
-  public void start(Future<Void> future) {
+  public void start(Promise<Void> future) {
     message = config().getString("message");
     String address = config().getString("address");
 
-    Future<Void> endpointReady = Future.future();
-    Future<Void> updateReady = Future.future();
+    Promise<Void> endpointReady = Promise.promise();
+    Promise<Void> updateReady = Promise.promise();
 
     vertx.eventBus().<JsonObject>consumer(address + "/update")
       .handler(json -> {
@@ -29,6 +29,6 @@ public class GreetingVerticle extends AbstractVerticle {
       .handler(msg -> msg.reply(message))
       .completionHandler(endpointReady);
 
-    CompositeFuture.all(endpointReady, updateReady).setHandler(x -> future.handle(x.mapEmpty()));
+    CompositeFuture.all(endpointReady.future(), updateReady.future()).setHandler(x -> future.handle(x.mapEmpty()));
   }
 }
