@@ -57,7 +57,7 @@ public class VerticleDeploymentTest {
             ctxt.fail(d2.cause());
           }
 
-          vertx.eventBus().<String>send("greeting/hello", "", response -> {
+          vertx.eventBus().<String>request("greeting/hello", "", response -> {
             if (response.failed()) {
               ctxt.fail(response.cause());
               return;
@@ -68,7 +68,7 @@ public class VerticleDeploymentTest {
             async1.complete();
           });
 
-          vertx.eventBus().<String>send("greeting/bonjour", "", response -> {
+          vertx.eventBus().<String>request("greeting/bonjour", "", response -> {
             if (response.failed()) {
               ctxt.fail(response.cause());
               return;
