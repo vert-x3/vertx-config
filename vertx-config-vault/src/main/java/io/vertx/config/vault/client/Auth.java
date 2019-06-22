@@ -65,7 +65,7 @@ public class Auth {
 
   @JsonProperty("metadata")
   private void setMetadata(Map<String, Object> meta) {
-    this.metadata = new JsonObject(meta);
+    this.metadata = meta != null ? new JsonObject(meta) : null;
   }
 
   public String getToken() {
