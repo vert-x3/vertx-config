@@ -65,8 +65,7 @@ public class RedisConfigStoreTest {
     redisServer = new RedisServer(6379);
     redisServer.start();
 
-    testRedisClient = Redis.createClient(vertx,
-        new RedisOptions().setEndpoint(SocketAddress.inetSocketAddress(6379, "localhost")));
+    testRedisClient = Redis.createClient(vertx, new RedisOptions().setEndpoint("redis://localhost:6379"));
     testRedisClient.connect(tc.asyncAssertSuccess());
   }
 
