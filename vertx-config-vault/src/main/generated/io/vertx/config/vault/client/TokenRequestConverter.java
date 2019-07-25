@@ -4,12 +4,21 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import io.vertx.core.spi.json.JsonCodec;
 
 /**
- * Converter for {@link io.vertx.config.vault.client.TokenRequest}.
+ * Converter and Codec for {@link io.vertx.config.vault.client.TokenRequest}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.config.vault.client.TokenRequest} original class using Vert.x codegen.
  */
-public class TokenRequestConverter {
+public class TokenRequestConverter implements JsonCodec<TokenRequest, JsonObject> {
+
+  public static final TokenRequestConverter INSTANCE = new TokenRequestConverter();
+
+  @Override public JsonObject encode(TokenRequest value) { return (value != null) ? value.toJson() : null; }
+
+  @Override public TokenRequest decode(JsonObject value) { return (value != null) ? new TokenRequest(value) : null; }
+
+  @Override public Class<TokenRequest> getTargetClass() { return TokenRequest.class; }
 
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, TokenRequest obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
