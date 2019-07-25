@@ -43,7 +43,7 @@ Once added to your classpath or dependencies, you need to configure the
 ----
 
 The store configuration is used to create an instance of
-{@link io.vertx.redis.RedisClient}. check the documentation of the Vert.x Redis Client
+{@link io.vertx.redis.client.Redis}. check the documentation of the Vert.x Redis Client
 for further details.
 
 In addition, you can set the `key` instructing the store in which _field_ the configuration
