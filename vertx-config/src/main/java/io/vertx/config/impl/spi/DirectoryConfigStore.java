@@ -99,7 +99,7 @@ public class DirectoryConfigStore implements ConfigStore {
               } else {
                 JsonObject json = new JsonObject();
                 futures.stream().map(f -> (JsonObject) f.result())
-                    .forEach(json::mergeIn);
+                    .forEach(config -> json.mergeIn(config, true));
                 completionHandler.handle(Future.succeededFuture(Buffer.buffer(json.encode())));
               }
             });

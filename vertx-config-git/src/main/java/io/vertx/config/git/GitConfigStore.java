@@ -188,7 +188,7 @@ public class GitConfigStore implements ConfigStore {
       } else {
         JsonObject json = new JsonObject();
         futures.stream().map(f -> (JsonObject) f.result())
-          .forEach(json::mergeIn);
+          .forEach(config -> json.mergeIn(config, true));
         result.complete(Buffer.buffer(json.encode()));
       }
     });
