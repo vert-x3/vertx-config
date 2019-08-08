@@ -265,6 +265,29 @@ public class SlimVaultClient {
   }
 
   /**
+   * The kubernetes auth method can be used to authenticate with Vault using a Kubernetes Service Account Token
+   *
+   * @param jwt      the JWT token
+   * @param role      this role authorizes the "vault-auth" service account in the default namespace and it gives it the default policy
+   * @param resultHandler the callback invoked with the result
+   */
+  public void loginWithKubernetes(String jwt, String role, Handler<AsyncResult<Auth>>
+    resultHandler) {
+    JsonObject payload = new JsonObject()
+      .put("jwt", Objects.requireNonNull(jwt, "The jwt token must not be null"))
+      .put("role", Objects.requireNonNull(role, "The role must not be null"));
+
+    client.post("/v1/auth/kubernetes/login")
+      .sendJsonObject(payload, ar -> {
+        if (ar.failed()) {
+          resultHandler.handle(VaultException.toFailure("Unable to access the Vault", ar.cause()));
+          return;
+        }
+        manageAuthResult(resultHandler, ar.result());
+      });
+  }
+
+  /**
    * Logs in against the `Cert` backend. Certificates are configured directly on the client instance.
    *
    * @param resultHandler the callback invoked with the result

@@ -170,6 +170,8 @@ public class VaultConfigStore implements ConfigStore {
         return loginWithToken();
       case "approle":
         return loginWithAppRole();
+      case "kubernetes":
+        return loginWithKubernetes();
       case "cert":
         return loginWithCert();
       case "userpass":
@@ -219,6 +221,21 @@ public class VaultConfigStore implements ConfigStore {
     Objects.requireNonNull(secretId, "When using approle, the secret-id must be set in the `approle` configuration");
 
     client.loginWithAppRole(roleId, secretId, auth -> manageAuthenticationResult(future, auth));
+    return future;
+  }
+
+  private Future<Void> loginWithKubernetes() {
+    Future<Void> future = Future.future();
+    JsonObject req = config.getJsonObject("service-account");
+    Objects.requireNonNull(req, "When using kubernetes, the `service-account` must be set in the " +
+      "configuration");
+    String jwt = req.getString("jwt");
+    String role = req.getString("role");
+
+    Objects.requireNonNull(jwt, "When using kubernetes, the jwt must be set in the `service-account` configuration");
+    Objects.requireNonNull(role, "When using kubernetes, the role must be set in the `service-account` configuration");
+
+    client.loginWithKubernetes(jwt, role, auth -> manageAuthenticationResult(future, auth));
     return future;
   }
 
