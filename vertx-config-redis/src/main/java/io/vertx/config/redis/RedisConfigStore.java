@@ -28,6 +28,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.redis.client.Command;
 import io.vertx.redis.client.Redis;
+import io.vertx.redis.client.RedisConnection;
 import io.vertx.redis.client.RedisOptions;
 import io.vertx.redis.client.Request;
 import io.vertx.redis.client.Response;
@@ -48,7 +49,7 @@ public class RedisConfigStore implements ConfigStore {
   private final Context ctx;
   private final RedisOptions options;
   private final String field;
-  private Future<Redis> fut;
+  private Future<RedisConnection> fut;
   private List<Handler<AsyncResult<Buffer>>> waiters;
   private boolean closed;
 
@@ -80,7 +81,7 @@ public class RedisConfigStore implements ConfigStore {
         if (closed) {
           completionHandler.handle(CLOSED_FUTURE);
         } else {
-          Promise<Redis> promise = Promise.promise();
+          Promise<RedisConnection> promise = Promise.promise();
           fut = promise.future();
           waiters = new ArrayList<>();
           waiters.add(completionHandler);
@@ -94,7 +95,7 @@ public class RedisConfigStore implements ConfigStore {
             List<Handler<AsyncResult<Buffer>>> list = waiters;
             waiters = null;
             if (ar.succeeded()) {
-              Redis redis = ar.result();
+              RedisConnection redis = ar.result();
               // We are missing here a Redis close handler to update the state
               list.forEach(waiter -> send(redis, waiter));
             } else {
@@ -118,7 +119,7 @@ public class RedisConfigStore implements ConfigStore {
     }
   }
 
-  private void send(Redis redis, Handler<AsyncResult<Buffer>> completionHandler) {
+  private void send(RedisConnection redis, Handler<AsyncResult<Buffer>> completionHandler) {
     redis.send(Request.cmd(Command.HGETALL).arg(field), ar ->
       completionHandler.handle(ar.map(resp -> {
         JsonObject result = new JsonObject();

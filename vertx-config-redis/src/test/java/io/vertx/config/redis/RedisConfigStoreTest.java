@@ -25,12 +25,12 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.config.ConfigStoreOptions;
-import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.redis.client.Redis;
 import io.vertx.redis.client.RedisAPI;
+import io.vertx.redis.client.RedisConnection;
 import io.vertx.redis.client.RedisOptions;
 import org.junit.After;
 import org.junit.Before;
@@ -54,7 +54,7 @@ public class RedisConfigStoreTest {
   private ConfigRetriever retriever;
   private Vertx vertx;
   private RedisServer redisServer;
-  private Redis testRedisClient;
+  private volatile RedisConnection testRedisConnection;
 
 
   @Before
@@ -65,15 +65,17 @@ public class RedisConfigStoreTest {
     redisServer = new RedisServer(6379);
     redisServer.start();
 
-    testRedisClient = Redis.createClient(vertx, new RedisOptions().setEndpoint("redis://localhost:6379"));
-    testRedisClient.connect(tc.asyncAssertSuccess());
+    Redis client = Redis.createClient(vertx, new RedisOptions().setEndpoint("redis://localhost:6379"));
+    client.connect(tc.asyncAssertSuccess(conn -> {
+      testRedisConnection = conn;
+    }));
   }
 
 
   @After
   public void tearDown(TestContext tc) {
     retriever.close();
-    testRedisClient.close();
+    testRedisConnection.close();
     vertx.close(tc.asyncAssertSuccess());
     redisServer.stop();
   }
@@ -140,7 +142,7 @@ public class RedisConfigStoreTest {
   }
 
   private void writeSomeConf(String key, Handler<AsyncResult<Void>> handler) {
-    RedisAPI client = RedisAPI.api(testRedisClient);
+    RedisAPI client = RedisAPI.api(testRedisConnection);
     client.hmset(Arrays.asList(key, "some-key", "some-value"), ar -> {
       if (ar.succeeded()) {
         handler.handle(Future.succeededFuture());
