@@ -72,7 +72,10 @@ public interface ConfigRetriever {
    *
    * @param retriever the config retrieve
    * @return the future completed when the configuration is retrieved
+   * @deprecated removed in Vert.x 4 for {@code ConfigRetriever#getConfig()} method that returns a {@code Future<JsonObject>}
+   *             in 3.x you can use instead {@code Future.future(retriever::getConfig)}
    */
+  @Deprecated
   static Future<JsonObject> getConfigAsFuture(ConfigRetriever retriever) {
     Promise<JsonObject> promise = Promise.promise();
     retriever.getConfig(promise);
