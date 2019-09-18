@@ -77,7 +77,7 @@ public class ConfigExamples {
   }
 
   public void future(ConfigRetriever retriever) {
-    Future<JsonObject> future = ConfigRetriever.getConfigAsFuture(retriever);
+    Future<JsonObject> future = retriever.getConfig();
     future.setHandler(ar -> {
       if (ar.failed()) {
         // Failed to retrieve the configuration

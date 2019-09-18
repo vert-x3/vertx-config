@@ -143,7 +143,7 @@ public class ConfigurationRetrieverTest {
       addStores(new ConfigRetrieverOptions()));
     Async async = tc.async();
 
-    ConfigRetriever.getConfigAsFuture(retriever).setHandler(ar -> {
+    retriever.getConfig().setHandler(ar -> {
       ConfigChecker.check(ar);
       assertThat(ar.result().getString("foo")).isEqualToIgnoringCase("bar");
       ConfigChecker.check(retriever.getCachedConfig());
@@ -157,7 +157,7 @@ public class ConfigurationRetrieverTest {
       addStores(new ConfigRetrieverOptions()));
     Async async = tc.async();
 
-    ConfigRetriever.getConfigAsFuture(retriever).setHandler(ar -> {
+    retriever.getConfig().setHandler(ar -> {
       ConfigChecker.check(ar);
       assertThat(ar.result().getString("foo")).isEqualToIgnoringCase("bar");
       ConfigChecker.check(retriever.getCachedConfig());

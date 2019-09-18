@@ -182,6 +182,13 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
   }
 
   @Override
+  public Future<JsonObject> getConfig() {
+    Promise<JsonObject> promise = Promise.promise();
+    getConfig(promise);
+    return promise.future();
+  }
+
+  @Override
   public synchronized void close() {
     if (scan != -1) {
       vertx.cancelTimer(scan);

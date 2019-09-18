@@ -67,19 +67,6 @@ public interface ConfigRetriever {
   }
 
   /**
-   * Same as {@link ConfigRetriever#getConfig(Handler)}, but returning a {@link Future} object. The result is a
-   * {@link JsonObject}.
-   *
-   * @param retriever the config retrieve
-   * @return the future completed when the configuration is retrieved
-   */
-  static Future<JsonObject> getConfigAsFuture(ConfigRetriever retriever) {
-    Promise<JsonObject> promise = Promise.promise();
-    retriever.getConfig(promise);
-    return promise.future();
-  }
-
-  /**
    * Reads the configuration from the different {@link ConfigStore}
    * and computes the final configuration.
    *
@@ -88,6 +75,10 @@ public interface ConfigRetriever {
    */
   void getConfig(Handler<AsyncResult<JsonObject>> completionHandler);
 
+  /**
+   * Like {@link #getConfig(Handler)} but returns a {@code Future} of the asynchronous result
+   */
+  Future<JsonObject> getConfig();
 
   /**
    * Closes the retriever.
