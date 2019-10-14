@@ -27,6 +27,7 @@ import io.vertx.config.spi.ConfigStore;
 import io.vertx.config.spi.ConfigStoreFactory;
 import io.vertx.config.spi.utils.Processors;
 import io.vertx.core.*;
+import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -152,9 +153,10 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
     if (value != null  && ! value.trim().isEmpty()) {
       return value.trim();
     }
-    boolean exists = vertx.fileSystem().existsBlocking(DEFAULT_CONFIG_PATH);
+    File file = ((VertxInternal) vertx).resolveFile(DEFAULT_CONFIG_PATH);
+    boolean exists = file != null && file.exists();
     if (exists) {
-      return DEFAULT_CONFIG_PATH;
+      return file.getAbsolutePath();
     }
     return null;
   }
