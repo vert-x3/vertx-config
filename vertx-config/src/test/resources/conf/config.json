@@ -1,0 +1,5 @@
+{
+  "name": "config.json",
+  "some-key": "some-message",
+  "from": "class-path"
+}

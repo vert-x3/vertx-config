@@ -195,23 +195,79 @@ public class ConfigurationRetrieverTest {
   }
 
   @Test
-  public void testDefaultStoreWithDefaultConfig(TestContext tc) {
+  public void testDefaultStoreWithDefaultConfigFromFileSystem(TestContext tc) {
     Async async = tc.async();
     File conf = new File("conf");
     conf.mkdirs();
 
-    vertx.fileSystem()
-      .writeFileBlocking("conf" + File.separator + "config.json",
-        new JsonObject().put("some-key", "some-message").toBuffer());
+    try {
+      vertx.fileSystem()
+        .writeFileBlocking("conf" + File.separator + "config.json",
+          new JsonObject()
+            .put("name", "config.json")
+            .put("some-key", "some-message")
+            .put("from", "file-system").toBuffer());
+
+      retriever = ConfigRetriever.create(vertx);
+      retriever.getConfig(ar -> {
+        assertThat(ar.result().getString("name")).isEqualToIgnoringCase("config.json");
+        assertThat(ar.result().getString("some-key")).isEqualToIgnoringCase("some-message");
+        assertThat(ar.result().getString("from")).isEqualToIgnoringCase("file-system");
+        assertThat(ar.result().getString("foo")).isEqualToIgnoringCase("bar");
+        assertThat(ar.result().getString("PATH")).isNotNull();
+        async.complete();
+      });
+
+      async.await(10_000);
+    } finally {
+      cleanupConf();
+    }
+  }
+
+  private void cleanupConf() {
+    vertx.fileSystem().deleteRecursiveBlocking("conf", true);
+  }
+
+  @Test
+  public void testDefaultStoreWithDefaultConfigFromClassPath(TestContext tc) {
+    cleanupConf();
+
+    Async async = tc.async();
 
     retriever = ConfigRetriever.create(vertx);
     retriever.getConfig(ar -> {
+      assertThat(ar.result().getString("name")).isEqualToIgnoringCase("config.json");
       assertThat(ar.result().getString("some-key")).isEqualToIgnoringCase("some-message");
+      assertThat(ar.result().getString("from")).isEqualToIgnoringCase("class-path");
       assertThat(ar.result().getString("foo")).isEqualToIgnoringCase("bar");
       assertThat(ar.result().getString("PATH")).isNotNull();
-      vertx.fileSystem().deleteRecursiveBlocking("conf", true);
       async.complete();
     });
+  }
+
+  @Test
+  public void testDefaultStoreWithSystemPropertyConfigFromClassPath(TestContext tc) {
+    cleanupConf();
+
+    Async async = tc.async();
+
+    System.setProperty("vertx-config-path", "conf/config2.json");
+
+    try {
+      retriever = ConfigRetriever.create(vertx);
+      retriever.getConfig(ar -> {
+        assertThat(ar.result().getString("name")).isEqualToIgnoringCase("config2.json");
+        assertThat(ar.result().getString("some-key")).isEqualToIgnoringCase("some-message");
+        assertThat(ar.result().getString("from")).isEqualToIgnoringCase("class-path");
+        assertThat(ar.result().getString("foo")).isEqualToIgnoringCase("bar");
+        assertThat(ar.result().getString("PATH")).isNotNull();
+        async.complete();
+      });
+
+      async.await(10_000);
+    } finally {
+      System.clearProperty("vertx-config-path");
+    }
   }
 
   @Test
