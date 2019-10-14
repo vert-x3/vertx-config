@@ -200,18 +200,23 @@ public class ConfigurationRetrieverTest {
     File conf = new File("conf");
     conf.mkdirs();
 
-    vertx.fileSystem()
-      .writeFileBlocking("conf" + File.separator + "config.json",
-        new JsonObject().put("some-key", "some-message").toBuffer());
+    try {
+      vertx.fileSystem()
+        .writeFileBlocking("conf" + File.separator + "config.json",
+          new JsonObject().put("some-key", "some-message").toBuffer());
 
-    retriever = ConfigRetriever.create(vertx);
-    retriever.getConfig(ar -> {
-      assertThat(ar.result().getString("some-key")).isEqualToIgnoringCase("some-message");
-      assertThat(ar.result().getString("foo")).isEqualToIgnoringCase("bar");
-      assertThat(ar.result().getString("PATH")).isNotNull();
+      retriever = ConfigRetriever.create(vertx);
+      retriever.getConfig(ar -> {
+        assertThat(ar.result().getString("some-key")).isEqualToIgnoringCase("some-message");
+        assertThat(ar.result().getString("foo")).isEqualToIgnoringCase("bar");
+        assertThat(ar.result().getString("PATH")).isNotNull();
+        async.complete();
+      });
+
+      async.await(10_000);
+    } finally {
       vertx.fileSystem().deleteRecursiveBlocking("conf", true);
-      async.complete();
-    });
+    }
   }
 
   @Test
