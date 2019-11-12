@@ -140,7 +140,8 @@ public class ConfigExamples {
         .put("defaultHost", "localhost")
         .put("defaultPort", 8080)
         .put("ssl", true)
-        .put("path", "/A"));
+        .put("path", "/A")
+        .put("headers", new JsonObject().put("Accept", "application/json")));
   }
 
   public void eb() {
