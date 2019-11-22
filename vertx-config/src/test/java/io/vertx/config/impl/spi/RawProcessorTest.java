@@ -17,11 +17,13 @@
 
 package io.vertx.config.impl.spi;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
-import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
 import io.vertx.config.ConfigStoreOptions;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.DecodeException;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -218,8 +220,9 @@ public class RawProcessorTest {
 
     retriever.getConfig(ar -> {
       assertThat(ar.failed());
-      // Before we had the json content, it's not the case anymore (when using Jackson 2.9.0+)
-      assertThat(ar.cause().getMessage()).contains("Failed to decode");
+      assertThat(ar.cause())
+        .isInstanceOf(DecodeException.class)
+        .hasRootCauseInstanceOf(JsonParseException.class);
       async.complete();
     });
   }
