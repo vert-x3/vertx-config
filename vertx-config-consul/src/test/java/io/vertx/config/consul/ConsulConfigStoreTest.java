@@ -24,6 +24,7 @@ import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.consul.ConsulClient;
 import io.vertx.ext.consul.ConsulClientOptions;
@@ -129,13 +130,45 @@ public class ConsulConfigStoreTest {
     });
   }
 
+  @Test
+  public void testNotRaw(TestContext tc) {
+    Async async = tc.async();
+    createRetriever(false);
+    String testStr = "{\"str\": \"bar\", \"double\": 1.2, \"bool1\": true, " +
+      "\"bool0\": false, \"int\": 1234, \"long\": 9223372036854775807, " +
+      "\"obj\": {\"int\": -321}, \"arr\": [\"1\", 2, false]}";
+    client.putValue("foo/bar", testStr, ar -> {
+      tc.assertTrue(ar.succeeded());
+      retriever.getConfig(init -> {
+        assertThat(init.succeeded()).isTrue();
+        JsonObject result = init.result();
+        tc.assertFalse(result.isEmpty());
+        JsonObject bar = result.getJsonObject("bar");
+        tc.assertEquals("bar", bar.getString("str"));
+        tc.assertTrue(1.2D - bar.getDouble("double") < 0.001);
+        tc.assertEquals(1234, bar.getInteger("int"));
+        tc.assertEquals(9223372036854775807L, bar.getLong("long"));
+        tc.assertFalse(bar.getBoolean("bool0"));
+        tc.assertTrue(bar.getBoolean("bool1"));
+        tc.assertEquals(new JsonObject().put("int", -321), bar.getJsonObject("obj"));
+        tc.assertEquals(new JsonArray().add("1").add(2).add(false), bar.getJsonArray("arr"));
+        client.deleteValues("foo", h -> async.complete());
+      });
+    });
+  }
+
   private void createRetriever() {
+    createRetriever(true);
+  }
+
+  private void createRetriever(boolean raw) {
     retriever = ConfigRetriever.create(vertx,
       new ConfigRetrieverOptions().addStore(
         new ConfigStoreOptions()
           .setType("consul")
           .setConfig(new JsonObject()
             .put("port", consulProcess.getHttpPort())
-            .put("prefix", "foo"))));
+            .put("prefix", "foo")
+            .put("raw-data", raw))));
   }
 }

@@ -17,6 +17,7 @@
 package io.vertx.config.consul;
 
 import io.vertx.config.spi.ConfigStore;
+import io.vertx.config.spi.utils.JsonObjectHelper;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -36,11 +37,13 @@ public class ConsulConfigStore implements ConfigStore {
   private final ConsulClient client;
   private final String delimiter;
   private final String prefix;
+  private final boolean rawData;
 
   ConsulConfigStore(Vertx vertx, JsonObject configuration) {
     client = ConsulClient.create(vertx, new ConsulClientOptions(configuration));
     delimiter = configuration.getString("delimiter", "/");
     prefix = prefix(configuration.getString("prefix"), delimiter);
+    rawData = configuration.getBoolean("raw-data", true);
   }
 
   @Override
@@ -49,7 +52,7 @@ public class ConsulConfigStore implements ConfigStore {
       if (kv.succeeded()) {
         KeyValueList list = kv.result();
         if (list.isPresent()) {
-          JsonObject tree = getTree(list, prefix.length(), delimiter);
+          JsonObject tree = getTree(list, prefix.length(), delimiter, rawData);
           completionHandler.handle(Future.succeededFuture(Buffer.buffer(tree.toString())));
         } else {
           completionHandler.handle(Future.succeededFuture(Buffer.buffer("{}")));
@@ -66,7 +69,7 @@ public class ConsulConfigStore implements ConfigStore {
     completionHandler.handle(null);
   }
 
-  private static JsonObject getTree(KeyValueList list, int prefix, String delimiter) {
+  private static JsonObject getTree(KeyValueList list, int prefix, String delimiter, boolean rawData) {
     JsonObject tree = new JsonObject();
     for (KeyValue keyValue : list.getList()) {
       if (keyValue.getKey().endsWith(delimiter)) {
@@ -77,7 +80,7 @@ public class ConsulConfigStore implements ConfigStore {
       for (int i = 0; i < arr.length; i++) {
         String key = arr[i];
         if (i == arr.length - 1) {
-          json.put(key, keyValue.getValue());
+          JsonObjectHelper.put(json, key, keyValue.getValue(), rawData);
         } else {
           JsonObject next = json.getJsonObject(key);
           if (next == null) {
