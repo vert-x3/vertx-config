@@ -54,7 +54,7 @@ public class RedisConfigStoreTest {
   private ConfigRetriever retriever;
   private Vertx vertx;
   private RedisServer redisServer;
-  private volatile RedisConnection testRedisConnection;
+  private volatile Redis redis;
 
 
   @Before
@@ -65,17 +65,14 @@ public class RedisConfigStoreTest {
     redisServer = new RedisServer(6379);
     redisServer.start();
 
-    Redis client = Redis.createClient(vertx, new RedisOptions().setEndpoint("redis://localhost:6379"));
-    client.connect(tc.asyncAssertSuccess(conn -> {
-      testRedisConnection = conn;
-    }));
+    redis = Redis.createClient(vertx, "redis://localhost:6379");
   }
 
 
   @After
   public void tearDown(TestContext tc) {
     retriever.close();
-    testRedisConnection.close();
+    redis.close();
     vertx.close(tc.asyncAssertSuccess());
     redisServer.stop();
   }
@@ -142,7 +139,7 @@ public class RedisConfigStoreTest {
   }
 
   private void writeSomeConf(String key, Handler<AsyncResult<Void>> handler) {
-    RedisAPI client = RedisAPI.api(testRedisConnection);
+    RedisAPI client = RedisAPI.api(redis);
     client.hmset(Arrays.asList(key, "some-key", "some-value"), ar -> {
       if (ar.succeeded()) {
         handler.handle(Future.succeededFuture());

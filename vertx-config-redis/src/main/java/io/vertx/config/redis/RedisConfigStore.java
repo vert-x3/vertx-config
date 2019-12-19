@@ -20,22 +20,17 @@ package io.vertx.config.redis;
 import io.vertx.config.spi.ConfigStore;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.redis.client.Command;
 import io.vertx.redis.client.Redis;
-import io.vertx.redis.client.RedisConnection;
 import io.vertx.redis.client.RedisOptions;
 import io.vertx.redis.client.Request;
 import io.vertx.redis.client.Response;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * An implementation of configuration store reading hash from Redis.
@@ -44,19 +39,16 @@ import java.util.List;
  */
 public class RedisConfigStore implements ConfigStore {
 
-  private static final Future CLOSED_FUTURE = Future.failedFuture("Closed");
-
   private final Context ctx;
-  private final RedisOptions options;
+  private final Redis redis;
   private final String field;
-  private Future<RedisConnection> fut;
-  private List<Handler<AsyncResult<Buffer>>> waiters;
+
   private boolean closed;
 
   public RedisConfigStore(Vertx vertx, JsonObject config) {
     this.ctx = vertx.getOrCreateContext();
     this.field = config.getString("key", "configuration");
-    this.options = new RedisOptions(config);
+    this.redis = Redis.createClient(vertx, new RedisOptions(config));
   }
 
   @Override
@@ -64,9 +56,7 @@ public class RedisConfigStore implements ConfigStore {
     if (Vertx.currentContext() == ctx) {
       if (!closed) {
         closed = true;
-        if (fut != null) {
-          fut.result().close();
-        }
+        redis.close();
       }
       completionHandler.handle(null);
     } else {
@@ -77,60 +67,21 @@ public class RedisConfigStore implements ConfigStore {
   @Override
   public void get(Handler<AsyncResult<Buffer>> completionHandler) {
     if (Vertx.currentContext() == ctx) {
-      if (fut == null) {
-        if (closed) {
-          completionHandler.handle(CLOSED_FUTURE);
-        } else {
-          Promise<RedisConnection> promise = Promise.promise();
-          fut = promise.future();
-          waiters = new ArrayList<>();
-          waiters.add(completionHandler);
-          fut.setHandler(ar -> {
-            if (closed) {
-              if (ar.succeeded()) {
-                ar.result().close();
-              }
-              ar = Future.failedFuture("Closed");
-            }
-            List<Handler<AsyncResult<Buffer>>> list = waiters;
-            waiters = null;
-            if (ar.succeeded()) {
-              RedisConnection redis = ar.result();
-              // We are missing here a Redis close handler to update the state
-              list.forEach(waiter -> send(redis, waiter));
-            } else {
-              fut = null;
-              AsyncResult<Buffer> failure = ar.mapEmpty();
-              list.forEach(waiter -> ctx.runOnContext(v -> waiter.handle(failure)));
-            }
-          });
-          Redis redis = Redis.createClient(ctx.owner(), options);
-          redis.connect(promise);
-        }
-      } else {
-        if (fut.succeeded()) {
-          send(fut.result(), completionHandler);
-        } else {
-          waiters.add(completionHandler);
-        }
-      }
+      redis
+        .send(Request.cmd(Command.HGETALL).arg(field), ar ->
+        completionHandler.handle(ar.map(resp -> {
+          JsonObject result = new JsonObject();
+          Iterator<Response> it = resp.iterator();
+          while (it.hasNext()) {
+            String key = it.next().toString();
+            String value = it.next().toString();
+            result.put(key, value);
+          }
+          return result.toBuffer();
+        }))
+      );
     } else {
       ctx.runOnContext(v -> get(completionHandler));
     }
-  }
-
-  private void send(RedisConnection redis, Handler<AsyncResult<Buffer>> completionHandler) {
-    redis.send(Request.cmd(Command.HGETALL).arg(field), ar ->
-      completionHandler.handle(ar.map(resp -> {
-        JsonObject result = new JsonObject();
-        Iterator<Response> it = resp.iterator();
-        while (it.hasNext()) {
-          String key = it.next().toString();
-          String value = it.next().toString();
-          result.put(key, value);
-        }
-        return result.toBuffer();
-      }))
-    );
   }
 }
