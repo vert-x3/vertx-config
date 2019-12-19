@@ -14,7 +14,7 @@ It:
 
 The library is structured around:
 
-* a*Config Retriever** instantiated and used by the Vert.x application. It
+**Config Retriever** instantiated and used by the Vert.x application. It
 configures a set of configuration store
 **Configuration store** defines a location from where the configuration data is read and also a format (JSON by default)
 
@@ -205,10 +205,10 @@ conversion, configure the `raw-data` attribute:
 ----
 
 You can configure the `raw-data` attribute (`false` by default). If `raw-data` is `true` no attempts to convert
-values is made, and you'll be able to get raw values using `config.getString(key)`. It is useful when manipulating
+values are made, and you'll be able to get raw values using `config.getString(key)`. It is useful when manipulating
 large integers.
 
-If you want to select the set of keys to import, use the `keys` attributes. It filters out all non selected keys. Keys
+If you want to select the set of keys to import, use the `keys` attributes. It filters out all not selected keys. Keys
 must be listed individually:
 
 [source, $lang]
@@ -232,7 +232,7 @@ You can configure the `cache` attribute (`true` by default) let you decide wheth
 not it caches the system properties on the first access and does not reload them.
 
 You can also configure the `raw-data` attribute (`false` by default). If `raw-data` is `true` no attempts to convert
-values is made, and you'll be able to get raw values using `config.getString(key)`. It is useful when manipulating
+values are made, and you'll be able to get raw values using `config.getString(key)`. It is useful when manipulating
 large integers.
 
 === HTTP
@@ -279,7 +279,8 @@ This configuration store configuration requires:
 * for properties file, you can indicate if you want to disable the type conversion using the `raw-data` attribute
 
 Each `fileset` contains:
-* a `pattern` : a Ant-style pattern to select files. The pattern is applied on the
+
+* a `pattern` : an Ant-style pattern to select files. The pattern is applied to the
 relative path of the files from the current working directory.
 * an optional `format` indicating the format of the files (each fileset can use a
 different format, BUT files in a fileset must share the same format).
@@ -291,7 +292,7 @@ different format, BUT files in a fileset must share the same format).
 
 === Properties file and raw data
 
-Vert.x Config can read properties file. When reading such a file, you can pass the `raw-data` attribute to
+Vert.x Config can read a properties file. When reading such a file, you can pass the `raw-data` attribute to
 indicate to Vert.x to not attempt to convert values. It is useful when manipulating large integers. Values can be
 retrieved using `config.getString(key)`.
 
@@ -322,7 +323,7 @@ Get values:
 
 == Listening for configuration changes
 
-The Configuration Retriever periodically retrieve the configuration, and if the outcome
+The Configuration Retriever periodically retrieves the configuration, and if the outcome
 is different from the current one, your application can be reconfigured. By default, the
 configuration is reloaded every 5 seconds.
 
@@ -362,7 +363,7 @@ set of handlers you are notified:
 You can configure a _processor_ that can validate and update the configuration. This is done using the
 {@link io.vertx.config.ConfigRetriever#setConfigurationProcessor(java.util.function.Function)} method.
 
-The prcessing must not return `null`. It takes the retrieved configuration and returns the processed one. If the processor
+The processing must not return `null`. It takes the retrieved configuration and returns the processed one. If the processor
 does not update the configuration, it must return the input configuration. If the processor can throw an exception (for
 example for validation purpose).
 
@@ -387,7 +388,7 @@ configuration store (place from where the configuration data is retrieved)
 
 == Additional formats
 
-Besides of the out of the box format supported by this library, Vert.x Config provides additional
+Besides the out of the box format supported by this library, Vert.x Config provides additional
 formats you can use in your application.
 
 include::hocon-format.adoc[]
@@ -396,7 +397,7 @@ include::yaml-format.adoc[]
 
 == Additional stores
 
-Besides of the out of the box stores supported by this library, Vert.x Config provides additional
+Besides the out of the box stores supported by this library, Vert.x Config provides additional
 stores you can use in your application.
 
 include::git-store.adoc[]
