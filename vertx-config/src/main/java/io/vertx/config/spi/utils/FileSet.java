@@ -20,9 +20,9 @@ package io.vertx.config.spi.utils;
 import io.vertx.config.spi.ConfigProcessor;
 import io.vertx.core.*;
 import io.vertx.core.impl.launcher.commands.FileSelector;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.json.JsonObject;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -107,7 +107,7 @@ public class FileSet {
               if (buffer.failed()) {
                 promise.fail(buffer.cause());
               } else {
-                processor.process(vertx, new JsonObject().put("raw-data", rawData), buffer.result(), promise);
+                processor.process(vertx, new JsonObject().put("raw-data", rawData), buffer.result()).onComplete(promise);
               }
             });
         } catch (RejectedExecutionException e) {

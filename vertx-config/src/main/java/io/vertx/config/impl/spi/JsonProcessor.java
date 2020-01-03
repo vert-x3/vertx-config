@@ -17,13 +17,13 @@
 
 package io.vertx.config.impl.spi;
 
-import io.vertx.core.AsyncResult;
+import io.vertx.config.spi.ConfigProcessor;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonObject;
-import io.vertx.config.spi.ConfigProcessor;
 
 /**
  * Builds a json object from the given buffer.
@@ -33,16 +33,18 @@ import io.vertx.config.spi.ConfigProcessor;
 public class JsonProcessor implements ConfigProcessor {
 
   @Override
-  public void process(Vertx vertx, JsonObject configuration, Buffer input, Handler<AsyncResult<JsonObject>> handler) {
+  public Future<JsonObject> process(Vertx vertx, JsonObject configuration, Buffer input) {
+    Promise<JsonObject> promise = ((VertxInternal) vertx).promise();
     try {
       JsonObject json = input.toJsonObject();
       if (json == null) {
         json = new JsonObject();
       }
-      handler.handle(Future.succeededFuture(json));
+      promise.complete(json);
     } catch (Exception e) {
-      handler.handle(Future.failedFuture(e));
+      promise.fail(e);
     }
+    return promise.future();
   }
 
   @Override

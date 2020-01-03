@@ -18,6 +18,7 @@
 package io.vertx.config.impl.spi;
 
 import io.vertx.config.ConfigRetriever;
+import io.vertx.config.spi.ConfigProcessor;
 import io.vertx.config.spi.ConfigStore;
 import io.vertx.config.spi.ConfigStoreFactory;
 import io.vertx.core.AsyncResult;
@@ -25,7 +26,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.config.spi.ConfigProcessor;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.After;
@@ -80,7 +80,7 @@ public abstract class ConfigStoreTestBase {
       if (buffer.failed()) {
         handler.handle(Future.failedFuture(buffer.cause()));
       } else {
-        JSON.process(vertx, new JsonObject(), buffer.result(), handler);
+        JSON.process(vertx, new JsonObject(), buffer.result()).onComplete(handler);
       }
     });
   }
@@ -90,7 +90,7 @@ public abstract class ConfigStoreTestBase {
       if (buffer.failed()) {
         handler.handle(Future.failedFuture(buffer.cause()));
       } else {
-        PROPERTIES.process(vertx, new JsonObject(), buffer.result(), handler);
+        PROPERTIES.process(vertx, new JsonObject(), buffer.result()).onComplete(handler);
       }
     });
   }

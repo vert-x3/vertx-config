@@ -21,11 +21,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import io.vertx.config.spi.ConfigProcessor;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -43,25 +42,21 @@ public class YamlProcessor implements ConfigProcessor {
   }
 
   @Override
-  public void process(Vertx vertx, JsonObject configuration, Buffer input, Handler<AsyncResult<JsonObject>> handler) {
+  public Future<JsonObject> process(Vertx vertx, JsonObject configuration, Buffer input) {
     if (input.length() == 0) {
       // the parser does not support empty files, which should be managed to be homogeneous
-      handler.handle(Future.succeededFuture(new JsonObject()));
-      return;
+      return ((ContextInternal) vertx.getOrCreateContext()).succeededFuture(new JsonObject());
     }
 
     // Use executeBlocking even if the bytes are in memory
-    vertx.executeBlocking(
-        future -> {
-          try {
-            JsonNode root = YAML_MAPPER.readTree(input.toString("utf-8"));
-            JsonObject json = new JsonObject(root.toString());
-            future.complete(json);
-          } catch (Exception e) {
-            future.fail(e);
-          }
-        },
-        handler
-    );
+    return vertx.executeBlocking(promise -> {
+      try {
+        JsonNode root = YAML_MAPPER.readTree(input.toString("utf-8"));
+        JsonObject json = new JsonObject(root.toString());
+        promise.complete(json);
+      } catch (Exception e) {
+        promise.fail(e);
+      }
+    });
   }
 }

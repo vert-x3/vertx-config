@@ -19,18 +19,13 @@ package io.vertx.config.impl.spi;
 
 import io.vertx.config.spi.ConfigProcessor;
 import io.vertx.config.spi.utils.JsonObjectHelper;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Stream;
@@ -56,7 +51,7 @@ public class PropertiesConfigProcessor implements ConfigProcessor {
   }
 
   @Override
-  public void process(Vertx vertx, JsonObject configuration, Buffer input, Handler<AsyncResult<JsonObject>> handler) {
+  public Future<JsonObject> process(Vertx vertx, JsonObject configuration, Buffer input) {
     Boolean hierarchicalData = configuration.getBoolean("hierarchical", false);
     PropertiesReader reader = hierarchicalData ? HIERARCHICAL_READER : FLAT_READER;
     // lock the input config before entering the execute blocking to avoid
@@ -66,7 +61,7 @@ public class PropertiesConfigProcessor implements ConfigProcessor {
     // I'm not sure the executeBlocking is really required here as the
     // buffer is in memory,
     // so the input stream is not blocking
-    vertx.executeBlocking(future -> {
+    return vertx.executeBlocking(future -> {
       byte[] bytes = input.getBytes();
       try (ByteArrayInputStream stream = new ByteArrayInputStream(bytes)) {
         JsonObject created = reader.readAsJson(rawData, stream);
@@ -74,7 +69,7 @@ public class PropertiesConfigProcessor implements ConfigProcessor {
       } catch (Exception e) {
         future.fail(e);
       }
-    }, handler);
+    });
   }
 
   private interface PropertiesReader {

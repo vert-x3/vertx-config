@@ -23,9 +23,9 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.json.JsonObject;
 
 /**
  * A configuration provider retrieve the configuration from a store and transform it to Json.
@@ -68,7 +68,7 @@ public class ConfigurationProvider {
           completionHandler.handle(Future.failedFuture(maybeBuffer.cause()));
         }
       } else {
-        processor.process(vertx, configuration, maybeBuffer.result(), maybeJson -> {
+        processor.process(vertx, configuration, maybeBuffer.result()).onComplete(maybeJson -> {
           if (maybeJson.failed()) {
             if (optional) {
               logger.warn("Unable to process the retrieve the configuration " + maybeJson.cause().getMessage());

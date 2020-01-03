@@ -17,13 +17,13 @@
 
 package io.vertx.config.impl.spi;
 
-import io.vertx.core.AsyncResult;
+import io.vertx.config.spi.ConfigProcessor;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonObject;
-import io.vertx.config.spi.ConfigProcessor;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -35,38 +35,39 @@ public class RawProcessor implements ConfigProcessor {
   }
 
   @Override
-  public void process(Vertx vertx, JsonObject configuration, Buffer input, Handler<AsyncResult<JsonObject>> handler) {
+  public Future<JsonObject> process(Vertx vertx, JsonObject configuration, Buffer input) {
+    Promise<JsonObject> promise = ((VertxInternal) vertx).promise();
     String key = configuration.getString("raw.key");
     String type = configuration.getString("raw.type", "string");
     if (key == null) {
-      handler.handle(Future.failedFuture("The `raw.key` is required in the configuration when using the `raw` " +
-          "processor."));
+      promise.fail("The `raw.key` is required in the configuration when using the `raw` processor.");
     } else {
       JsonObject json = new JsonObject();
       try {
         switch (type) {
           case "string":
             json.put(key, input.toString(configuration.getString("raw.encoding", "utf-8")));
-            handler.handle(Future.succeededFuture(json));
+            promise.complete(json);
             break;
           case "json-object":
             json.put(key, input.toJsonObject());
-            handler.handle(Future.succeededFuture(json));
+            promise.complete(json);
             break;
           case "json-array":
             json.put(key, input.toJsonArray());
-            handler.handle(Future.succeededFuture(json));
+            promise.complete(json);
             break;
           case "binary":
             json.put(key, input.getBytes());
-            handler.handle(Future.succeededFuture(json));
+            promise.complete(json);
             break;
           default:
-            handler.handle(Future.failedFuture("Unrecognized `raw.type` : " + type));
+            promise.fail("Unrecognized `raw.type` : " + type);
         }
       } catch (Exception e) {
-        handler.handle(Future.failedFuture(e));
+        promise.fail(e);
       }
     }
+    return promise.future();
   }
 }
