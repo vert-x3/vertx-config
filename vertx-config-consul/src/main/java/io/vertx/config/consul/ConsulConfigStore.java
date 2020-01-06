@@ -17,11 +17,10 @@
 package io.vertx.config.consul;
 
 import io.vertx.config.spi.ConfigStore;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.consul.ConsulClient;
 import io.vertx.ext.consul.ConsulClientOptions;
@@ -33,37 +32,28 @@ import io.vertx.ext.consul.KeyValueList;
  */
 public class ConsulConfigStore implements ConfigStore {
 
+  private final VertxInternal vertx;
   private final ConsulClient client;
   private final String delimiter;
   private final String prefix;
 
   ConsulConfigStore(Vertx vertx, JsonObject configuration) {
+    this.vertx = (VertxInternal) vertx;
     client = ConsulClient.create(vertx, new ConsulClientOptions(configuration));
     delimiter = configuration.getString("delimiter", "/");
     prefix = prefix(configuration.getString("prefix"), delimiter);
   }
 
   @Override
-  public void get(Handler<AsyncResult<Buffer>> completionHandler) {
-    client.getValues(prefix, kv -> {
-      if (kv.succeeded()) {
-        KeyValueList list = kv.result();
-        if (list.isPresent()) {
-          JsonObject tree = getTree(list, prefix.length(), delimiter);
-          completionHandler.handle(Future.succeededFuture(Buffer.buffer(tree.toString())));
-        } else {
-          completionHandler.handle(Future.succeededFuture(Buffer.buffer("{}")));
-        }
-      } else {
-        completionHandler.handle(Future.failedFuture(kv.cause()));
-      }
-    });
+  public Future<Buffer> get() {
+    return client.getValues(prefix)
+      .map(list -> list.isPresent() ? getTree(list, prefix.length(), delimiter).toBuffer() : Buffer.buffer("{}"));
   }
 
   @Override
-  public void close(Handler<Void> completionHandler) {
+  public Future<Void> close() {
     client.close();
-    completionHandler.handle(null);
+    return vertx.getOrCreateContext().succeededFuture();
   }
 
   private static JsonObject getTree(KeyValueList list, int prefix, String delimiter) {

@@ -17,8 +17,8 @@
 
 io.vertx.config.impl.spi.FileConfigtoreFactory
 io.vertx.config.impl.spi.JsonConfigStoreFactory
-io.vertx.config.impl.spi.EnvVariablesConfigStore
-io.vertx.config.impl.spi.SystemPropertiesConfigStore
+io.vertx.config.impl.spi.EnvVariablesConfigStoreFactory
+io.vertx.config.impl.spi.SystemPropertiesConfigStoreFactory
 io.vertx.config.impl.spi.HttpConfigStoreFactory
 io.vertx.config.impl.spi.EventBusConfigStoreFactory
 io.vertx.config.impl.spi.DirectoryConfigStoreFactory

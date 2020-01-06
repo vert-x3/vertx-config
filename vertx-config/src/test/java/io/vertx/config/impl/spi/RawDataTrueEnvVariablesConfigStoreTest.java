@@ -27,10 +27,10 @@ import org.junit.Test;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.runner.RunWith;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(VertxUnitRunner.class)
 public class RawDataTrueEnvVariablesConfigStoreTest extends ConfigStoreTestBase {
@@ -48,7 +48,7 @@ public class RawDataTrueEnvVariablesConfigStoreTest extends ConfigStoreTestBase 
   public void init() {
     environmentVariables.set(KEY_1, VAL_1);
     environmentVariables.set(KEY_2, VAL_2);
-    factory = new EnvVariablesConfigStore();
+    factory = new EnvVariablesConfigStoreFactory();
     store = factory.create(vertx, new JsonObject().put("raw-data", true));
   }
 

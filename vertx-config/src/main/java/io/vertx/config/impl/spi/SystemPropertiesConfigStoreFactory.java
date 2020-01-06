@@ -23,19 +23,19 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
 /**
- * The factory creating Json object configuration stores.
+ * The factory creating system properties configuration stores.
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class JsonConfigStoreFactory implements ConfigStoreFactory {
+public class SystemPropertiesConfigStoreFactory implements ConfigStoreFactory {
 
   @Override
   public String name() {
-    return "json";
+    return "sys";
   }
 
   @Override
   public ConfigStore create(Vertx vertx, JsonObject configuration) {
-    return new JsonConfigStore(vertx, configuration);
+    return new SystemPropertiesConfigStore(vertx, configuration);
   }
 }

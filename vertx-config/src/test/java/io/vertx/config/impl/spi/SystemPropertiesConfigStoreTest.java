@@ -33,7 +33,7 @@ public class SystemPropertiesConfigStoreTest extends ConfigStoreTestBase {
 
   @Before
   public void init() {
-    factory = new SystemPropertiesConfigStore();
+    factory = new SystemPropertiesConfigStoreFactory();
     System.setProperty("key", "value");
     System.setProperty("sub", "{\"foo\":\"bar\"}");
     System.setProperty("array", "[1, 2, 3]");

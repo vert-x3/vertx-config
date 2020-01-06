@@ -18,17 +18,12 @@
 package io.vertx.config.redis;
 
 import io.vertx.config.spi.ConfigStore;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Handler;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonObject;
-import io.vertx.redis.client.Command;
-import io.vertx.redis.client.Redis;
-import io.vertx.redis.client.RedisOptions;
-import io.vertx.redis.client.Request;
-import io.vertx.redis.client.Response;
+import io.vertx.redis.client.*;
 
 import java.util.Iterator;
 
@@ -39,49 +34,36 @@ import java.util.Iterator;
  */
 public class RedisConfigStore implements ConfigStore {
 
-  private final Context ctx;
+  private final VertxInternal vertx;
   private final Redis redis;
   private final String field;
 
   private boolean closed;
 
   public RedisConfigStore(Vertx vertx, JsonObject config) {
-    this.ctx = vertx.getOrCreateContext();
+    this.vertx = (VertxInternal) vertx;
     this.field = config.getString("key", "configuration");
     this.redis = Redis.createClient(vertx, new RedisOptions(config));
   }
 
   @Override
-  public void close(Handler<Void> completionHandler) {
-    if (Vertx.currentContext() == ctx) {
-      if (!closed) {
-        closed = true;
-        redis.close();
-      }
-      completionHandler.handle(null);
-    } else {
-      ctx.runOnContext(v -> close(completionHandler));
-    }
+  public Future<Void> close() {
+    redis.close();
+    return vertx.getOrCreateContext().succeededFuture();
   }
 
   @Override
-  public void get(Handler<AsyncResult<Buffer>> completionHandler) {
-    if (Vertx.currentContext() == ctx) {
-      redis
-        .send(Request.cmd(Command.HGETALL).arg(field), ar ->
-        completionHandler.handle(ar.map(resp -> {
-          JsonObject result = new JsonObject();
-          Iterator<Response> it = resp.iterator();
-          while (it.hasNext()) {
-            String key = it.next().toString();
-            String value = it.next().toString();
-            result.put(key, value);
-          }
-          return result.toBuffer();
-        }))
-      );
-    } else {
-      ctx.runOnContext(v -> get(completionHandler));
-    }
+  public Future<Buffer> get() {
+    return redis.send(Request.cmd(Command.HGETALL).arg(field))
+      .map(resp -> {
+        JsonObject result = new JsonObject();
+        Iterator<Response> it = resp.iterator();
+        while (it.hasNext()) {
+          String key = it.next().toString();
+          String value = it.next().toString();
+          result.put(key, value);
+        }
+        return result.toBuffer();
+      });
   }
 }

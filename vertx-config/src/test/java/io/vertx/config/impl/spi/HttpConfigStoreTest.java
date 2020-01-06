@@ -108,19 +108,16 @@ public class HttpConfigStoreTest extends ConfigStoreTestBase {
 
   @Test
   public void testPropertiesConf(TestContext tc) {
-    Async async = tc.async();
     store = factory.create(vertx, new JsonObject()
       .put("host", "localhost")
       .put("port", 8080)
       .put("path", "/C")
     );
 
-    getPropertiesConfiguration(vertx, store, ar -> {
-      assertThat(ar.succeeded()).isTrue();
-      assertThat(ar.result().getString("key")).isEqualTo("value");
-      assertThat(ar.result().getString("foo")).isEqualTo("bar");
-      async.complete();
-    });
+    getPropertiesConfiguration(vertx, store, tc.asyncAssertSuccess(result -> {
+      assertThat(result.getString("key")).isEqualTo("value");
+      assertThat(result.getString("foo")).isEqualTo("bar");
+    }));
   }
 
   @Test

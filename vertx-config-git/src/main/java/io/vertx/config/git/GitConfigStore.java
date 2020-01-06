@@ -17,31 +17,33 @@
 
 package io.vertx.config.git;
 
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 import io.vertx.config.spi.ConfigStore;
 import io.vertx.config.spi.utils.FileSet;
 import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
+import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullResult;
+import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.*;
 import org.eclipse.jgit.util.FS;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
-import org.eclipse.jgit.api.TransportConfigCallback;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -51,7 +53,7 @@ public class GitConfigStore implements ConfigStore {
   private final static Logger LOGGER
     = LoggerFactory.getLogger(GitConfigStore.class);
 
-  private final Vertx vertx;
+  private final VertxInternal vertx;
   private final File path;
   private final List<FileSet> filesets = new ArrayList<>();
   private final String url;
@@ -62,7 +64,7 @@ public class GitConfigStore implements ConfigStore {
   private final TransportConfigCallback transportConfigCallback;
 
   public GitConfigStore(Vertx vertx, JsonObject configuration) {
-    this.vertx = vertx;
+    this.vertx = (VertxInternal) vertx;
 
     String path = Objects.requireNonNull(configuration.getString("path"),
       "The `path` configuration is required.");
@@ -159,16 +161,13 @@ public class GitConfigStore implements ConfigStore {
 
 
   @Override
-  public void get(Handler<AsyncResult<Buffer>> completionHandler) {
-    update()   // Update repository
+  public Future<Buffer> get() {
+    return update()   // Update repository
       .compose(v -> read()) // Read files
-      .compose(this::compute)  // Compute the merged json
-      .onComplete(completionHandler); // Forward
+      .compose(this::compute);  // Compute the merged json
   }
 
   private Future<Buffer> compute(List<File> files) {
-    Promise<Buffer> result = Promise.promise();
-
     List<Future> futures = new ArrayList<>();
     for (FileSet set : filesets) {
       Promise<JsonObject> future = Promise.promise();
@@ -182,70 +181,47 @@ public class GitConfigStore implements ConfigStore {
       futures.add(future.future());
     }
 
-    CompositeFuture.all(futures).onComplete(cf -> {
-      if (cf.failed()) {
-        result.fail(cf.cause());
-      } else {
-        JsonObject json = new JsonObject();
-        futures.stream().map(f -> (JsonObject) f.result())
-          .forEach(config -> json.mergeIn(config, true));
-        result.complete(Buffer.buffer(json.encode()));
-      }
+    return CompositeFuture.all(futures).map(compositeFuture -> {
+      JsonObject json = new JsonObject();
+      compositeFuture.<JsonObject>list().stream().forEach(config -> json.mergeIn(config, true));
+      return json.toBuffer();
     });
-
-    return result.future();
   }
 
   private Future<Void> update() {
-    Promise<Void> result = Promise.promise();
-    vertx.executeBlocking(
-      future -> {
-        PullResult call;
-        try {
-          call = git.pull().setRemote(remote).setRemoteBranchName(branch).setCredentialsProvider(credentialProvider)
-                  .setTransportConfigCallback(transportConfigCallback).call();
-        } catch (GitAPIException e) {
-          future.fail(e);
-          return;
-        }
-        if (call.isSuccessful()) {
-          future.complete();
-        } else {
-          if (call.getMergeResult() != null) {
-            future.fail("Unable to merge repository - Conflicts: "
-              + call.getMergeResult().getCheckoutConflicts());
-          } else {
-            future.fail("Unable to rebase repository - Conflicts: "
-              + call.getRebaseResult().getConflicts());
-          }
-        }
-      },
-      result
-    );
-    return result.future();
+    return vertx.<PullResult>executeBlocking(promise -> {
+      PullResult call;
+      try {
+        call = git.pull().setRemote(remote).setRemoteBranchName(branch).setCredentialsProvider(credentialProvider)
+          .setTransportConfigCallback(transportConfigCallback).call();
+        promise.complete(call);
+      } catch (GitAPIException e) {
+        promise.fail(e);
+      }
+    }).flatMap(call -> {
+      if (call.isSuccessful()) {
+        return Future.succeededFuture();
+      }
+      if (call.getMergeResult() != null) {
+        return Future.failedFuture("Unable to merge repository - Conflicts: "
+          + call.getMergeResult().getCheckoutConflicts());
+      }
+      return Future.failedFuture("Unable to rebase repository - Conflicts: "
+        + call.getRebaseResult().getConflicts());
+    });
   }
 
   private Future<List<File>> read() {
-    Promise<List<File>> result = Promise.promise();
-    vertx.executeBlocking(
-      fut -> {
-        try {
-          fut.complete(FileSet.traverse(path).stream().sorted().collect(Collectors.toList()));
-        } catch (Throwable e) {
-          fut.fail(e);
-        }
-      },
-      result);
-    return result.future();
+    return vertx.executeBlocking(promise -> {
+      promise.complete(FileSet.traverse(path).stream().sorted().collect(toList()));
+    });
   }
 
   @Override
-  public void close(Handler<Void> completionHandler) {
-    vertx.runOnContext(v -> {
-      if (git != null) {
-        git.close();
-      }
-      completionHandler.handle(null);
+  public Future<Void> close() {
+    return vertx.executeBlocking(promise -> {
+      git.close();
+      promise.complete();
     });
   }
 }

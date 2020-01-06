@@ -23,19 +23,22 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
 /**
- * The factory creating Json object configuration stores.
+ * The factory creating environment variables configuration stores.
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class JsonConfigStoreFactory implements ConfigStoreFactory {
+public class EnvVariablesConfigStoreFactory implements ConfigStoreFactory {
+
+  public EnvVariablesConfigStoreFactory() {
+  }
 
   @Override
   public String name() {
-    return "json";
+    return "env";
   }
 
   @Override
   public ConfigStore create(Vertx vertx, JsonObject configuration) {
-    return new JsonConfigStore(vertx, configuration);
+    return new EnvVariablesConfigStore(vertx, configuration.getBoolean("raw-data", false), configuration.getJsonArray("keys"));
   }
 }

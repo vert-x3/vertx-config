@@ -18,46 +18,47 @@
 package io.vertx.config.impl.spi;
 
 import io.vertx.config.spi.ConfigStore;
-import io.vertx.config.spi.ConfigStoreFactory;
 import io.vertx.config.spi.utils.JsonObjectHelper;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonObject;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * An implementation of configuration store loading the content from the system properties.
- * <p>
- * As this configuration store is a singleton, the factory returns always the same instance.
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class SystemPropertiesConfigStore implements ConfigStore, ConfigStoreFactory {
-  private boolean cache;
-  private JsonObject cached;
-  private Boolean rawData;
+public class SystemPropertiesConfigStore implements ConfigStore {
+  private final VertxInternal vertx;
+  private final boolean cache;
+  private final Boolean rawData;
 
-  @Override
-  public String name() {
-    return "sys";
-  }
+  private AtomicReference<Buffer> cached = new AtomicReference<>();
 
-  @Override
-  public ConfigStore create(Vertx vertx, JsonObject configuration) {
+  public SystemPropertiesConfigStore(Vertx vertx, JsonObject configuration) {
+    this.vertx = (VertxInternal) vertx;
     cache = configuration.getBoolean("cache", true);
     rawData = configuration.getBoolean("raw-data", false);
-    return this;
   }
 
   @Override
-  public void get(Handler<AsyncResult<Buffer>> completionHandler) {
-    if (!cache || cached == null) {
-      cached = JsonObjectHelper.from(System.getProperties(), rawData);
+  public Future<Buffer> get() {
+    Buffer value = cached.get();
+    if (value == null) {
+      value = JsonObjectHelper.from(System.getProperties(), rawData).toBuffer();
+      if (cache) {
+        cached.set(value);
+      }
     }
-    completionHandler.handle(Future.succeededFuture(Buffer.buffer(cached.encode())));
+    return vertx.getOrCreateContext().succeededFuture(value);
   }
 
-
+  @Override
+  public Future<Void> close() {
+    return vertx.getOrCreateContext().succeededFuture();
+  }
 }

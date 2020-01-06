@@ -28,9 +28,9 @@ import io.vertx.config.spi.ConfigStoreFactory;
 import io.vertx.config.spi.utils.Processors;
 import io.vertx.core.*;
 import io.vertx.core.impl.VertxInternal;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.streams.ReadStream;
 
 import java.io.File;
@@ -199,8 +199,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
     streamOfConfiguration.close();
 
     for (ConfigurationProvider provider : providers) {
-      provider.close(v -> {
-      });
+      provider.close();
     }
   }
 

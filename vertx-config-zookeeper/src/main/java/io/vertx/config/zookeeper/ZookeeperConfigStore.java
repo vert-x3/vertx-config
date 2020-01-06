@@ -18,8 +18,11 @@
 package io.vertx.config.zookeeper;
 
 import io.vertx.config.spi.ConfigStore;
-import io.vertx.core.*;
+import io.vertx.core.Future;
+import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonObject;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -36,12 +39,12 @@ public class ZookeeperConfigStore implements ConfigStore {
 
   private final CuratorFramework client;
   private final String path;
-  private final Vertx vertx;
+  private final VertxInternal vertx;
 
   public ZookeeperConfigStore(Vertx vertx, JsonObject configuration) {
     String connection = Objects.requireNonNull(configuration.getString("connection"));
     path = Objects.requireNonNull(configuration.getString("path"));
-    this.vertx = Objects.requireNonNull(vertx);
+    this.vertx = (VertxInternal) Objects.requireNonNull(vertx);
     int maxRetries = configuration.getInteger("maxRetries", 3);
     int baseGraceBetweenRetries = configuration.getInteger("baseSleepTimeBetweenRetries", 1000);
 
@@ -51,64 +54,44 @@ public class ZookeeperConfigStore implements ConfigStore {
   }
 
   @Override
-  public void get(Handler<AsyncResult<Buffer>> completionHandler) {
-    Context context = Vertx.currentContext();
-    vertx.executeBlocking(
-        future -> {
-          try {
-            client.blockUntilConnected();
-            future.complete();
-          } catch (InterruptedException e) {
-            future.fail(e);
-          }
-
-        },
-        v -> {
-          if (v.failed()) {
-            completionHandler.handle(Future.failedFuture(v.cause()));
-          } else {
-            // We are connected.
-            try {
-              client.getData()
-                  .inBackground((client, event) -> {
-                    if (context != null) {
-                      context.runOnContext(x -> retrieve(event, completionHandler));
-                    } else {
-                      retrieve(event, completionHandler);
-                    }
-                  })
-                  .withUnhandledErrorListener((message, e) -> {
-                    Exception failure = new Exception(message, e);
-                    if (context != null) {
-                      context.runOnContext(x -> completionHandler.handle(Future.failedFuture(failure)));
-                    } else {
-                      completionHandler.handle(Future.failedFuture(failure));
-                    }
-                  })
-                  .forPath(path);
-            } catch (Exception e) {
-              completionHandler.handle(Future.failedFuture(e));
-            }
-          }
-        }
-    );
+  public Future<Buffer> get() {
+    return vertx.executeBlocking(promise -> {
+      try {
+        client.blockUntilConnected();
+        promise.complete();
+      } catch (InterruptedException e) {
+        promise.fail(e);
+      }
+    }).flatMap(v -> {
+      // We are connected.
+      Promise<Buffer> promise = vertx.promise();
+      try {
+        client.getData()
+          .inBackground((client, event) -> retrieve(event, promise))
+          .withUnhandledErrorListener((message, e) -> promise.fail(new Exception(message, e)))
+          .forPath(path);
+      } catch (Exception e) {
+        promise.fail(e);
+      }
+      return promise.future();
+    });
   }
 
-  private void retrieve(CuratorEvent event, Handler<AsyncResult<Buffer>> completionHandler) {
+  private void retrieve(CuratorEvent event, Promise<Buffer> promise) {
     KeeperException.Code code = KeeperException.Code.get(event.getResultCode());
     if (code == KeeperException.Code.OK) {
-      completionHandler.handle(Future.succeededFuture(Buffer.buffer(event.getData())));
+      promise.complete(Buffer.buffer(event.getData()));
     } else if (code == KeeperException.Code.NONODE) {
-      completionHandler.handle(Future.succeededFuture(Buffer.buffer("{}")));
+      promise.complete(Buffer.buffer("{}"));
     } else {
-      completionHandler.handle(Future.failedFuture(KeeperException.create(code, path)));
+      promise.fail(KeeperException.create(code, path));
     }
   }
 
   @Override
-  public void close(Handler<Void> completionHandler) {
+  public Future<Void> close() {
     client.close();
-    completionHandler.handle(null);
+    return vertx.getOrCreateContext().succeededFuture();
   }
 
 }

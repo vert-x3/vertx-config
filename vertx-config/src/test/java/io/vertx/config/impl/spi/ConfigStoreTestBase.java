@@ -26,6 +26,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.After;
@@ -58,12 +59,12 @@ public abstract class ConfigStoreTestBase {
   }
 
   @After
-  public void tearDown() {
+  public void tearDown(TestContext context) {
     AtomicBoolean done = new AtomicBoolean();
     if (store != null) {
-      store.close(v -> done.set(true));
-      await().untilAtomic(done, is(true));
-      done.set(false);
+      Async async = context.async();
+      store.close().onComplete(v -> async.complete());
+      async.awaitSuccess();
     }
 
     if (retriever != null) {
@@ -76,7 +77,7 @@ public abstract class ConfigStoreTestBase {
   }
 
   protected void getJsonConfiguration(Vertx vertx, ConfigStore store, Handler<AsyncResult<JsonObject>> handler) {
-    store.get(buffer -> {
+    store.get().onComplete(buffer -> {
       if (buffer.failed()) {
         handler.handle(Future.failedFuture(buffer.cause()));
       } else {
@@ -86,7 +87,7 @@ public abstract class ConfigStoreTestBase {
   }
 
   protected void getPropertiesConfiguration(Vertx vertx, ConfigStore store, Handler<AsyncResult<JsonObject>> handler) {
-    store.get(buffer -> {
+    store.get().onComplete(buffer -> {
       if (buffer.failed()) {
         handler.handle(Future.failedFuture(buffer.cause()));
       } else {

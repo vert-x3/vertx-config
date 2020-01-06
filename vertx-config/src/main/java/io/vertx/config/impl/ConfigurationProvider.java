@@ -57,7 +57,7 @@ public class ConfigurationProvider {
   }
 
   void get(Vertx vertx, Handler<AsyncResult<JsonObject>> completionHandler) {
-    store.get(maybeBuffer -> {
+    store.get().onComplete(maybeBuffer -> {
       if (maybeBuffer.failed()) {
         if (optional) {
           if (logger.isDebugEnabled()) {
@@ -87,8 +87,8 @@ public class ConfigurationProvider {
     });
   }
 
-  void close(Handler<Void> handler) {
-    store.close(handler);
+  void close() {
+    store.close();
   }
 
   public ConfigStore getStore() {

@@ -18,10 +18,11 @@
 package io.vertx.config.impl.spi;
 
 import io.vertx.config.spi.ConfigStore;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
+import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -32,18 +33,27 @@ import io.vertx.core.json.JsonObject;
  */
 public class JsonConfigStore implements ConfigStore {
 
-  private JsonObject config;
+  private final VertxInternal vertx;
+  private final JsonObject config;
 
-  public JsonConfigStore(JsonObject configuration) {
+  public JsonConfigStore(Vertx vertx, JsonObject configuration) {
+    this.vertx = (VertxInternal) vertx;
     config = configuration;
   }
 
   @Override
-  public void get(Handler<AsyncResult<Buffer>> completionHandler) {
+  public Future<Buffer> get() {
+    Promise<Buffer> promise = vertx.promise();
     if (config == null) {
-      completionHandler.handle(Future.failedFuture("no configuration"));
+      promise.fail("no configuration");
     } else {
-      completionHandler.handle(Future.succeededFuture(config.toBuffer()));
+      promise.complete(config.toBuffer());
     }
+    return promise.future();
+  }
+
+  @Override
+  public Future<Void> close() {
+    return vertx.getOrCreateContext().succeededFuture();
   }
 }

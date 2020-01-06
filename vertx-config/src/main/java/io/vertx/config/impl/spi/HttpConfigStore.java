@@ -18,15 +18,15 @@
 package io.vertx.config.impl.spi;
 
 import io.vertx.config.spi.ConfigStore;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.RequestOptions;
+import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -36,10 +36,12 @@ import io.vertx.core.json.JsonObject;
  */
 public class HttpConfigStore implements ConfigStore {
 
+  private final VertxInternal vertx;
   private final HttpClient client;
   private final RequestOptions requestOptions;
 
   public HttpConfigStore(Vertx vertx, JsonObject configuration) {
+    this.vertx = (VertxInternal) vertx;
     String host = configuration.getString("host");
     int port = configuration.getInteger("port", 80);
     String path = configuration.getString("path", "/");
@@ -58,22 +60,24 @@ public class HttpConfigStore implements ConfigStore {
   }
 
   @Override
-  public void get(Handler<AsyncResult<Buffer>> completionHandler) {
+  public Future<Buffer> get() {
+    Promise<Buffer> promise = vertx.promise();
     client.get(requestOptions, ar -> {
       if (ar.succeeded()) {
         HttpClientResponse response = ar.result();
         response
-          .exceptionHandler(t -> completionHandler.handle(Future.failedFuture(t)))
-          .bodyHandler(buffer -> completionHandler.handle(Future.succeededFuture(buffer)));
+          .exceptionHandler(t -> promise.fail(t))
+          .bodyHandler(buffer -> promise.complete(buffer));
       } else {
-        completionHandler.handle(Future.failedFuture(ar.cause()));
+        promise.fail(ar.cause());
       }
     });
+    return promise.future();
   }
 
   @Override
-  public void close(Handler<Void> completionHandler) {
+  public Future<Void> close() {
     this.client.close();
-    completionHandler.handle(null);
+    return vertx.getOrCreateContext().succeededFuture();
   }
 }

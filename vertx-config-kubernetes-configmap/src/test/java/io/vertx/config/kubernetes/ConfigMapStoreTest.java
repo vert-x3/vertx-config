@@ -128,7 +128,7 @@ public class ConfigMapStoreTest {
 
   @After
   public void tearDown() {
-    store.close(null);
+    store.close();
     vertx.close();
     server.shutdown();
   }
@@ -149,7 +149,7 @@ public class ConfigMapStoreTest {
       .put("name", "my-unknown-config-map")
       .put("optional", false));
 
-    store.get(ar -> {
+    store.get().onComplete(ar -> {
       assertThat(ar.failed()).isTrue();
       async.complete();
     });
@@ -163,7 +163,7 @@ public class ConfigMapStoreTest {
       .put("optional", false)
       .put("secret", true));
 
-    store.get(ar -> {
+    store.get().onComplete(ar -> {
       assertThat(ar.failed()).isTrue();
       async.complete();
     });
@@ -177,7 +177,7 @@ public class ConfigMapStoreTest {
       .put("secret", true)
       .put("namespace", "my-project"));
 
-    store.get(ar -> {
+    store.get().onComplete(ar -> {
       tc.assertTrue(ar.succeeded());
       JsonObject json = ar.result().toJsonObject();
       assertThat(json.getString("password")).isEqualTo("secret");
@@ -186,7 +186,7 @@ public class ConfigMapStoreTest {
   }
 
   private void checkJsonConfig(TestContext tc, Async async) {
-    store.get(ar -> {
+    store.get().onComplete(ar -> {
       if (ar.failed()) {
         ar.cause().printStackTrace();
       }
@@ -216,7 +216,7 @@ public class ConfigMapStoreTest {
     store = new ConfigMapStore(vertx, config()
       .put("name", "my-config-map").put("key", "my-unknown-key"));
 
-    store.get(ar -> {
+    store.get().onComplete(ar -> {
       tc.assertTrue(ar.failed());
       async.complete();
     });
@@ -229,7 +229,7 @@ public class ConfigMapStoreTest {
       .put("name", "my-unknown-map")
       .put("optional", false));
 
-    store.get(ar -> {
+    store.get().onComplete(ar -> {
       tc.assertTrue(ar.failed());
       async.complete();
     });
@@ -242,7 +242,7 @@ public class ConfigMapStoreTest {
       .put("optional", true)
       .put("name", "my-unknown-map"));
 
-    store.get(ar -> {
+    store.get().onComplete(ar -> {
       if (ar.failed()) {
         ar.cause().printStackTrace();
       }
@@ -258,7 +258,7 @@ public class ConfigMapStoreTest {
     store = new ConfigMapStore(vertx, config()
       .put("name", "my-config-map").put("key", "my-app-props"));
 
-    store.get(ar -> {
+    store.get().onComplete(ar -> {
       tc.assertTrue(ar.succeeded());
       Properties properties = new Properties();
       try {
@@ -279,8 +279,8 @@ public class ConfigMapStoreTest {
     store = new ConfigMapStore(vertx, config()
       .put("name", "my-config-map-2"));
 
-    store.get(ar -> {
-      if (! ar.succeeded()) {
+    store.get().onComplete(ar -> {
+      if (!ar.succeeded()) {
         ar.cause().printStackTrace();
       }
       tc.assertTrue(ar.succeeded());
