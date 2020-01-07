@@ -27,7 +27,7 @@ import io.vertx.config.spi.ConfigStore;
 import io.vertx.config.spi.ConfigStoreFactory;
 import io.vertx.config.spi.utils.Processors;
 import io.vertx.core.*;
-import io.vertx.core.impl.VertxInternal;
+import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonObject;
@@ -48,7 +48,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
 
   private static final String DEFAULT_CONFIG_PATH = "conf" + File.separator + "config.json";
 
-  private final Vertx vertx;
+  private final ContextInternal context;
   private final List<ConfigurationProvider> providers;
   private long scan;
   private final List<Handler<ConfigChange>> listeners = new ArrayList<>();
@@ -61,7 +61,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
   private Function<JsonObject, JsonObject> processor;
 
   public ConfigRetrieverImpl(Vertx vertx, ConfigRetrieverOptions options) {
-    this.vertx = vertx;
+    this.context = (ContextInternal) vertx.getOrCreateContext();
     this.options = options;
 
     ServiceLoader<ConfigStoreFactory> storeImpl =
@@ -153,7 +153,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
     if (value != null  && ! value.trim().isEmpty()) {
       return value.trim();
     }
-    File file = ((VertxInternal) vertx).resolveFile(DEFAULT_CONFIG_PATH);
+    File file = context.owner().resolveFile(DEFAULT_CONFIG_PATH);
     boolean exists = file != null && file.exists();
     if (exists) {
       return file.getAbsolutePath();
@@ -163,7 +163,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
 
   public synchronized void initializePeriodicScan() {
     if (options.getScanPeriod() > 0) {
-      this.scan = vertx.setPeriodic(options.getScanPeriod(), l -> scan());
+      this.scan = context.setPeriodic(options.getScanPeriod(), l -> scan());
     } else {
       this.scan = -1;
     }
@@ -172,28 +172,23 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
   @Override
   public void getConfig(Handler<AsyncResult<JsonObject>> completionHandler) {
     Objects.requireNonNull(completionHandler);
-    compute(ar -> {
-      if (ar.succeeded()) {
-        synchronized ((ConfigRetrieverImpl.this)) {
-          current = ar.result();
-          streamOfConfiguration.handle(current);
-        }
-      }
-      completionHandler.handle(ar);
-    });
+    getConfig().onComplete(completionHandler);
   }
 
   @Override
   public Future<JsonObject> getConfig() {
-    Promise<JsonObject> promise = Promise.promise();
-    getConfig(promise);
-    return promise.future();
+    return compute().onSuccess(result -> {
+      synchronized (this) {
+        current = result;
+      }
+      streamOfConfiguration.handle(result);
+    });
   }
 
   @Override
   public synchronized void close() {
     if (scan != -1) {
-      vertx.cancelTimer(scan);
+      context.owner().cancelTimer(scan);
     }
 
     streamOfConfiguration.close();
@@ -209,19 +204,19 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
   }
 
   @Override
-  public void listen(Handler<ConfigChange> listener) {
+  public synchronized void listen(Handler<ConfigChange> listener) {
     Objects.requireNonNull(listener);
     listeners.add(listener);
   }
 
   @Override
-  public ConfigRetriever setBeforeScanHandler(Handler<Void> handler) {
+  public synchronized ConfigRetriever setBeforeScanHandler(Handler<Void> handler) {
     this.beforeScan = Objects.requireNonNull(handler, "The handler must not be `null`");
     return this;
   }
 
   @Override
-  public ConfigRetriever setConfigurationProcessor(Function<JsonObject, JsonObject> processor) {
+  public synchronized ConfigRetriever setConfigurationProcessor(Function<JsonObject, JsonObject> processor) {
     this.processor = Objects.requireNonNull(processor, "The processor must not be `null`");
     return this;
   }
@@ -232,95 +227,48 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
   }
 
   private void scan() {
-    if (beforeScan != null) {
-      beforeScan.handle(null);
+    Handler<Void> h;
+    synchronized (this) {
+      h = this.beforeScan;
     }
-    compute(ar -> {
-      if (ar.failed()) {
-        streamOfConfiguration.fail(ar.cause());
-        LOGGER.error("Error while scanning configuration", ar.cause());
-      } else {
-        synchronized (ConfigRetrieverImpl.this) {
-          // Check for changes
-          if (!current.equals(ar.result())) {
-            JsonObject prev = current;
-            current = ar.result();
-
-            listeners.forEach(l -> l.handle(new ConfigChange(prev, current)));
-            try {
-              streamOfConfiguration.handle(current);
-            } catch (Throwable e) {
-              // Report the error on the context exception handler.
-              if (vertx.exceptionHandler() != null) {
-                vertx.exceptionHandler().handle(e);
-              } else {
-                throw e;
-              }
-            }
-          }
+    if (h != null) {
+      h.handle(null);
+    }
+    compute().onFailure(throwable -> {
+      streamOfConfiguration.fail(throwable);
+      LOGGER.error("Error while scanning configuration", throwable);
+    }).onSuccess(result -> {
+      JsonObject prev;
+      List<Handler<ConfigChange>> handlers;
+      synchronized (this) {
+        // Check for changes
+        if (!current.equals(result)) {
+          prev = current;
+          current = result;
+          handlers = !listeners.isEmpty() ? new ArrayList<>(listeners) : Collections.emptyList();
+        } else {
+          prev = null;
+          handlers = null;
         }
+      }
+      if (handlers != null) {
+        handlers.forEach(changeHandler -> changeHandler.handle(new ConfigChange(prev, result)));
+        streamOfConfiguration.handle(result);
       }
     });
   }
 
-  private void compute(Handler<AsyncResult<JsonObject>> completionHandler) {
+  private Future<JsonObject> compute() {
     List<Future> futures = providers.stream()
-        .map(s -> {
-          Promise<JsonObject> conf = Promise.promise();
-          s.get(vertx, ar -> {
-            if (ar.succeeded()) {
-              conf.tryComplete(ar.result());
-            } else {
-              conf.tryFail(ar.cause());
-            }
-          });
-          return conf.future();
-        })
-        .collect(Collectors.toList());
+      .map(s -> s.get(context.owner()))
+      .collect(Collectors.toList());
 
-    CompositeFuture.all(futures).onComplete(r -> {
-      if (r.failed()) {
-        try {
-          completionHandler.handle(Future.failedFuture(r.cause()));
-        } catch (Throwable e) {
-          // Report the error on the context exception handler.
-          if (vertx.exceptionHandler() != null) {
-            vertx.exceptionHandler().handle(e);
-          } else {
-            throw e;
-          }
-        }
-      } else {
-        // Merge the different futures
-        JsonObject json = new JsonObject();
-        futures.forEach(future -> json.mergeIn((JsonObject) future.result(), true));
-        try {
-          JsonObject computed = json;
-          if (processor != null) {
-            processConfigurationAndReport(completionHandler, json);
-          } else {
-            completionHandler.handle(Future.succeededFuture(computed));
-          }
-        } catch (Throwable e) {
-          // Report the error on the context exception handler.
-          if (vertx.exceptionHandler() != null) {
-            vertx.exceptionHandler().handle(e);
-          } else {
-            throw e;
-          }
-        }
-      }
-    });
-  }
-
-  private void processConfigurationAndReport(Handler<AsyncResult<JsonObject>> completionHandler, JsonObject json) {
-    JsonObject computed;
-    try {
-      computed = processor.apply(json);
-      completionHandler.handle(Future.succeededFuture(computed));
-    } catch (Throwable e) {
-      completionHandler.handle(Future.failedFuture(e));
-    }
+    return CompositeFuture.all(futures).map(compositeFuture -> {
+      // Merge the different futures
+      JsonObject json = new JsonObject();
+      futures.forEach(future -> json.mergeIn((JsonObject) future.result(), true));
+      return json;
+    }).map(json -> processor != null ? processor.apply(json) : json);
   }
 
   /**
@@ -356,7 +304,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
       }
 
       if (conf != null && !conf.isEmpty()) {
-        vertx.runOnContext(v -> this.handler.handle(conf));
+        context.runOnContext(v -> this.handler.handle(conf));
       }
 
       return this;
@@ -400,7 +348,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
           demand--;
         }
         if (succ != null) {
-          vertx.runOnContext(v -> succ.handle(conf));
+          context.runOnContext(v -> succ.handle(conf));
         }
       }
     }
@@ -422,7 +370,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
       }
 
       if (!isPaused && succ != null) {
-        vertx.runOnContext(v -> succ.handle(conf));
+        context.runOnContext(v -> succ.handle(conf));
       }
 
     }
@@ -434,7 +382,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
       }
 
       if (err != null) {
-        vertx.runOnContext(v -> err.handle(cause));
+        context.runOnContext(v -> err.handle(cause));
       }
 
     }
@@ -445,7 +393,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
         handler = endHandler;
       }
       if (handler != null) {
-        vertx.runOnContext(v -> handler.handle(null));
+        context.runOnContext(v -> handler.handle(null));
       }
     }
   }
