@@ -328,7 +328,7 @@ public class ConfigurationRetrieverTest {
       tc.assertNotNull(ar.result());
 
       // Class cast exception here - on purpose
-      ar.result().getString("int");
+      ar.result().getBoolean("int");
     });
 
     await().untilAtomic(reference, is(notNullValue()));

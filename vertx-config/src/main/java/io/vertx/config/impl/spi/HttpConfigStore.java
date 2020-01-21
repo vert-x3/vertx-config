@@ -46,7 +46,7 @@ public class HttpConfigStore implements ConfigStore {
 
   @Override
   public void get(Handler<AsyncResult<Buffer>> completionHandler) {
-    client.getNow(port, host, path, ar -> {
+    client.get(port, host, path, ar -> {
       if (ar.succeeded()) {
         HttpClientResponse response = ar.result();
         response

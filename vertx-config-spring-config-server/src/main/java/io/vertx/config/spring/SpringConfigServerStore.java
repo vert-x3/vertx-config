@@ -26,6 +26,7 @@ import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.http.RequestOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.config.spi.ConfigStore;
@@ -96,7 +97,11 @@ class SpringConfigServerStore implements ConfigStore {
 
   @Override
   public void get(Handler<AsyncResult<Buffer>> completionHandler) {
-    HttpClientRequest request = client.get(path, ar -> {
+    RequestOptions options = new RequestOptions().setURI(path).setTimeout(timeout);
+    if (authHeaderValue != null) {
+      options.addHeader("Authorization", authHeaderValue);
+    }
+    client.get(options, ar -> {
       if (ar.succeeded()) {
         HttpClientResponse response = ar.result();
         if (response.statusCode() != 200) {
@@ -110,14 +115,7 @@ class SpringConfigServerStore implements ConfigStore {
       } else {
         completionHandler.handle(Future.failedFuture(ar.cause()));
       }
-    })
-      .setTimeout(timeout);
-
-    if (authHeaderValue != null) {
-      request.putHeader("Authorization", authHeaderValue);
-    }
-
-    request.end();
+    });
   }
 
   private void parse(JsonObject body, Handler<AsyncResult<Buffer>> handler) {
