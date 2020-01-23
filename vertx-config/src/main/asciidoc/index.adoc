@@ -248,7 +248,9 @@ any supported format.
 It creates a Vert.x HTTP Client with the store configuration (see next snippet). To
 ease the configuration; you can also configure the `host`, `port` and `path` with the
 `host`, `port` and `path`
-properties.
+properties. You can also configure optional HTTP request headers with `headers` property,
+the timeout (in milliseconds, 3000 by default) to retrieve the configuration with `timeout` property,
+if following redirects (false by default) with `followRedirects` property.
 
 [source, $lang]
 ----

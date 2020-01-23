@@ -67,6 +67,21 @@ public class HttpConfigStoreTest extends ConfigStoreTestBase {
           // Properties
           request.response().end("#some properties\nfoo=bar\nkey=value");
         }
+        if (request.path().endsWith("/D")) {
+          if (!"application/json".equalsIgnoreCase(request.getHeader("Accept"))) {
+            request.response().setStatusCode(406).setStatusMessage("Not Acceptable").end();
+          } else {
+            request.response().end(new JsonObject(JSON).encodePrettily());
+          }
+        }
+        if (request.path().endsWith("/E")) {
+          // not found
+          request.response().setStatusCode(404).setStatusMessage("Not Found").end();
+        }
+        if (request.path().endsWith("/F")) {
+          // send redirects to /A
+          request.response().setStatusCode(302).putHeader("Location", "/A").end();
+        }
       })
       .listen(8080, s -> {
         done.set(true);
@@ -129,4 +144,65 @@ public class HttpConfigStoreTest extends ConfigStoreTestBase {
     });
   }
 
+  @Test
+  public void testJsonConfWithHeaders(TestContext tc) {
+    Async async = tc.async();
+    store = factory.create(vertx, new JsonObject()
+      .put("host", "localhost")
+      .put("port", 8080)
+      .put("path", "/D")
+      .put("headers", new JsonObject().put("Accept", "application/json"))
+
+    );
+
+    getJsonConfiguration(vertx, store, ar -> {
+      ConfigChecker.check(ar);
+      async.complete();
+    });
+  }
+
+  @Test
+  public void testJsonConfNotFollowingRedirects(TestContext tc) {
+    Async async = tc.async();
+    store = factory.create(vertx, new JsonObject()
+      .put("port", 8080)
+      .put("path", "/F")
+      .put("followRedirects", false)
+    );
+
+    getJsonConfiguration(vertx, store, ar -> {
+      assertThat(ar.failed()).isTrue();
+      async.complete();
+    });
+  }
+
+  @Test
+  public void testJsonConfFollowingRedirects(TestContext tc) {
+    Async async = tc.async();
+    store = factory.create(vertx, new JsonObject()
+      .put("port", 8080)
+      .put("path", "/F")
+      .put("followRedirects", true)
+    );
+
+    getJsonConfiguration(vertx, store, ar -> {
+      ConfigChecker.check(ar);
+      async.complete();
+    });
+  }
+
+  @Test
+  public void testJsonConf404(TestContext tc) {
+    Async async = tc.async();
+    store = factory.create(vertx, new JsonObject()
+      .put("host", "localhost")
+      .put("port", 8080)
+      .put("path", "/E")
+    );
+
+    getJsonConfiguration(vertx, store, ar -> {
+      assertThat(ar.failed()).isTrue();
+      async.complete();
+    });
+  }
 }

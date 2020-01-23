@@ -21,9 +21,13 @@ import io.vertx.config.spi.ConfigStore;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.http.RequestOptions;
+import io.vertx.core.json.JsonObject;
 
 /**
  * A configuration store retrieving the configuration from a HTTP location
@@ -32,21 +36,30 @@ import io.vertx.core.http.HttpClientResponse;
  */
 public class HttpConfigStore implements ConfigStore {
 
-  private final String host;
-  private final int port;
-  private final String path;
   private final HttpClient client;
+  private final RequestOptions requestOptions;
 
-  public HttpConfigStore(String host, int port, String path, HttpClient client) {
-    this.host = host;
-    this.port = port;
-    this.path = path;
-    this.client = client;
+  public HttpConfigStore(Vertx vertx, JsonObject configuration) {
+    String host = configuration.getString("host");
+    int port = configuration.getInteger("port", 80);
+    String path = configuration.getString("path", "/");
+    long timeout = configuration.getLong("timeout", 3000L);
+    boolean followRedirects = configuration.getBoolean("followRedirects", false);
+    this.client = vertx.createHttpClient(new HttpClientOptions(configuration));
+    this.requestOptions = new RequestOptions()
+      .setHost(host)
+      .setPort(port)
+      .setURI(path)
+      .setTimeout(timeout)
+      .setFollowRedirects(followRedirects);
+    configuration.getJsonObject("headers", new JsonObject()).stream()
+      .filter(h -> h.getValue() != null)
+      .forEach(h -> requestOptions.addHeader(h.getKey(), h.getValue().toString()));
   }
 
   @Override
   public void get(Handler<AsyncResult<Buffer>> completionHandler) {
-    client.get(port, host, path, ar -> {
+    client.get(requestOptions, ar -> {
       if (ar.succeeded()) {
         HttpClientResponse response = ar.result();
         response
