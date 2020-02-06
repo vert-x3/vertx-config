@@ -25,7 +25,6 @@ import io.vertx.config.impl.ConfigurationProvider;
 import io.vertx.config.vault.client.SlimVaultClient;
 import io.vertx.config.vault.utils.VaultProcess;
 import io.vertx.core.CompositeFuture;
-import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -394,9 +393,12 @@ public abstract class VaultConfigStoreTestBase {
         process.run("token revoke " + VaultProcess.CA_CERT_ARG + " -self");
         // Generate another token - restart vault.
         process.shutdown();
+        process = new VaultProcess();
         process.initAndUnsealVault();
+        await().until(process::isRunning);
         future.complete();
       }, step2 -> {
+        tc.assertTrue(process.isRunning());
         // Step 3 - attempt to retrieve the config
         retriever.getConfig(json2 -> {
           tc.assertTrue(json2.failed());
