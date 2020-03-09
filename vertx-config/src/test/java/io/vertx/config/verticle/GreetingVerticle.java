@@ -29,6 +29,6 @@ public class GreetingVerticle extends AbstractVerticle {
       .handler(msg -> msg.reply(message))
       .completionHandler(endpointReady);
 
-    CompositeFuture.all(endpointReady.future(), updateReady.future()).setHandler(x -> future.handle(x.mapEmpty()));
+    CompositeFuture.all(endpointReady.future(), updateReady.future()).onComplete(x -> future.handle(x.mapEmpty()));
   }
 }

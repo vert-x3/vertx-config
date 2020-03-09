@@ -279,7 +279,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
         })
         .collect(Collectors.toList());
 
-    CompositeFuture.all(futures).setHandler(r -> {
+    CompositeFuture.all(futures).onComplete(r -> {
       if (r.failed()) {
         try {
           completionHandler.handle(Future.failedFuture(r.cause()));

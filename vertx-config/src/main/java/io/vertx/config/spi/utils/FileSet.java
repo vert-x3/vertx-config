@@ -116,7 +116,7 @@ public class FileSet {
         }
       });
 
-    CompositeFuture.all(futures).setHandler(ar -> {
+    CompositeFuture.all(futures).onComplete(ar -> {
       if (ar.failed()) {
         handler.handle(Future.failedFuture(ar.cause()));
       } else {

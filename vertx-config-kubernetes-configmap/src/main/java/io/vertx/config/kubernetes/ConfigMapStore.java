@@ -243,7 +243,7 @@ public class ConfigMapStore implements ConfigStore {
             }
           });
         return promise.future();
-      }).setHandler(completionHandler);
+      }).onComplete(completionHandler);
   }
 
   private static Map<String, Object> asObjectMap(Map<String, Object> source) {

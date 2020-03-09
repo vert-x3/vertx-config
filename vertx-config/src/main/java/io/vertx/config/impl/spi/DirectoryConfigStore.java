@@ -93,7 +93,7 @@ public class DirectoryConfigStore implements ConfigStore {
               futures.add(promise.future());
             }
 
-            CompositeFuture.all(futures).setHandler(cf -> {
+            CompositeFuture.all(futures).onComplete(cf -> {
               if (cf.failed()) {
                 completionHandler.handle(Future.failedFuture(cf.cause()));
               } else {

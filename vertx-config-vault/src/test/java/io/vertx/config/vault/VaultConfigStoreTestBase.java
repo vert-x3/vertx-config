@@ -98,7 +98,7 @@ public abstract class VaultConfigStoreTestBase {
       });
     });
 
-    CompositeFuture.all(keyValueV1Promise.future(), keyValueV2Promise.future()).setHandler(h -> {
+    CompositeFuture.all(keyValueV1Promise.future(), keyValueV2Promise.future()).onComplete(h -> {
       vertx.executeBlocking(future -> {
         configureVault();
         future.complete();

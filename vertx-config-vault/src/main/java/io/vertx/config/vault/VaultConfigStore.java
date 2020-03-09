@@ -79,7 +79,7 @@ public class VaultConfigStore implements ConfigStore {
         .compose(v -> renew()) // Do we need to renew
         .compose(v -> retrieve()) // Retrieve the data
         .compose(this::extract) // Extract the sub set
-        .setHandler(completionHandler); // Done
+        .onComplete(completionHandler); // Done
     };
 
     if (Vertx.currentContext() == context) {

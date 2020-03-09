@@ -163,7 +163,7 @@ public class GitConfigStore implements ConfigStore {
     update()   // Update repository
       .compose(v -> read()) // Read files
       .compose(this::compute)  // Compute the merged json
-      .setHandler(completionHandler); // Forward
+      .onComplete(completionHandler); // Forward
   }
 
   private Future<Buffer> compute(List<File> files) {
@@ -182,7 +182,7 @@ public class GitConfigStore implements ConfigStore {
       futures.add(future.future());
     }
 
-    CompositeFuture.all(futures).setHandler(cf -> {
+    CompositeFuture.all(futures).onComplete(cf -> {
       if (cf.failed()) {
         result.fail(cf.cause());
       } else {
