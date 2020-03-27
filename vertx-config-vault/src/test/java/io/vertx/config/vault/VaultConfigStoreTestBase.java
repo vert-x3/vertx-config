@@ -400,7 +400,8 @@ public abstract class VaultConfigStoreTestBase {
         // Step 3 - attempt to retrieve the config
         retriever.getConfig(json2 -> {
           tc.assertTrue(json2.failed());
-          tc.assertTrue(json2.cause().getMessage().contains("permission denied"));
+          String msg = json2.cause().getMessage();
+          tc.assertTrue(msg.contains("permission denied"), "Was expected <" + msg + "> to contain <permission denied>");
           async.complete();
         });
       });
