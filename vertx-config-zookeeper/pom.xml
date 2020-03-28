@@ -36,12 +36,6 @@
 
   <dependencies>
 
-    <!-- Force to 20.0 as that's the stack version -->
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>25.1-jre</version>
-    </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>vertx-config</artifactId>
@@ -55,10 +49,6 @@
         <exclusion>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-api</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.google.guava</groupId>
-          <artifactId>guava</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -85,6 +75,13 @@
       <version>1.2.16</version>
     </dependency>
 
+    <!-- Force to 25.1-jre as that's the stack version -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>25.1-jre</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.apache.curator</groupId>
       <artifactId>curator-test</artifactId>
