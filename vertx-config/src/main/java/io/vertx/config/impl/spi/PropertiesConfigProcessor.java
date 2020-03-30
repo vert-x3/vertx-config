@@ -28,7 +28,6 @@ import io.vertx.core.json.JsonObject;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -65,26 +64,13 @@ public class PropertiesConfigProcessor implements ConfigProcessor {
     // so the input stream is not blocking
     vertx.executeBlocking(future -> {
       byte[] bytes = input.getBytes();
-      ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
-      try {
+      try (ByteArrayInputStream stream = new ByteArrayInputStream(bytes)) {
         JsonObject created = reader.readAsJson(configuration, stream);
         future.complete(created);
       } catch (Exception e) {
         future.fail(e);
-      } finally {
-        closeQuietly(stream);
       }
     }, handler);
-  }
-
-  public static void closeQuietly(Closeable closeable) {
-    if (closeable != null) {
-      try {
-        closeable.close();
-      } catch (Exception e) {
-        // Ignore it.
-      }
-    }
   }
 
   private interface PropertiesReader {

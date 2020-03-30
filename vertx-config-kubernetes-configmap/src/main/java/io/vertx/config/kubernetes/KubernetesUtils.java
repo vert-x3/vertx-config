@@ -30,14 +30,5 @@ public class KubernetesUtils {
 
   public static final String OPENSHIFT_KUBERNETES_TOKEN_FILE = "/var/run/secrets/kubernetes.io/serviceaccount/token";
 
-  private static void closeQuietly(InputStream is) {
-    if (is != null) {
-      try {
-        is.close();
-      } catch (IOException e) {
-        // Ignore it.
-      }
-    }
-  }
 }
 
