@@ -29,6 +29,7 @@ import io.vertx.core.json.JsonObject;
 
 import java.io.Reader;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 
 /**
  * A processor using Typesafe Conf to read Hocon files. It also support JSON and Properties.
@@ -49,7 +50,7 @@ public class HoconProcessor implements ConfigProcessor {
     // Indeed, HOCON resolution can read others files (includes).
     vertx.executeBlocking(
         future -> {
-          try (Reader reader = new StringReader(input.toString())){
+          try (Reader reader = new StringReader(input.toString(StandardCharsets.UTF_8))){
             Config conf = ConfigFactory.parseReader(reader);
             conf = conf.resolve();
             String output = conf.root().render(ConfigRenderOptions.concise()
