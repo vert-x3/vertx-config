@@ -30,8 +30,6 @@ import io.vertx.core.json.JsonObject;
 import java.io.Reader;
 import java.io.StringReader;
 
-import static io.vertx.config.impl.spi.PropertiesConfigProcessor.closeQuietly;
-
 /**
  * A processor using Typesafe Conf to read Hocon files. It also support JSON and Properties.
  * More details on Hocon and the used library on the
@@ -51,18 +49,15 @@ public class HoconProcessor implements ConfigProcessor {
     // Indeed, HOCON resolution can read others files (includes).
     vertx.executeBlocking(
         future -> {
-          Reader reader = new StringReader(input.toString("UTF-8"));
-          try {
+          try (Reader reader = new StringReader(input.toString("UTF-8"))) {
             Config conf = ConfigFactory.parseReader(reader);
             conf = conf.resolve();
             String output = conf.root().render(ConfigRenderOptions.concise()
-                .setJson(true).setComments(false).setFormatted(false));
+              .setJson(true).setComments(false).setFormatted(false));
             JsonObject json = new JsonObject(output);
             future.complete(json);
           } catch (Exception e) {
             future.fail(e);
-          } finally {
-            closeQuietly(reader);
           }
         },
         handler
