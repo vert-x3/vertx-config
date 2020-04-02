@@ -30,7 +30,7 @@ public class ConfigRetrieverOptionsConverter {
             java.util.ArrayList<io.vertx.config.ConfigStoreOptions> list =  new java.util.ArrayList<>();
             ((Iterable<Object>)member.getValue()).forEach( item -> {
               if (item instanceof JsonObject)
-                list.add(new io.vertx.config.ConfigStoreOptions((JsonObject)item));
+                list.add(new io.vertx.config.ConfigStoreOptions((io.vertx.core.json.JsonObject)item));
             });
             obj.setStores(list);
           }
