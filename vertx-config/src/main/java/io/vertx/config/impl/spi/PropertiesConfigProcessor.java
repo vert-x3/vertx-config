@@ -59,13 +59,17 @@ public class PropertiesConfigProcessor implements ConfigProcessor {
   public void process(Vertx vertx, JsonObject configuration, Buffer input, Handler<AsyncResult<JsonObject>> handler) {
     Boolean hierarchicalData = configuration.getBoolean("hierarchical", false);
     PropertiesReader reader = hierarchicalData ? HIERARCHICAL_READER : FLAT_READER;
+    // lock the input config before entering the execute blocking to avoid
+    // access from 2 different threads (the called e.g.: the event loop) and
+    // the thread pool thread.
+    final boolean rawData = configuration.getBoolean("raw-data", false);
     // I'm not sure the executeBlocking is really required here as the
     // buffer is in memory,
     // so the input stream is not blocking
     vertx.executeBlocking(future -> {
       byte[] bytes = input.getBytes();
       try (ByteArrayInputStream stream = new ByteArrayInputStream(bytes)) {
-        JsonObject created = reader.readAsJson(configuration, stream);
+        JsonObject created = reader.readAsJson(rawData, stream);
         future.complete(created);
       } catch (Exception e) {
         future.fail(e);
@@ -75,23 +79,23 @@ public class PropertiesConfigProcessor implements ConfigProcessor {
 
   private interface PropertiesReader {
 
-    JsonObject readAsJson(JsonObject configuration, InputStream stream) throws IOException;
+    JsonObject readAsJson(boolean rawData, InputStream stream) throws IOException;
   }
 
   private static class FlatPropertiesReader implements PropertiesReader {
 
     @Override
-    public JsonObject readAsJson(JsonObject configuration, InputStream byteStream) throws IOException {
+    public JsonObject readAsJson(boolean rawData, InputStream byteStream) throws IOException {
       Properties properties = new Properties();
       properties.load(byteStream);
-      return JsonObjectHelper.from(properties, configuration.getBoolean("raw-data", false));
+      return JsonObjectHelper.from(properties, rawData);
     }
   }
 
   private static class HierarchicalPropertiesReader implements PropertiesReader {
 
     @Override
-    public JsonObject readAsJson(JsonObject configuration, InputStream byteStream) throws IOException {
+    public JsonObject readAsJson(boolean rawData, InputStream byteStream) throws IOException {
       try (
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(byteStream));
         Stream<String> stream = bufferedReader.lines()
