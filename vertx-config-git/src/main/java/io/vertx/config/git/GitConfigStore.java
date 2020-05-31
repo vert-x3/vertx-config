@@ -138,11 +138,11 @@ public class GitConfigStore implements ConfigStore {
         }
         return git;
       } else {
-        git.checkout().
-          setName(branch).
-          setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK).
-          setStartPoint(remote + "/" + branch).
-          call();
+        git.checkout()
+          .setName(branch)
+          .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK)
+          .setStartPoint(remote + "/" + branch)
+          .call();
         return git;
       }
     } else {
@@ -202,7 +202,8 @@ public class GitConfigStore implements ConfigStore {
       future -> {
         PullResult call;
         try {
-          call = git.pull().setRemote(remote).setRemoteBranchName(branch).setCredentialsProvider(credentialProvider).call();
+          call = git.pull().setRemote(remote).setRemoteBranchName(branch).setCredentialsProvider(credentialProvider)
+                  .setTransportConfigCallback(transportConfigCallback).call();
         } catch (GitAPIException e) {
           future.fail(e);
           return;
