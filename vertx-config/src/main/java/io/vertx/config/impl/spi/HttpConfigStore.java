@@ -19,7 +19,6 @@ package io.vertx.config.impl.spi;
 
 import io.vertx.config.spi.ConfigStore;
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
@@ -61,18 +60,8 @@ public class HttpConfigStore implements ConfigStore {
 
   @Override
   public Future<Buffer> get() {
-    Promise<Buffer> promise = vertx.promise();
-    client.get(requestOptions, ar -> {
-      if (ar.succeeded()) {
-        HttpClientResponse response = ar.result();
-        response
-          .exceptionHandler(t -> promise.fail(t))
-          .bodyHandler(buffer -> promise.complete(buffer));
-      } else {
-        promise.fail(ar.cause());
-      }
-    });
-    return promise.future();
+    return client.get(requestOptions)
+      .flatMap(HttpClientResponse::body);
   }
 
   @Override

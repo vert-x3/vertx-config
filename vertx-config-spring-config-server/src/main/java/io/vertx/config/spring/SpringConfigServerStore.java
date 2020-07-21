@@ -18,11 +18,11 @@
 package io.vertx.config.spring;
 
 import io.vertx.config.spi.ConfigStore;
-import io.vertx.core.*;
+import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonArray;
@@ -93,59 +93,42 @@ class SpringConfigServerStore implements ConfigStore {
 
   @Override
   public Future<Buffer> get() {
-    Promise<Buffer> promise = vertx.promise();
-
     RequestOptions options = new RequestOptions().setURI(path).setTimeout(timeout);
     if (authHeaderValue != null) {
       options.addHeader("Authorization", authHeaderValue);
     }
-    client.get(options, ar -> {
-      if (ar.succeeded()) {
-        HttpClientResponse response = ar.result();
+    return client.get(options)
+      .flatMap(response -> {
         if (response.statusCode() != 200) {
-          promise.fail("Invalid response from server: " + response.statusCode() + " - "
+          return Future.failedFuture("Invalid response from server: " + response.statusCode() + " - "
             + response.statusMessage());
         } else {
-          response
-            .exceptionHandler(t -> promise.fail(t))
-            .bodyHandler(buffer -> parse(buffer.toJsonObject(), promise));
+          return response.body();
         }
-      } else {
-        promise.fail(ar.cause());
-      }
-    });
-
-    return promise.future();
+      })
+      .map(Buffer::toJsonObject)
+      .flatMap(this::parse);
   }
 
-  private void parse(JsonObject body, Handler<AsyncResult<Buffer>> handler) {
-    if (this.path.endsWith(".json")) {
-      parseFromJson(body, handler);
-    } else {
-      parseFromStandard(body, handler);
-    }
+  private Future<Buffer> parse(JsonObject body) {
+    return this.path.endsWith(".json") ? parseFromJson(body) : parseFromStandard(body);
   }
 
-  private void parseFromStandard(JsonObject body, Handler<AsyncResult<Buffer>> handler) {
+  private Future<Buffer> parseFromStandard(JsonObject body) {
     JsonArray sources = body.getJsonArray("propertySources");
     if (sources == null) {
-      handler.handle(Future.failedFuture("Invalid configuration server response, property sources missing"));
-    } else {
-      JsonObject configuration = new JsonObject();
-      for (int i = sources.size() - 1; i >= 0; i--) {
-        JsonObject source = sources.getJsonObject(i);
-        JsonObject content = source.getJsonObject("source");
-        configuration = configuration.mergeIn(content, true);
-      }
-      handler.handle(Future.succeededFuture(Buffer.buffer(configuration.encode())));
+      return Future.failedFuture("Invalid configuration server response, property sources missing");
     }
+    JsonObject configuration = new JsonObject();
+    for (int i = sources.size() - 1; i >= 0; i--) {
+      JsonObject source = sources.getJsonObject(i);
+      JsonObject content = source.getJsonObject("source");
+      configuration = configuration.mergeIn(content, true);
+    }
+    return Future.succeededFuture(Buffer.buffer(configuration.encode()));
   }
 
-  private void parseFromJson(JsonObject body, Handler<AsyncResult<Buffer>> handler) {
-    if (body == null) {
-      handler.handle(Future.failedFuture("Invalid configuration server response, property sources missing"));
-    } else {
-      handler.handle(Future.succeededFuture(Buffer.buffer(body.encode())));
-    }
+  private Future<Buffer> parseFromJson(JsonObject body) {
+    return body == null ? Future.failedFuture("Invalid configuration server response, property sources missing") : Future.succeededFuture(Buffer.buffer(body.encode()));
   }
 }
