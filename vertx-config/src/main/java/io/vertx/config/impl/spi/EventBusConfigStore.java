@@ -18,12 +18,12 @@
 package io.vertx.config.impl.spi;
 
 import io.vertx.config.spi.ConfigStore;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.MessageConsumer;
+import io.vertx.core.impl.ContextInternal;
+import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonObject;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -36,10 +36,12 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class EventBusConfigStore implements ConfigStore {
 
+  private final VertxInternal vertx;
   private final MessageConsumer<Object> consumer;
-  private AtomicReference<Buffer> last = new AtomicReference<>();
+  private final AtomicReference<Buffer> last = new AtomicReference<>();
 
   public EventBusConfigStore(Vertx vertx, String address) {
+    this.vertx = (VertxInternal) vertx;
     consumer = vertx.eventBus().consumer(address);
     consumer.handler(message -> {
       Object body = message.body();
@@ -52,17 +54,14 @@ public class EventBusConfigStore implements ConfigStore {
   }
 
   @Override
-  public void close(Handler<Void> completionHandler) {
-    consumer.unregister(ar -> completionHandler.handle(null));
+  public Future<Void> close() {
+    return consumer.unregister();
   }
 
   @Override
-  public void get(Handler<AsyncResult<Buffer>> completionHandler) {
+  public Future<Buffer> get() {
     Buffer buffer = last.get();
-    if (buffer != null) {
-      completionHandler.handle(Future.succeededFuture(buffer));
-    } else {
-      completionHandler.handle(Future.succeededFuture(Buffer.buffer("{}")));
-    }
+    ContextInternal context = vertx.getOrCreateContext();
+    return context.succeededFuture(buffer != null ? buffer : Buffer.buffer("{}"));
   }
 }

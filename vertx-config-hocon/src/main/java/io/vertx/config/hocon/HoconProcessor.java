@@ -21,8 +21,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigRenderOptions;
 import io.vertx.config.spi.ConfigProcessor;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
@@ -44,23 +43,21 @@ public class HoconProcessor implements ConfigProcessor {
   }
 
   @Override
-  public void process(Vertx vertx, JsonObject configuration, Buffer input, Handler<AsyncResult<JsonObject>> handler) {
+  public Future<JsonObject> process(Vertx vertx, JsonObject configuration, Buffer input) {
     // Use executeBlocking even if the bytes are in memory
     // Indeed, HOCON resolution can read others files (includes).
-    vertx.executeBlocking(
-        future -> {
-          try (Reader reader = new StringReader(input.toString("UTF-8"))) {
-            Config conf = ConfigFactory.parseReader(reader);
-            conf = conf.resolve();
-            String output = conf.root().render(ConfigRenderOptions.concise()
-              .setJson(true).setComments(false).setFormatted(false));
-            JsonObject json = new JsonObject(output);
-            future.complete(json);
-          } catch (Exception e) {
-            future.fail(e);
-          }
-        },
-        handler
+    return vertx.executeBlocking(promise -> {
+        try (Reader reader = new StringReader(input.toString("UTF-8"))) {
+          Config conf = ConfigFactory.parseReader(reader);
+          conf = conf.resolve();
+          String output = conf.root().render(ConfigRenderOptions.concise()
+            .setJson(true).setComments(false).setFormatted(false));
+          JsonObject json = new JsonObject(output);
+          promise.complete(json);
+        } catch (Exception e) {
+          promise.fail(e);
+        }
+      }
     );
   }
 }

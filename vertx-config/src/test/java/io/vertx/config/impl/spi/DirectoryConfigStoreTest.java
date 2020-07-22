@@ -19,11 +19,11 @@ package io.vertx.config.impl.spi;
 
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
+import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.config.ConfigStoreOptions;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import org.junit.Before;
@@ -70,7 +70,7 @@ public class DirectoryConfigStoreTest extends ConfigStoreTestBase {
     Async async = tc.async();
     store = factory.create(vertx, new JsonObject().put("path", "src/test/missing")
         .put("filesets", new JsonArray().add(new JsonObject().put("pattern", "*.json"))));
-    store.get(ar -> {
+    store.get().onComplete(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result()).isEqualTo(Buffer.buffer("{}"));
       async.complete();

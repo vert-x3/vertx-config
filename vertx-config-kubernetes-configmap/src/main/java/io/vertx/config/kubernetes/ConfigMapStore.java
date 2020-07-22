@@ -19,13 +19,10 @@ package io.vertx.config.kubernetes;
 
 import io.vertx.config.spi.ConfigStore;
 import io.vertx.config.spi.utils.JsonObjectHelper;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
@@ -45,7 +42,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class ConfigMapStore implements ConfigStore {
   private static final String KUBERNETES_NAMESPACE = System.getenv("KUBERNETES_NAMESPACE");
   private static final Base64.Decoder DECODER = Base64.getDecoder();
-  private final Vertx vertx;
+  private final VertxInternal vertx;
   private final JsonObject configuration;
   private final String namespace;
   private final String name;
@@ -53,15 +50,13 @@ public class ConfigMapStore implements ConfigStore {
   private final boolean secret;
   private final boolean optional;
 
-  private final Context ctx;
   private final WebClient client;
   private String token;
 
 
   public ConfigMapStore(Vertx vertx, JsonObject configuration) {
-    this.vertx = vertx;
+    this.vertx = (VertxInternal) vertx;
     this.configuration = configuration;
-    this.ctx = vertx.getOrCreateContext();
 
     String ns = configuration.getString("namespace");
     if (ns == null) {
@@ -109,141 +104,108 @@ public class ConfigMapStore implements ConfigStore {
   }
 
   @Override
-  public synchronized void close(Handler<Void> completionHandler) {
-    runOnContext(v -> closeOnContext(completionHandler));
-  }
-
-  private synchronized void closeOnContext(Handler<Void> completionHandler) {
+  public Future<Void> close() {
     if (client != null) {
       client.close();
     }
-    if (completionHandler != null) {
-      completionHandler.handle(null);
-    }
-  }
-
-  private void runOnContext(Handler<Void> action) {
-    if (Vertx.currentContext() == this.ctx) {
-      action.handle(null);
-    }
-    else {
-      ctx.runOnContext(action);
-    }
+    return vertx.getOrCreateContext().succeededFuture();
   }
 
   private Future<String> getToken() {
-    Promise<String> result = Promise.promise();
-
     String token = configuration.getString("token");
     if (token != null && !token.trim().isEmpty()) {
       this.token = token;
-      result.complete(token);
-      return result.future();
+      return vertx.getOrCreateContext().succeededFuture(token);
     }
 
     // Read from file
-    vertx.fileSystem().readFile(KubernetesUtils.OPENSHIFT_KUBERNETES_TOKEN_FILE, ar -> {
-      if (ar.failed()) {
-        if (optional) {
-          this.token = "";
-          result.tryComplete(this.token);
-        } else {
-          result.tryFail(ar.cause());
-        }
-      } else {
-        this.token = ar.result().toString();
-        result.tryComplete(ar.result().toString());
-      }
-    });
-
-    return result.future();
+    return vertx.fileSystem().readFile(KubernetesUtils.OPENSHIFT_KUBERNETES_TOKEN_FILE)
+      .recover(throwable -> optional ? Future.succeededFuture(Buffer.buffer()) : Future.failedFuture(throwable))
+      .map(Buffer::toString)
+      .onSuccess(tk -> {
+        this.token = tk;
+      });
   }
 
   @Override
-  public void get(Handler<AsyncResult<Buffer>> completionHandler) {
-    runOnContext(v -> getOnContext(completionHandler));
-  }
-
-  private synchronized void getOnContext(Handler<AsyncResult<Buffer>> completionHandler) {
+  public Future<Buffer> get() {
     Future<String> retrieveToken;
     if (token == null) {
       retrieveToken = getToken();
     } else {
-      retrieveToken = Future.succeededFuture(token);
+      retrieveToken = vertx.getOrCreateContext().succeededFuture(token);
     }
 
-    retrieveToken
-      .compose(token -> {
-        Promise<Buffer> promise = Promise.promise();
-        if (token.isEmpty()) {
-          promise.complete(Buffer.buffer("{}"));
-          return promise.future();
-        }
+    return retrieveToken.flatMap(token -> {
+      if (token.isEmpty()) {
+        return Future.succeededFuture(Buffer.buffer("{}"));
+      }
 
-        String path = "/api/v1/namespaces/" + namespace;
-        if (secret) {
-          path += "/secrets/" + name;
-        } else {
-          path += "/configmaps/" + name;
-        }
+      String path = "/api/v1/namespaces/" + namespace;
+      if (secret) {
+        path += "/secrets/" + name;
+      } else {
+        path += "/configmaps/" + name;
+      }
 
-        client.get(path)
-          .putHeader("Authorization", "Bearer " + token)
-          .send(ar -> {
-            if (ar.failed()) {
-              completionHandler.handle(ar.mapEmpty());
-              return;
-            }
-            HttpResponse<Buffer> response = ar.result();
-            if (response.statusCode() == 404) {
-              if (optional) {
-                promise.complete(Buffer.buffer("{}"));
-              } else {
-                promise.fail("Cannot find the config map '" + name + "' in '" + namespace + "'");
-              }
-            } else if (response.statusCode() == 403) {
-              completionHandler.handle(Future.failedFuture("Access denied to configmap or secret in namespace "
-                + namespace + ": " + name));
-            } else if (response.statusCode() != 200) {
-              if (optional) {
-                promise.complete(Buffer.buffer("{}"));
-              } else {
-                completionHandler.handle(Future.failedFuture("Cannot retrieve the configmap or secret in namespace "
-                  + namespace + ": " + name + ", status code: " + response.statusCode() + ", error: "
-                  + response.bodyAsString()));
-              }
-            } else {
-              JsonObject data = response.bodyAsJsonObject().getJsonObject("data");
-              if (data == null) {
-                promise.fail("Invalid secret of configmap in namespace " + namespace + " " + name + ", the data " +
-                  "entry is empty");
-                return;
-              }
-              if (this.key == null) {
-                if (secret) {
-                  promise.complete(new JsonObject(asSecretObjectMap(data.getMap())).toBuffer());
-                }
-                else {
-                  promise.complete(new JsonObject(asObjectMap(data.getMap())).toBuffer());
-                }
+      return client.get(path)
+        .putHeader("Authorization", "Bearer " + token)
+        .send()
+        .flatMap(response -> {
+          if (response.statusCode() == 404) {
+            return handle404();
+          }
+          if (response.statusCode() == 403) {
+            return handle403();
+          }
+          if (response.statusCode() != 200) {
+            return handleOtherErrors(response);
+          }
+          return handle200(response);
+        });
+    });
+  }
 
-              } else {
-                String string = data.getString(this.key);
-                if (string == null) {
-                  promise.fail("Cannot find key '" + this.key + "' in the configmap or secret '" + this.name + "'");
-                } else {
-                  if (secret) {
-                    promise.complete(Buffer.buffer(DECODER.decode(string)));
-                  }
-                  else {
-                    promise.complete(Buffer.buffer(string));
-                  }
-                }
-              }
-            }
-          });
-        return promise.future();
-      }).onComplete(completionHandler);
+  private Future<Buffer> handle404() {
+    if (optional) {
+      return Future.succeededFuture(Buffer.buffer("{}"));
+    }
+    return Future.failedFuture("Cannot find the config map '" + name + "' in '" + namespace + "'");
+  }
+
+  private Future<Buffer> handle403() {
+    return Future.failedFuture("Access denied to configmap or secret in namespace " + namespace + ": " + name);
+  }
+
+  private Future<Buffer> handleOtherErrors(HttpResponse<Buffer> response) {
+    if (optional) {
+      return Future.succeededFuture(Buffer.buffer("{}"));
+    }
+    return Future.failedFuture("Cannot retrieve the configmap or secret in namespace "
+      + namespace + ": " + name + ", status code: " + response.statusCode() + ", error: "
+      + response.bodyAsString());
+  }
+
+  private Future<Buffer> handle200(HttpResponse<Buffer> response) {
+    JsonObject data = response.bodyAsJsonObject().getJsonObject("data");
+    if (data == null) {
+      return Future.failedFuture("Invalid secret of configmap in namespace " + namespace + " " + name
+        + ", the data " + "entry is empty");
+    }
+    if (this.key == null) {
+      if (secret) {
+        return Future.succeededFuture(new JsonObject(asSecretObjectMap(data.getMap())).toBuffer());
+      }
+      return Future.succeededFuture(new JsonObject(asObjectMap(data.getMap())).toBuffer());
+    }
+    String string = data.getString(this.key);
+    if (string == null) {
+      return Future.failedFuture("Cannot find key '" + this.key + "' in the configmap or secret '" + this.name + "'");
+    }
+    if (secret) {
+      return Future.succeededFuture(Buffer.buffer(DECODER.decode(string)));
+    }
+    return Future.succeededFuture(Buffer.buffer(string));
   }
 
   private static Map<String, Object> asObjectMap(Map<String, Object> source) {

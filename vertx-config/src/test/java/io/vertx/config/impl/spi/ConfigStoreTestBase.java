@@ -18,6 +18,7 @@
 package io.vertx.config.impl.spi;
 
 import io.vertx.config.ConfigRetriever;
+import io.vertx.config.spi.ConfigProcessor;
 import io.vertx.config.spi.ConfigStore;
 import io.vertx.config.spi.ConfigStoreFactory;
 import io.vertx.core.AsyncResult;
@@ -25,7 +26,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.config.spi.ConfigProcessor;
+import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.After;
@@ -58,12 +59,12 @@ public abstract class ConfigStoreTestBase {
   }
 
   @After
-  public void tearDown() {
+  public void tearDown(TestContext context) {
     AtomicBoolean done = new AtomicBoolean();
     if (store != null) {
-      store.close(v -> done.set(true));
-      await().untilAtomic(done, is(true));
-      done.set(false);
+      Async async = context.async();
+      store.close().onComplete(v -> async.complete());
+      async.awaitSuccess();
     }
 
     if (retriever != null) {
@@ -76,21 +77,21 @@ public abstract class ConfigStoreTestBase {
   }
 
   protected void getJsonConfiguration(Vertx vertx, ConfigStore store, Handler<AsyncResult<JsonObject>> handler) {
-    store.get(buffer -> {
+    store.get().onComplete(buffer -> {
       if (buffer.failed()) {
         handler.handle(Future.failedFuture(buffer.cause()));
       } else {
-        JSON.process(vertx, new JsonObject(), buffer.result(), handler);
+        JSON.process(vertx, new JsonObject(), buffer.result()).onComplete(handler);
       }
     });
   }
 
   protected void getPropertiesConfiguration(Vertx vertx, ConfigStore store, Handler<AsyncResult<JsonObject>> handler) {
-    store.get(buffer -> {
+    store.get().onComplete(buffer -> {
       if (buffer.failed()) {
         handler.handle(Future.failedFuture(buffer.cause()));
       } else {
-        PROPERTIES.process(vertx, new JsonObject(), buffer.result(), handler);
+        PROPERTIES.process(vertx, new JsonObject(), buffer.result()).onComplete(handler);
       }
     });
   }

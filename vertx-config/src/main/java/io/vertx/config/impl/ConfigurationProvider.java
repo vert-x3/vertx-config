@@ -19,13 +19,11 @@ package io.vertx.config.impl;
 
 import io.vertx.config.spi.ConfigProcessor;
 import io.vertx.config.spi.ConfigStore;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.json.JsonObject;
 
 /**
  * A configuration provider retrieve the configuration from a store and transform it to Json.
@@ -56,39 +54,27 @@ public class ConfigurationProvider {
     this.logger = LoggerFactory.getLogger("ConfigurationProvider#" + store);
   }
 
-  void get(Vertx vertx, Handler<AsyncResult<JsonObject>> completionHandler) {
-    store.get(maybeBuffer -> {
-      if (maybeBuffer.failed()) {
-        if (optional) {
-          if (logger.isDebugEnabled()) {
-            logger.debug("Unable to retrieve the configuration", maybeBuffer.cause());
-          }
-          completionHandler.handle(Future.succeededFuture(new JsonObject()));
-        } else {
-          completionHandler.handle(Future.failedFuture(maybeBuffer.cause()));
+  Future<JsonObject> get(Vertx vertx) {
+    return store.get()
+      .onFailure(throwable -> {
+        if (optional && logger.isDebugEnabled()) {
+          logger.debug("Unable to retrieve the configuration", throwable);
         }
-      } else {
-        processor.process(vertx, configuration, maybeBuffer.result(), maybeJson -> {
-          if (maybeJson.failed()) {
+      })
+      .flatMap(maybeBuffer -> {
+        return processor.process(vertx, configuration, maybeBuffer)
+          .onFailure(throwable -> {
             if (optional) {
-              logger.warn("Unable to process the retrieve the configuration " + maybeJson.cause().getMessage());
               if (logger.isDebugEnabled()) {
-                logger.debug("Failure caught when processing the configuration", maybeJson.cause());
+                logger.debug("Failure caught when processing the configuration", throwable);
               }
-              completionHandler.handle(Future.succeededFuture(new JsonObject()));
-            } else {
-              completionHandler.handle(Future.failedFuture(maybeJson.cause()));
             }
-          } else {
-            completionHandler.handle(Future.succeededFuture(maybeJson.result()));
-          }
-        });
-      }
-    });
+          });
+      }).recover(throwable -> optional ? Future.succeededFuture(new JsonObject()) : Future.failedFuture(throwable));
   }
 
-  void close(Handler<Void> handler) {
-    store.close(handler);
+  void close() {
+    store.close();
   }
 
   public ConfigStore getStore() {

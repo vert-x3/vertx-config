@@ -33,7 +33,7 @@ public class EnvVariablesConfigStoreTest extends ConfigStoreTestBase {
 
   @Before
   public void init() {
-    factory = new EnvVariablesConfigStore();
+    factory = new EnvVariablesConfigStoreFactory();
     store = factory.create(vertx, new JsonObject());
   }
 

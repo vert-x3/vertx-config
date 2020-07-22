@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Red Hat, Inc. and others
+ * Copyright 2020 Red Hat, Inc.
  *
  * Red Hat licenses this file to you under the Apache License, version 2.0
  * (the "License"); you may not use this file except in compliance with the
@@ -12,30 +12,31 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
  * License for the specific language governing permissions and limitations
  * under the License.
- *
  */
 
 package io.vertx.config.impl.spi;
 
 import io.vertx.config.spi.ConfigStore;
-import io.vertx.config.spi.ConfigStoreFactory;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 
-/**
- * The factory creating Json object configuration stores.
- *
- * @author <a href="http://escoffier.me">Clement Escoffier</a>
- */
-public class JsonConfigStoreFactory implements ConfigStoreFactory {
+public class NonFuturizedConfigStore implements ConfigStore {
 
-  @Override
-  public String name() {
-    return "json";
+  private final Vertx vertx;
+  private final JsonObject configuration;
+
+  public NonFuturizedConfigStore(Vertx vertx, JsonObject configuration) {
+    this.vertx = vertx;
+    this.configuration = configuration;
   }
 
   @Override
-  public ConfigStore create(Vertx vertx, JsonObject configuration) {
-    return new JsonConfigStore(vertx, configuration);
+  public void get(Handler<AsyncResult<Buffer>> completionHandler) {
+    vertx.executeBlocking(promise -> {
+      promise.complete(configuration.getBuffer("foo"));
+    }, completionHandler);
   }
 }

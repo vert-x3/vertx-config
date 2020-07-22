@@ -17,10 +17,9 @@
 
 package io.vertx.config.spi;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -48,7 +47,26 @@ public interface ConfigProcessor {
    * @param input         the input, must not be {@code null}
    * @param handler       the result handler, must not be {@code null}. The handler will be called in the same context as
    *                      the caller.
+   * @deprecated implement {@link #process(Vertx, JsonObject, Buffer)} instead
    */
-  void process(Vertx vertx, JsonObject configuration, Buffer input, Handler<AsyncResult<JsonObject>> handler);
+  @Deprecated
+  default void process(Vertx vertx, JsonObject configuration, Buffer input, Handler<AsyncResult<JsonObject>> handler) {
+    vertx.runOnContext(v -> handler.handle(Future.failedFuture("Deprecated")));
+  }
 
+  /**
+   * Transforms the given {@code input} into a {@link JsonObject}.
+   * <p>
+   * This is an asynchronous non-blocking transformation.
+   *
+   * @param vertx         the Vert.x instance
+   * @param configuration the processor configuration, may be {@code null}
+   * @param input         the input, must not be {@code null}
+   */
+  default Future<JsonObject> process(Vertx vertx, JsonObject configuration, Buffer input) {
+    VertxInternal vertxInternal = (VertxInternal) vertx;
+    Promise<JsonObject> promise = vertxInternal.promise();
+    process(vertx, configuration, input, promise);
+    return promise.future();
+  }
 }

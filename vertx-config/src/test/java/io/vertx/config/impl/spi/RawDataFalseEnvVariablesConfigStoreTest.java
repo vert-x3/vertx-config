@@ -17,8 +17,6 @@
 
 package io.vertx.config.impl.spi;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -31,6 +29,8 @@ import org.junit.runner.RunWith;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(VertxUnitRunner.class)
 public class RawDataFalseEnvVariablesConfigStoreTest extends ConfigStoreTestBase {
@@ -48,7 +48,7 @@ public class RawDataFalseEnvVariablesConfigStoreTest extends ConfigStoreTestBase
   public void init() {
     environmentVariables.set(KEY_1, VAL_1);
     environmentVariables.set(KEY_2, VAL_2);
-    factory = new EnvVariablesConfigStore();
+    factory = new EnvVariablesConfigStoreFactory();
     store = factory.create(vertx, new JsonObject().put("raw-data", false));
   }
 

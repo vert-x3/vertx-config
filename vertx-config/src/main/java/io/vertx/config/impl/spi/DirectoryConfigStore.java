@@ -19,13 +19,18 @@ package io.vertx.config.impl.spi;
 
 import io.vertx.config.spi.ConfigStore;
 import io.vertx.config.spi.utils.FileSet;
-import io.vertx.core.*;
+import io.vertx.core.CompositeFuture;
+import io.vertx.core.Future;
+import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -35,13 +40,13 @@ import java.util.stream.Collectors;
  */
 public class DirectoryConfigStore implements ConfigStore {
 
-  private Vertx vertx;
+  private VertxInternal vertx;
 
   private File path;
   private final List<FileSet> filesets = new ArrayList<>();
 
   public DirectoryConfigStore(Vertx vertx, JsonObject configuration) {
-    this.vertx = vertx;
+    this.vertx = (VertxInternal) vertx;
     String thePath = configuration.getString("path");
     if (thePath == null) {
       throw new IllegalArgumentException("The `path` configuration is required.");
@@ -63,48 +68,37 @@ public class DirectoryConfigStore implements ConfigStore {
     }
   }
 
-
+  @Override
+  public Future<Buffer> get() {
+    return vertx.<List<File>>executeBlocking(promise -> {
+      try {
+        promise.complete(FileSet.traverse(path).stream().sorted().collect(Collectors.toList()));
+      } catch (Throwable e) {
+        promise.fail(e);
+      }
+    }).flatMap(files -> {
+      List<Future> futures = new ArrayList<>();
+      for (FileSet set : filesets) {
+        Promise<JsonObject> promise = vertx.promise();
+        set.buildConfiguration(files, json -> {
+          if (json.failed()) {
+            promise.fail(json.cause());
+          } else {
+            promise.complete(json.result());
+          }
+        });
+        futures.add(promise.future());
+      }
+      return CompositeFuture.all(futures);
+    }).map(compositeFuture -> {
+      JsonObject json = new JsonObject();
+      compositeFuture.<JsonObject>list().forEach(config -> json.mergeIn(config, true));
+      return json.toBuffer();
+    });
+  }
 
   @Override
-  public void get(Handler<AsyncResult<Buffer>> completionHandler) {
-
-    vertx.<List<File>>executeBlocking(
-        fut -> {
-          try {
-            fut.complete(FileSet.traverse(path).stream().sorted().collect(Collectors.toList()));
-          } catch (Throwable e) {
-            fut.fail(e);
-          }
-        },
-        ar -> {
-          if (ar.failed()) {
-            completionHandler.handle(Future.failedFuture(ar.cause()));
-          } else {
-            List<Future> futures = new ArrayList<>();
-            for (FileSet set : filesets) {
-              Promise<JsonObject> promise = Promise.promise();
-              set.buildConfiguration(ar.result(), json -> {
-                if (json.failed()) {
-                  promise.fail(json.cause());
-                } else {
-                  promise.complete(json.result());
-                }
-              });
-              futures.add(promise.future());
-            }
-
-            CompositeFuture.all(futures).onComplete(cf -> {
-              if (cf.failed()) {
-                completionHandler.handle(Future.failedFuture(cf.cause()));
-              } else {
-                JsonObject json = new JsonObject();
-                futures.stream().map(f -> (JsonObject) f.result())
-                    .forEach(config -> json.mergeIn(config, true));
-                completionHandler.handle(Future.succeededFuture(Buffer.buffer(json.encode())));
-              }
-            });
-          }
-        }
-    );
+  public Future<Void> close() {
+    return vertx.getOrCreateContext().succeededFuture();
   }
 }

@@ -17,19 +17,16 @@
 
 package io.vertx.config.spring;
 
-import io.vertx.core.AsyncResult;
+import io.vertx.config.spi.ConfigStore;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.RequestOptions;
+import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.config.spi.ConfigStore;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -43,13 +40,14 @@ import java.util.Objects;
  */
 class SpringConfigServerStore implements ConfigStore {
 
-
+  private final VertxInternal vertx;
   private final String path;
   private final String authHeaderValue;
   private final HttpClient client;
   private final long timeout;
 
   SpringConfigServerStore(Vertx vertx, JsonObject configuration) {
+    this.vertx = (VertxInternal) vertx;
     String url = configuration.getString("url");
     this.timeout = configuration.getLong("timeout", 3000L);
     Objects.requireNonNull(url);
@@ -78,7 +76,7 @@ class SpringConfigServerStore implements ConfigStore {
 
     if (configuration.getString("user") != null && configuration.getString("password") != null) {
       authHeaderValue = "Basic " + Base64.getEncoder().encodeToString((configuration.getString("user")
-          + ":" + configuration.getString("password")).getBytes());
+        + ":" + configuration.getString("password")).getBytes());
     } else {
       authHeaderValue = null;
     }
@@ -88,64 +86,49 @@ class SpringConfigServerStore implements ConfigStore {
   }
 
   @Override
-  public void close(Handler<Void> completionHandler) {
-    if (client != null) {
-      client.close();
-    }
-    completionHandler.handle(null);
+  public Future<Void> close() {
+    client.close();
+    return vertx.getOrCreateContext().succeededFuture();
   }
 
   @Override
-  public void get(Handler<AsyncResult<Buffer>> completionHandler) {
+  public Future<Buffer> get() {
     RequestOptions options = new RequestOptions().setURI(path).setTimeout(timeout);
     if (authHeaderValue != null) {
       options.addHeader("Authorization", authHeaderValue);
     }
-    client.get(options, ar -> {
-      if (ar.succeeded()) {
-        HttpClientResponse response = ar.result();
+    return client.get(options)
+      .flatMap(response -> {
         if (response.statusCode() != 200) {
-          completionHandler.handle(Future.failedFuture("Invalid response from server: " + response.statusCode() + " - "
-            + response.statusMessage()));
+          return Future.failedFuture("Invalid response from server: " + response.statusCode() + " - "
+            + response.statusMessage());
         } else {
-          response
-            .exceptionHandler(t -> completionHandler.handle(Future.failedFuture(t)))
-            .bodyHandler(buffer -> parse(buffer.toJsonObject(), completionHandler));
+          return response.body();
         }
-      } else {
-        completionHandler.handle(Future.failedFuture(ar.cause()));
-      }
-    });
+      })
+      .map(Buffer::toJsonObject)
+      .flatMap(this::parse);
   }
 
-  private void parse(JsonObject body, Handler<AsyncResult<Buffer>> handler) {
-    if (this.path.endsWith(".json")) {
-      parseFromJson(body, handler);
-    } else {
-      parseFromStandard(body, handler);
-    }
+  private Future<Buffer> parse(JsonObject body) {
+    return this.path.endsWith(".json") ? parseFromJson(body) : parseFromStandard(body);
   }
 
-  private void parseFromStandard(JsonObject body, Handler<AsyncResult<Buffer>> handler) {
+  private Future<Buffer> parseFromStandard(JsonObject body) {
     JsonArray sources = body.getJsonArray("propertySources");
     if (sources == null) {
-      handler.handle(Future.failedFuture("Invalid configuration server response, property sources missing"));
-    } else {
-      JsonObject configuration = new JsonObject();
-      for (int i = sources.size() - 1; i >= 0; i--) {
-        JsonObject source = sources.getJsonObject(i);
-        JsonObject content = source.getJsonObject("source");
-        configuration = configuration.mergeIn(content, true);
-      }
-      handler.handle(Future.succeededFuture(Buffer.buffer(configuration.encode())));
+      return Future.failedFuture("Invalid configuration server response, property sources missing");
     }
+    JsonObject configuration = new JsonObject();
+    for (int i = sources.size() - 1; i >= 0; i--) {
+      JsonObject source = sources.getJsonObject(i);
+      JsonObject content = source.getJsonObject("source");
+      configuration = configuration.mergeIn(content, true);
+    }
+    return Future.succeededFuture(Buffer.buffer(configuration.encode()));
   }
 
-  private void parseFromJson(JsonObject body, Handler<AsyncResult<Buffer>> handler) {
-    if (body == null) {
-      handler.handle(Future.failedFuture("Invalid configuration server response, property sources missing"));
-    } else {
-      handler.handle(Future.succeededFuture(Buffer.buffer(body.encode())));
-    }
+  private Future<Buffer> parseFromJson(JsonObject body) {
+    return body == null ? Future.failedFuture("Invalid configuration server response, property sources missing") : Future.succeededFuture(Buffer.buffer(body.encode()));
   }
 }

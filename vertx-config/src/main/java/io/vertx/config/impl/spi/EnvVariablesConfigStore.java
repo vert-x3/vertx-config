@@ -19,16 +19,18 @@ package io.vertx.config.impl.spi;
 
 import io.vertx.config.spi.ConfigStore;
 import io.vertx.config.spi.utils.JsonObjectHelper;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.config.spi.ConfigStoreFactory;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * An implementation of configuration store loading the content from the environment variables.
@@ -37,42 +39,33 @@ import java.util.*;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class EnvVariablesConfigStore implements ConfigStoreFactory, ConfigStore {
+public class EnvVariablesConfigStore implements ConfigStore {
+
+  private final VertxInternal vertx;
   private final boolean rawData;
   private final Set<String> keys;
 
-  private JsonObject cached;
+  private final AtomicReference<Buffer> cached = new AtomicReference<>();
 
-  public EnvVariablesConfigStore() {
-    this(false, null);
-  }
-
-  public EnvVariablesConfigStore(boolean rawData, JsonArray keys) {
+  public EnvVariablesConfigStore(Vertx vertx, boolean rawData, JsonArray keys) {
+    this.vertx = (VertxInternal) vertx;
     this.rawData = rawData;
     this.keys = (keys == null) ? null : new HashSet<>(keys.getList());
   }
 
   @Override
-  public String name() {
-    return "env";
-  }
-
-  @Override
-  public ConfigStore create(Vertx vertx, JsonObject configuration) {
-    return new EnvVariablesConfigStore(configuration.getBoolean("raw-data", false), configuration.getJsonArray("keys"));
-  }
-
-  @Override
-  public void get(Handler<AsyncResult<Buffer>> completionHandler) {
-    if (cached == null) {
-      cached = all(System.getenv(), rawData, keys);
+  public Future<Buffer> get() {
+    Buffer value = cached.get();
+    if (value == null) {
+      value = all(System.getenv(), rawData, keys).toBuffer();
+      cached.set(value);
     }
-    completionHandler.handle(Future.succeededFuture(Buffer.buffer(cached.encode())));
+    return vertx.getOrCreateContext().succeededFuture(value);
   }
 
   private static JsonObject all(Map<String, String> env, boolean rawData, Set<String> keys) {
     JsonObject json = new JsonObject();
-    Collection localKeys = keys == null ? env.keySet() : keys;
+    Collection<String> localKeys = keys == null ? env.keySet() : keys;
     env.forEach((key, value) -> {
       if (localKeys.contains(key)) {
         JsonObjectHelper.put(json, key, value, rawData);
@@ -81,4 +74,8 @@ public class EnvVariablesConfigStore implements ConfigStoreFactory, ConfigStore 
     return json;
   }
 
+  @Override
+  public Future<Void> close() {
+    return vertx.getOrCreateContext().succeededFuture();
+  }
 }

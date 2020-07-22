@@ -17,38 +17,28 @@
 
 package io.vertx.config.impl.spi;
 
-import io.vertx.config.spi.ConfigProcessor;
-import io.vertx.core.Future;
-import io.vertx.core.Promise;
+import io.vertx.config.spi.ConfigStore;
+import io.vertx.config.spi.ConfigStoreFactory;
 import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonObject;
 
 /**
- * Builds a json object from the given buffer.
+ * The factory creating environment variables configuration stores.
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class JsonProcessor implements ConfigProcessor {
+public class EnvVariablesConfigStoreFactory implements ConfigStoreFactory {
 
-  @Override
-  public Future<JsonObject> process(Vertx vertx, JsonObject configuration, Buffer input) {
-    Promise<JsonObject> promise = ((VertxInternal) vertx).promise();
-    try {
-      JsonObject json = input.toJsonObject();
-      if (json == null) {
-        json = new JsonObject();
-      }
-      promise.complete(json);
-    } catch (Exception e) {
-      promise.fail(e);
-    }
-    return promise.future();
+  public EnvVariablesConfigStoreFactory() {
   }
 
   @Override
   public String name() {
-    return "json";
+    return "env";
+  }
+
+  @Override
+  public ConfigStore create(Vertx vertx, JsonObject configuration) {
+    return new EnvVariablesConfigStore(vertx, configuration.getBoolean("raw-data", false), configuration.getJsonArray("keys"));
   }
 }

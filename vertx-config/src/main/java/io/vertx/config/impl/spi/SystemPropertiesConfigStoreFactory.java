@@ -17,38 +17,25 @@
 
 package io.vertx.config.impl.spi;
 
-import io.vertx.config.spi.ConfigProcessor;
-import io.vertx.core.Future;
-import io.vertx.core.Promise;
+import io.vertx.config.spi.ConfigStore;
+import io.vertx.config.spi.ConfigStoreFactory;
 import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonObject;
 
 /**
- * Builds a json object from the given buffer.
+ * The factory creating system properties configuration stores.
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class JsonProcessor implements ConfigProcessor {
-
-  @Override
-  public Future<JsonObject> process(Vertx vertx, JsonObject configuration, Buffer input) {
-    Promise<JsonObject> promise = ((VertxInternal) vertx).promise();
-    try {
-      JsonObject json = input.toJsonObject();
-      if (json == null) {
-        json = new JsonObject();
-      }
-      promise.complete(json);
-    } catch (Exception e) {
-      promise.fail(e);
-    }
-    return promise.future();
-  }
+public class SystemPropertiesConfigStoreFactory implements ConfigStoreFactory {
 
   @Override
   public String name() {
-    return "json";
+    return "sys";
+  }
+
+  @Override
+  public ConfigStore create(Vertx vertx, JsonObject configuration) {
+    return new SystemPropertiesConfigStore(vertx, configuration);
   }
 }

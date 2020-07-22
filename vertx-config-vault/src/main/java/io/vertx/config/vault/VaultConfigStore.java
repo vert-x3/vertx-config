@@ -19,8 +19,12 @@ package io.vertx.config.vault;
 
 import io.vertx.config.spi.ConfigStore;
 import io.vertx.config.vault.client.*;
-import io.vertx.core.*;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
+import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Objects;
@@ -35,7 +39,7 @@ public class VaultConfigStore implements ConfigStore {
   private final SlimVaultClient client;
   private final JsonObject config;
   private final String path;
-  private final Vertx vertx;
+  private final VertxInternal vertx;
 
   /**
    * When authenticated, whether or not the token is renewable.
@@ -47,8 +51,6 @@ public class VaultConfigStore implements ConfigStore {
    */
   private long validity;
 
-  private Context context;
-
   /**
    * Creates an instance of {@link VaultConfigStore}.
    *
@@ -58,35 +60,22 @@ public class VaultConfigStore implements ConfigStore {
   public VaultConfigStore(Vertx vertx, JsonObject config) {
     client = new SlimVaultClient(vertx, config);
     this.config = config;
-    this.vertx = vertx;
+    this.vertx = (VertxInternal) vertx;
     this.path = Objects.requireNonNull(config.getString("path"), "The path of the secret must be set");
   }
 
   @Override
-  public void close(Handler<Void> completionHandler) {
+  public Future<Void> close() {
     client.close();
-    completionHandler.handle(null);
+    return vertx.getOrCreateContext().succeededFuture();
   }
 
   @Override
-  public void get(Handler<AsyncResult<Buffer>> completionHandler) {
-    if (context == null) {
-      context = vertx.getOrCreateContext();
-    }
-
-    Handler<Void> actions = x -> {
-      authenticate(false) // Are we logged in
-        .compose(v -> renew()) // Do we need to renew
-        .compose(v -> retrieve()) // Retrieve the data
-        .compose(this::extract) // Extract the sub set
-        .onComplete(completionHandler); // Done
-    };
-
-    if (Vertx.currentContext() == context) {
-      actions.handle(null);
-    } else {
-      context.runOnContext(actions);
-    }
+  public Future<Buffer> get() {
+    return authenticate(false) // Are we logged in
+      .compose(v -> renew()) // Do we need to renew
+      .compose(v -> retrieve()) // Retrieve the data
+      .compose(this::extract); // Extract the sub set
   }
 
   private Future<Buffer> extract(JsonObject json) {
@@ -109,28 +98,27 @@ public class VaultConfigStore implements ConfigStore {
   }
 
   private Future<JsonObject> retrieve() {
-    Promise<JsonObject> promise = Promise.promise();
-    client.read(path, ar -> {
-      if (ar.failed() && !(ar.cause() instanceof VaultException)) {
-        promise.fail(ar.cause());
-      } else if (ar.failed() && ((VaultException) ar.cause()).getStatusCode() == 404) {
-        promise.complete(null);
-      } else if (ar.failed()) {
-        promise.fail(ar.cause());
-      } else {
-        Secret result = ar.result();
-        JsonObject copy = result.getData().copy();
-        copy.put("vault-lease-id", result.getLeaseId());
-        copy.put("vault-lease-duration", result.getLeaseDuration());
-        copy.put("vault-renewable", result.isRenewable());
-        promise.complete(copy);
+    Promise<Secret> promise = vertx.promise();
+    client.read(path, promise);
+    return promise.future().map(result -> {
+      JsonObject copy = result.getData().copy();
+      copy.put("vault-lease-id", result.getLeaseId());
+      copy.put("vault-lease-duration", result.getLeaseDuration());
+      copy.put("vault-renewable", result.isRenewable());
+      return copy;
+    }).recover(throwable -> {
+      if (throwable instanceof VaultException) {
+        VaultException vaultException = (VaultException) throwable;
+        if (vaultException.getStatusCode() == 404) {
+          return Future.succeededFuture();
+        }
       }
+      return Future.failedFuture(throwable);
     });
-    return promise.future();
   }
 
   private Future<Void> renew() {
-    Promise<Void> promise = Promise.promise();
+    Promise<Void> promise = vertx.promise();
     if (validity == 0) {
       // Using a root token - should not expire
       promise.complete();
@@ -148,7 +136,7 @@ public class VaultConfigStore implements ConfigStore {
   }
 
   private Future<Void> renewToken() {
-    Promise<Void> promise = Promise.promise();
+    Promise<Void> promise = vertx.promise();
     client.renewSelf(config.getLong("lease-duration", 3600L), auth -> {
       manageAuthenticationResult(promise, auth);
     });
@@ -157,7 +145,7 @@ public class VaultConfigStore implements ConfigStore {
 
 
   private Future<Void> authenticate(boolean renew) {
-    Promise<Void> promise = Promise.promise();
+    Promise<Void> promise = vertx.promise();
     if (!renew && client.getToken() != null) {
       promise.complete();
       return promise.future();
@@ -180,7 +168,7 @@ public class VaultConfigStore implements ConfigStore {
   }
 
   private Future<Void> loginWithUserName() {
-    Promise<Void> promise = Promise.promise();
+    Promise<Void> promise = vertx.promise();
     JsonObject req = config.getJsonObject("user-credentials");
     Objects.requireNonNull(req, "When using username, the `user-credentials` must be set in the " +
       "configuration");
@@ -200,7 +188,7 @@ public class VaultConfigStore implements ConfigStore {
   }
 
   private Future<Void> loginWithCert() {
-    Promise<Void> promise = Promise.promise();
+    Promise<Void> promise = vertx.promise();
     // No validation, certs are configured on the client itself
     client.loginWithCert(auth -> manageAuthenticationResult(promise, auth));
     return promise.future();
@@ -208,7 +196,7 @@ public class VaultConfigStore implements ConfigStore {
 
 
   private Future<Void> loginWithAppRole() {
-    Promise<Void> promise = Promise.promise();
+    Promise<Void> promise = vertx.promise();
     JsonObject req = config.getJsonObject("approle");
     Objects.requireNonNull(req, "When using approle, the `app-role` must be set in the " +
       "configuration");
@@ -223,7 +211,7 @@ public class VaultConfigStore implements ConfigStore {
   }
 
   private Future<Void> loginWithToken() {
-    Promise<Void> promise = Promise.promise();
+    Promise<Void> promise = vertx.promise();
     JsonObject req = config.getJsonObject("token-request");
     Objects.requireNonNull(req, "When using a token creation policy, the `token-request` must be set in the " +
       "configuration");
