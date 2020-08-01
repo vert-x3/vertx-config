@@ -97,17 +97,22 @@ class SpringConfigServerStore implements ConfigStore {
     if (authHeaderValue != null) {
       options.addHeader("Authorization", authHeaderValue);
     }
-    return client.get(options)
-      .flatMap(response -> {
-        if (response.statusCode() != 200) {
-          return Future.failedFuture("Invalid response from server: " + response.statusCode() + " - "
-            + response.statusMessage());
-        } else {
-          return response.body();
-        }
-      })
-      .map(Buffer::toJsonObject)
-      .flatMap(this::parse);
+    return client.request(options)
+      .flatMap(request ->
+        request
+          .send()
+          .flatMap(response -> {
+          if (response.statusCode() != 200) {
+            return Future.failedFuture("Invalid response from server: " + response.statusCode() + " - "
+              + response.statusMessage());
+          } else {
+            return response
+              .body()
+              .map(Buffer::toJsonObject)
+              .flatMap(this::parse);
+          }
+        })
+      );
   }
 
   private Future<Buffer> parse(JsonObject body) {
