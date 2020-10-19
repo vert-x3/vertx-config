@@ -17,6 +17,7 @@
 package io.vertx.config.consul;
 
 import io.vertx.config.spi.ConfigStore;
+import io.vertx.config.spi.utils.JsonObjectHelper;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
@@ -36,18 +37,20 @@ public class ConsulConfigStore implements ConfigStore {
   private final ConsulClient client;
   private final String delimiter;
   private final String prefix;
+  private final boolean rawData;
 
   ConsulConfigStore(Vertx vertx, JsonObject configuration) {
     this.vertx = (VertxInternal) vertx;
     client = ConsulClient.create(vertx, new ConsulClientOptions(configuration));
     delimiter = configuration.getString("delimiter", "/");
     prefix = prefix(configuration.getString("prefix"), delimiter);
+    rawData = configuration.getBoolean("raw-data", true);
   }
 
   @Override
   public Future<Buffer> get() {
     return client.getValues(prefix)
-      .map(list -> list.isPresent() ? getTree(list, prefix.length(), delimiter).toBuffer() : Buffer.buffer("{}"));
+      .map(list -> list.isPresent() ? getTree(list, prefix.length(), delimiter, rawData).toBuffer() : Buffer.buffer("{}"));
   }
 
   @Override
@@ -56,7 +59,7 @@ public class ConsulConfigStore implements ConfigStore {
     return vertx.getOrCreateContext().succeededFuture();
   }
 
-  private static JsonObject getTree(KeyValueList list, int prefix, String delimiter) {
+  private static JsonObject getTree(KeyValueList list, int prefix, String delimiter, boolean rawData) {
     JsonObject tree = new JsonObject();
     for (KeyValue keyValue : list.getList()) {
       if (keyValue.getKey().endsWith(delimiter)) {
@@ -67,7 +70,7 @@ public class ConsulConfigStore implements ConfigStore {
       for (int i = 0; i < arr.length; i++) {
         String key = arr[i];
         if (i == arr.length - 1) {
-          json.put(key, keyValue.getValue());
+          JsonObjectHelper.put(json, key, keyValue.getValue(), rawData);
         } else {
           JsonObject next = json.getJsonObject(key);
           if (next == null) {

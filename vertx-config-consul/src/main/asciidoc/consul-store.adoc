@@ -48,3 +48,5 @@ for further details. And this is the parameters specific to the Consul Configura
 
 `prefix`:: A prefix that will not be taken into account when building the configuration tree. Defaults to empty.
 `delimiter`:: Symbol that used to split keys in the Consul storage to obtain levels in the configuration tree. Defaults to "/".
+`raw-data`:: If `raw-data` is `true` no attempts to convert values is made, and you'll be able to get raw values using
+  `config.getString(key)`. Defaults to true.

@@ -36,6 +36,7 @@ public class ConfigConsulExamples {
           .put("host", "localhost")
           .put("port", 8500)
           .put("prefix", "foo")
+          .put("raw-data", false)
         );
 
     ConfigRetriever retriever = ConfigRetriever.create(vertx,
