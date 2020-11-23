@@ -1,6 +1,6 @@
 = Vert.x Config
 
-image:https://travis-ci.org/vert-x3/vertx-config.svg?branch=master["Build Status",link="https://travis-ci.org/vert-x3/vertx-config"]
+image:https://github.com/vert-x3/vertx-config/workflows/CI/badge.svg?branch=master["Build Status", link="https://github.com/vert-x3/vertx-config/actions?query=workflow%3ACI"]
 
 Vert.x Config provide an extensible way to configure Vert.x applications:
 
