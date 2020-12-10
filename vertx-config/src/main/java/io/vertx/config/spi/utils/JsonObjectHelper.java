@@ -53,9 +53,14 @@ public class JsonObjectHelper {
       return bool;
     }
 
-    Double integer = asNumber(value);
+    Integer integer = asInteger(value);
     if (integer != null) {
       return integer;
+    }
+
+    Double doubleValue = asNumber(value);
+    if (doubleValue != null) {
+      return doubleValue;
     }
 
     JsonObject obj = asJsonObject(value);
@@ -69,6 +74,14 @@ public class JsonObjectHelper {
     }
 
     return value;
+  }
+
+  private static Integer asInteger(String s) {
+    try {
+      return Integer.parseInt(s);
+    } catch (NumberFormatException nfe) {
+      return null;
+    }
   }
 
   private static Double asNumber(String s) {
