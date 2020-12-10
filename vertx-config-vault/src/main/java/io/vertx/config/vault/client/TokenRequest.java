@@ -84,19 +84,7 @@ public class TokenRequest {
   }
 
   public TokenRequest(JsonObject json) {
-    TokenRequestConverter.fromJson(json, this);
-  }
-
-  public TokenRequest(TokenRequest other) {
-    this.id = other.id;
-    this.policies = other.policies;
-    this.meta = other.meta;
-    this.noParent = other.noParent;
-    this.noDefaultPolicy = other.noDefaultPolicy;
-    this.ttl = other.ttl;
-    this.displayName = other.displayName;
-    this.numUses = other.numUses;
-    this.role = other.role;
+    fromJson(json, this);
   }
 
   public String getId() {
@@ -180,12 +168,6 @@ public class TokenRequest {
     return this;
   }
 
-  public JsonObject toJson() {
-    JsonObject json = new JsonObject();
-    TokenRequestConverter.toJson(this, json);
-    return json;
-  }
-
   public JsonObject toPayload() {
     JsonObject payload = new JsonObject();
     if (getId() != null) {
@@ -223,4 +205,65 @@ public class TokenRequest {
 
     return payload;
   }
-}
+
+  private static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, TokenRequest obj) {
+    for (java.util.Map.Entry<String, Object> member : json) {
+      switch (member.getKey()) {
+        case "displayName":
+          if (member.getValue() instanceof String) {
+            obj.setDisplayName((String)member.getValue());
+          }
+          break;
+        case "id":
+          if (member.getValue() instanceof String) {
+            obj.setId((String)member.getValue());
+          }
+          break;
+        case "meta":
+          if (member.getValue() instanceof JsonObject) {
+            java.util.Map<String, java.lang.String> map = new java.util.LinkedHashMap<>();
+            ((Iterable<java.util.Map.Entry<String, Object>>)member.getValue()).forEach(entry -> {
+              if (entry.getValue() instanceof String)
+                map.put(entry.getKey(), (String)entry.getValue());
+            });
+            obj.setMeta(map);
+          }
+          break;
+        case "noDefaultPolicy":
+          if (member.getValue() instanceof Boolean) {
+            obj.setNoDefaultPolicy((Boolean)member.getValue());
+          }
+          break;
+        case "noParent":
+          if (member.getValue() instanceof Boolean) {
+            obj.setNoParent((Boolean)member.getValue());
+          }
+          break;
+        case "numUses":
+          if (member.getValue() instanceof Number) {
+            obj.setNumUses(((Number)member.getValue()).longValue());
+          }
+          break;
+        case "policies":
+          if (member.getValue() instanceof JsonArray) {
+            java.util.ArrayList<java.lang.String> list =  new java.util.ArrayList<>();
+            ((Iterable<Object>)member.getValue()).forEach( item -> {
+              if (item instanceof String)
+                list.add((String)item);
+            });
+            obj.setPolicies(list);
+          }
+          break;
+        case "role":
+          if (member.getValue() instanceof String) {
+            obj.setRole((String)member.getValue());
+          }
+          break;
+        case "ttl":
+          if (member.getValue() instanceof String) {
+            obj.setTTL((String)member.getValue());
+          }
+          break;
+      }
+    }
+  }}
