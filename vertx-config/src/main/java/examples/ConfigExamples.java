@@ -103,7 +103,7 @@ public class ConfigExamples {
   public void sys() {
     ConfigStoreOptions json = new ConfigStoreOptions()
       .setType("sys")
-      .setConfig(new JsonObject().put("cache", "false"));
+      .setConfig(new JsonObject().put("cache", false));
   }
 
   public void env() {
