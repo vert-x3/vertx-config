@@ -15,7 +15,7 @@
 #
 #
 
-io.vertx.config.impl.spi.FileConfigtoreFactory
+io.vertx.config.impl.spi.FileConfigStoreFactory
 io.vertx.config.impl.spi.JsonConfigStoreFactory
 io.vertx.config.impl.spi.EnvVariablesConfigStoreFactory
 io.vertx.config.impl.spi.SystemPropertiesConfigStoreFactory

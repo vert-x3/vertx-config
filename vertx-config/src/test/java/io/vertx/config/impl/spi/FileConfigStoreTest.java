@@ -35,7 +35,7 @@ public class FileConfigStoreTest extends ConfigStoreTestBase {
 
   @Before
   public void init() {
-    factory = new FileConfigtoreFactory();
+    factory = new FileConfigStoreFactory();
   }
 
 

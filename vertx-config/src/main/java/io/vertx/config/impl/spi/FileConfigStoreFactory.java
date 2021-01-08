@@ -27,7 +27,7 @@ import io.vertx.core.json.JsonObject;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class FileConfigtoreFactory implements ConfigStoreFactory {
+public class FileConfigStoreFactory implements ConfigStoreFactory {
 
   @Override
   public String name() {
