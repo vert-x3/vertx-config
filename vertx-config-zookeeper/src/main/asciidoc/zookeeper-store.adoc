@@ -45,7 +45,7 @@ Once added to your classpath or dependencies, you need to configure the
 The store configuration is used to configure the Apache Curator client and the _path_ of the Zookeeper node
 containing the configuration. Notice that the format of the configuration can be JSON, or any supported format.
 
-The configuration requires the `configuration` attribute indicating the connection _string_ of the Zookeeper
+The configuration requires the `connection` attribute indicating the connection _string_ of the Zookeeper
 server, and the `path` attribute indicating the path of the node containing the configuration.
 
 In addition you can configure:
