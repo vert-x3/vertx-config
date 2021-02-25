@@ -53,7 +53,7 @@ public class JsonObjectHelper {
       return bool;
     }
 
-    Double integer = asNumber(value);
+    Object integer = asNumber(value);
     if (integer != null) {
       return integer;
     }
@@ -71,9 +71,12 @@ public class JsonObjectHelper {
     return value;
   }
 
-  private static Double asNumber(String s) {
+  private static Object asNumber(String s) {
     try {
-      return Double.parseDouble(s);
+      if(s.contains(".")){
+        return Double.parseDouble(s);
+      }
+      return Long.parseLong(s);
     } catch (NumberFormatException nfe) {
       return null;
     }
