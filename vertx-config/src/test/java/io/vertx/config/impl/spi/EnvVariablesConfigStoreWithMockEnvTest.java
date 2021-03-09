@@ -74,8 +74,12 @@ public class EnvVariablesConfigStoreWithMockEnvTest extends ConfigStoreTestBase 
 
     retriever.getConfig(ar -> {
       assertThat(ar.succeeded()).isTrue();
-      // Converted value, totally wrong ;-)
-      assertThat(ar.result().getInteger("name")).isEqualTo(2147483647);
+      try {
+        // We don't mind the value (truncated, we just want to make sure it doesn't throw an exception)
+        assertThat(ar.result().getInteger("name")).isNotNull();
+      } catch (ClassCastException e) {
+        throw new AssertionError("Should not throw exception", e);
+      }
       done.set(true);
     });
     await().untilAtomic(done, is(true));
