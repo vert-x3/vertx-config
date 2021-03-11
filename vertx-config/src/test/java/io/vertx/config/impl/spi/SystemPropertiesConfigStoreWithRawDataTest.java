@@ -23,7 +23,6 @@ import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.json.JsonObject;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -75,8 +74,12 @@ public class SystemPropertiesConfigStoreWithRawDataTest extends ConfigStoreTestB
 
     retriever.getConfig(ar -> {
       assertThat(ar.succeeded()).isTrue();
-      // Converted value, totally wrong ;-)
-      assertThat(ar.result().getInteger("name")).isEqualTo(2147483647);
+      try {
+        // We don't mind the value (truncated, we just want to make sure it doesn't throw an exception)
+        assertThat(ar.result().getInteger("name")).isNotNull();
+      } catch (ClassCastException e) {
+        throw new AssertionError("Should not throw exception", e);
+      }
       done.set(true);
     });
     await().untilAtomic(done, is(true));

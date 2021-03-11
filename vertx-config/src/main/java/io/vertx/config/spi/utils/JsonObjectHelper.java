@@ -21,6 +21,8 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -53,9 +55,9 @@ public class JsonObjectHelper {
       return bool;
     }
 
-    Double integer = asNumber(value);
-    if (integer != null) {
-      return integer;
+    Object number = asNumber(value);
+    if (number != null) {
+      return number;
     }
 
     JsonObject obj = asJsonObject(value);
@@ -71,12 +73,16 @@ public class JsonObjectHelper {
     return value;
   }
 
-  private static Double asNumber(String s) {
+  private static Object asNumber(String s) {
     try {
-      return Double.parseDouble(s);
-    } catch (NumberFormatException nfe) {
-      return null;
+      return new BigInteger(s);
+    } catch (NumberFormatException ignore) {
     }
+    try {
+      return new BigDecimal(s);
+    } catch (NumberFormatException ignore) {
+    }
+    return null;
   }
 
   private static Boolean asBoolean(String s) {

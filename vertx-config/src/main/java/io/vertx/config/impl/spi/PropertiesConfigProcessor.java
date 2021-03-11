@@ -26,6 +26,8 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.io.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Stream;
@@ -147,11 +149,13 @@ public class PropertiesConfigProcessor implements ConfigProcessor {
       if ("false".equals(raw)) {
         return false;
       }
-      if (raw.matches("^\\d+\\.\\d+$")) {
-        return Double.parseDouble(raw);
+      try {
+        return new BigInteger(raw);
+      } catch (NumberFormatException ignore) {
       }
-      if (raw.matches("^\\d+$")) {
-        return Integer.parseInt(raw);
+      try {
+        return new BigDecimal(raw);
+      } catch (NumberFormatException ignore) {
       }
       return raw;
     }

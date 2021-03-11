@@ -119,10 +119,14 @@ public class DirectoryConfigStoreTest extends ConfigStoreTestBase {
       JsonObject json = ar.result();
       assertThat(json.getString("key")).isEqualTo("value");
       assertThat(json.getBoolean("true")).isTrue();
+      assertThat(json.getString("true")).isEqualTo("true");
       assertThat(json.getBoolean("false")).isFalse();
+      assertThat(json.getString("false")).isEqualTo("false");
       assertThat(json.getString("missing")).isNull();
       assertThat(json.getInteger("int")).isEqualTo(5);
+      assertThat(json.getString("int")).isEqualTo("5");
       assertThat(json.getDouble("float")).isEqualTo(25.3);
+      assertThat(json.getString("float")).isEqualTo("25.3");
       async.complete();
     });
   }
