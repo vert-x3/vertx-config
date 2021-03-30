@@ -101,24 +101,30 @@ public class ConfigExamples {
   }
 
   public void sys() {
-    ConfigStoreOptions json = new ConfigStoreOptions()
+    ConfigStoreOptions sys = new ConfigStoreOptions()
       .setType("sys")
       .setConfig(new JsonObject().put("cache", false));
   }
 
+  public void sysHierarchical() {
+    ConfigStoreOptions sysHierarchical = new ConfigStoreOptions()
+      .setType("sys")
+      .setConfig(new JsonObject().put("hierarchical", true));
+  }
+
   public void env() {
-    ConfigStoreOptions json = new ConfigStoreOptions()
+    ConfigStoreOptions env = new ConfigStoreOptions()
       .setType("env");
   }
 
   public void env2() {
-    ConfigStoreOptions json = new ConfigStoreOptions()
+    ConfigStoreOptions env = new ConfigStoreOptions()
       .setType("env")
       .setConfig(new JsonObject().put("raw-data", true));
   }
 
   public void env3() {
-    ConfigStoreOptions json = new ConfigStoreOptions()
+    ConfigStoreOptions env = new ConfigStoreOptions()
       .setType("env")
       .setConfig(new JsonObject().put("keys", new JsonArray().add("SERVICE1_HOST").add("SERVICE2_HOST")));
   }
@@ -180,14 +186,14 @@ public class ConfigExamples {
       );
   }
 
-  public void propsWitHierarchicalStructure() {
-    ConfigStoreOptions propertyWitHierarchical = new ConfigStoreOptions()
+  public void propsWithHierarchicalStructure() {
+    ConfigStoreOptions propertyWithHierarchical = new ConfigStoreOptions()
       .setFormat("properties")
       .setType("file")
       .setConfig(new JsonObject().put("path", "hierarchical.properties").put("hierarchical", true)
       );
     ConfigRetrieverOptions options = new ConfigRetrieverOptions()
-      .addStore(propertyWitHierarchical);
+      .addStore(propertyWithHierarchical);
 
     ConfigRetriever configRetriever = ConfigRetriever.create(Vertx.vertx(), options);
 
