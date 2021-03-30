@@ -157,6 +157,38 @@ public class DirectoryConfigStoreTest extends ConfigStoreTestBase {
     });
   }
 
+  @Test
+  public void testLoadingASinglePropertiesFileHierarchical(TestContext context) {
+    Async async = context.async();
+    retriever = ConfigRetriever.create(vertx, new ConfigRetrieverOptions()
+      .addStore(new ConfigStoreOptions()
+        .setType("directory")
+        .setConfig(new JsonObject().put("path", "src/test/resources")
+                                   .put("filesets", new JsonArray().add(new JsonObject()
+                                     .put("format", "properties")
+                                     .put("pattern", "**/hierarchical.properties")
+                                     .put("hierarchical", true))))));
+
+    JsonObject expected = new JsonObject()
+      .put("server", new JsonObject()
+        .put("port", 8080)
+        .put("host", "http://localhost")
+      )
+      .put("some", new JsonObject()
+        .put("double", new JsonObject().put("value", 1.0))
+        .put("integer", new JsonObject().put("values", new JsonArray().add(1).add(2).add(3)))
+      )
+      .put("single", 0);
+
+    retriever.getConfig(ar -> {
+      assertThat(ar.succeeded()).isTrue();
+      JsonObject json = ar.result();
+      assertThat(json).isEqualTo(expected);
+
+      async.complete();
+    });
+  }
+
 
   @Test
   public void testWhenNoFileMatch(TestContext context) {

@@ -44,6 +44,7 @@ public class FileSet {
   private final File root;
   private final Vertx vertx;
   private final Boolean rawData;
+  private final Boolean hierarchical;
 
   /**
    * Creates a new {@link FileSet} from a json object.
@@ -60,6 +61,7 @@ public class FileSet {
       throw new IllegalArgumentException("Each file set needs to contain a `pattern`");
     }
     this.rawData = set.getBoolean("raw-data", false);
+    this.hierarchical = set.getBoolean("hierarchical", false);
     String format = set.getString("format", "json");
     this.processor = Processors.get(format);
     if (this.processor == null) {
@@ -107,7 +109,9 @@ public class FileSet {
               if (buffer.failed()) {
                 promise.fail(buffer.cause());
               } else {
-                processor.process(vertx, new JsonObject().put("raw-data", rawData), buffer.result()).onComplete(promise);
+                processor.process(vertx, new JsonObject().put("raw-data", rawData)
+                                                         .put("hierarchical", hierarchical), buffer.result())
+                         .onComplete(promise);
               }
             });
         } catch (RejectedExecutionException e) {
