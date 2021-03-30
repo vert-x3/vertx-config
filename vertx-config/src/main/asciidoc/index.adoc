@@ -235,6 +235,31 @@ You can also configure the `raw-data` attribute (`false` by default). If `raw-da
 values are made, and you'll be able to get raw values using `config.getString(key)`. It is useful when manipulating
 large integers.
 
+Furthermore, there is the `hierarchical` attribute (`false` by default). If `hierarchical` is `true`, the system
+properties will be parsed as a nested JSON object, using the dot-separated property name as the path in the JSON object.
+
+Example:
+
+[source, $lang]
+----
+{@link examples.ConfigExamples#sysHierarchical()}
+----
+....
+java -Dserver.host=localhost -Dserver.port=8080 -jar your-application.jar
+....
+
+This will read the system properties as JSON object equivalent to
+
+[source,json]
+----
+{
+  "server": {
+    "host": "localhost",
+    "port": 8080
+  }
+}
+----
+
 === HTTP
 
 This configuration store retrieves the configuration from an HTTP location. It can use
@@ -320,7 +345,7 @@ Get values:
 
 [source, $lang]
 ----
-{@link examples.ConfigExamples#propsWitHierarchicalStructure()}
+{@link examples.ConfigExamples#propsWithHierarchicalStructure()}
 ----
 
 == Listening for configuration changes

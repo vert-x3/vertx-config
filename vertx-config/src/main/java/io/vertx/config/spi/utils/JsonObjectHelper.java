@@ -23,6 +23,8 @@ import io.vertx.core.json.JsonObject;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -47,7 +49,7 @@ public class JsonObjectHelper {
     json.put(name, rawData ? value : convert(value));
   }
 
-  public  static Object convert(String value) {
+  public static Object convert(String value) {
     Objects.requireNonNull(value);
 
     Boolean bool = asBoolean(value);
@@ -113,7 +115,11 @@ public class JsonObjectHelper {
       } catch (Exception e) {
         return null;
       }
+    } else if (!s.startsWith("[") && !s.endsWith("]") && s.contains(",")) {
+      // Allow same comma-separated syntax as for .properties files
+      return asJsonArray("[" + s + "]");
     }
+
     return null;
   }
 
@@ -122,9 +128,36 @@ public class JsonObjectHelper {
   }
 
   public static JsonObject from(Properties props, boolean rawData) {
-    JsonObject json = new JsonObject();
-    props.stringPropertyNames()
-      .forEach(name -> put(json, name, props.getProperty(name), rawData));
-    return json;
+    return from(props, rawData, false);
+  }
+
+  public static JsonObject from(Properties props, boolean rawData, boolean hierarchical) {
+    if (!hierarchical) {
+      JsonObject json = new JsonObject();
+      props.stringPropertyNames()
+           .forEach(name -> put(json, name, props.getProperty(name), rawData));
+      return json;
+    } else {
+      return props.stringPropertyNames()
+                  .stream()
+                  .map(path -> toJson(Arrays.asList(path.split("\\.")), props.getProperty(path), rawData))
+                  .reduce((json, other) -> json.mergeIn(other, true))
+                  .orElse(new JsonObject());
+    }
+  }
+
+  public static JsonObject toJson(List<String> paths, String value, boolean rawData) {
+    if (paths.size() == 0) {
+      return new JsonObject();
+    }
+
+    if (paths.size() == 1) {
+      JsonObject json = new JsonObject();
+      put(json, paths.get(0), value, rawData);
+
+      return json;
+    }
+
+    return new JsonObject().put(paths.get(0), toJson(paths.subList(1, paths.size()), value, rawData));
   }
 }
