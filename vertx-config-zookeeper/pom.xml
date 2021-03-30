@@ -96,11 +96,11 @@
       <version>1.7.21</version>
     </dependency>
 
-    <!-- Force to 25.1-jre as that's the stack version -->
+    <!-- Force to stack version -->
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>25.1-jre</version>
+      <version>30.1.1-jre</version>
       <scope>test</scope>
     </dependency>
     <dependency>
