@@ -79,4 +79,18 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <profiles>
+    <!-- Work around for https://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8266261 -->
+    <profile>
+      <id>jdk-1.8.0_292-workaround</id>
+      <activation>
+        <jdk>1.8.0_292</jdk>
+      </activation>
+      <properties>
+        <maven.test.skip>true</maven.test.skip>
+      </properties>
+    </profile>
+  </profiles>
+
 </project>
