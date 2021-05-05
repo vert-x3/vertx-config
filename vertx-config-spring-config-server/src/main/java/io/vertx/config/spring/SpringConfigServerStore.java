@@ -97,6 +97,7 @@ class SpringConfigServerStore implements ConfigStore {
     if (authHeaderValue != null) {
       options.addHeader("Authorization", authHeaderValue);
     }
+    System.out.println("REQUESTING " + path);
     return client.request(options)
       .flatMap(request ->
         request
