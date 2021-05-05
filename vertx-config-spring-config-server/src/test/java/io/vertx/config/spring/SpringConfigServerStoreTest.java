@@ -22,7 +22,6 @@ import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.config.ConfigStoreOptions;
-import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.*;
@@ -50,7 +49,7 @@ public class SpringConfigServerStoreTest {
   @BeforeClass
   public static void initSpringConfigServer() {
     springConfigServer = new SpringApplicationBuilder(ConfigServerApplication.class)
-        .properties("spring.config.name=configserver").run();
+        .properties("spring.config.name=configserver", "spring.cloud.config.server.git.default-label=main").run();
   }
 
 
@@ -74,7 +73,6 @@ public class SpringConfigServerStoreTest {
 
   @Test
   public void testWithFooDev(TestContext tc) {
-    Async async = tc.async();
     retriever = ConfigRetriever.create(vertx,
         new ConfigRetrieverOptions().addStore(
             new ConfigStoreOptions()
@@ -82,22 +80,16 @@ public class SpringConfigServerStoreTest {
                 .setConfig(new JsonObject().put("url", "http://localhost:8888/foo/development").put("timeout", 10000))));
 
 
-    retriever.getConfig(json -> {
-      assertThat(json.succeeded()).isTrue();
-      JsonObject config = json.result();
+    retriever.getConfig(tc.asyncAssertSuccess(config -> {
 
       assertThat(config.getString("bar")).isEqualToIgnoringCase("spam");
       assertThat(config.getString("foo")).isEqualToIgnoringCase("from foo development");
       assertThat(config.getString("info.description")).isEqualToIgnoringCase("Spring Cloud Samples");
-
-      async.complete();
-    });
-
+    }));
   }
 
   @Test
   public void testJsonWithFooDev(TestContext tc) {
-    Async async = tc.async();
     retriever = ConfigRetriever.create(vertx,
       new ConfigRetrieverOptions().addStore(
         new ConfigStoreOptions()
@@ -105,22 +97,15 @@ public class SpringConfigServerStoreTest {
           .setConfig(new JsonObject().put("url", "http://localhost:8888/foo-development.json").put("timeout", 10000))));
 
 
-    retriever.getConfig(json -> {
-      assertThat(json.succeeded()).isTrue();
-      JsonObject config = json.result();
-
+    retriever.getConfig(tc.asyncAssertSuccess(config -> {
       assertThat(config.getString("bar")).isEqualToIgnoringCase("spam");
       assertThat(config.getString("foo")).isEqualToIgnoringCase("from foo development");
       assertThat(config.getJsonObject("info").getString("description")).isEqualToIgnoringCase("Spring Cloud Samples");
-
-      async.complete();
-    });
-
+    }));
   }
 
   @Test
   public void testWithStoresCloud(TestContext tc) {
-    Async async = tc.async();
     retriever = ConfigRetriever.create(vertx,
         new ConfigRetrieverOptions().addStore(
             new ConfigStoreOptions()
@@ -130,25 +115,19 @@ public class SpringConfigServerStoreTest {
                     .put("timeout", 10000))));
 
 
-    retriever.getConfig(json -> {
-      assertThat(json.succeeded()).isTrue();
-      JsonObject config = json.result();
-
+    retriever.getConfig(tc.asyncAssertSuccess(config -> {
       assertThat(config.getInteger("hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds"))
-          .isEqualTo(60000);
+        .isEqualTo(60000);
       assertThat(config.getString("eureka.password")).isEqualToIgnoringCase("password");
       assertThat(config.getString("spring.data.mongodb.uri")).isEqualToIgnoringCase("${vcap.services.${PREFIX:}mongodb.credentials.uri}");
       assertThat(config.getString("eureka.client.serviceUrl.defaultZone"))
         .isEqualToIgnoringCase("${vcap.services.${PREFIX:}eureka.credentials.uri:http://user:${eureka.password:}@${PREFIX:}eureka.${application.domain:cfapps.io}}/eureka/");
-
-      async.complete();
-    });
+    }));
 
   }
 
   @Test
   public void testJsonWithStoresCloud(TestContext tc) {
-    Async async = tc.async();
     retriever = ConfigRetriever.create(vertx,
       new ConfigRetrieverOptions().addStore(
         new ConfigStoreOptions()
@@ -158,25 +137,18 @@ public class SpringConfigServerStoreTest {
             .put("timeout", 10000))));
 
 
-    retriever.getConfig(json -> {
-      assertThat(json.succeeded()).isTrue();
-      JsonObject config = json.result();
-
+    retriever.getConfig(tc.asyncAssertSuccess(config -> {
       assertThat(config.getJsonObject("hystrix").getJsonObject("command").getJsonObject("default").getJsonObject("execution").getJsonObject("isolation").getJsonObject("thread").getInteger("timeoutInMilliseconds"))
         .isEqualTo(60000);
       assertThat(config.getJsonObject("eureka").getString("password")).isEqualToIgnoringCase("password");
       assertThat(config.getJsonObject("spring").getJsonObject("data").getJsonObject("mongodb").getString("uri")).isEqualToIgnoringCase("${vcap.services.${PREFIX:}mongodb.credentials.uri}");
       assertThat(config.getJsonObject("eureka").getJsonObject("client").getJsonObject("serviceUrl").getString("defaultZone"))
         .isEqualToIgnoringCase("http://user:password@eureka.cfapps.io/eureka/");
-
-      async.complete();
-    });
-
+    }));
   }
 
   @Test
   public void testWithUnknownConfiguration(TestContext tc) {
-    Async async = tc.async();
     retriever = ConfigRetriever.create(vertx,
         new ConfigRetrieverOptions().addStore(
             new ConfigStoreOptions()
@@ -186,18 +158,14 @@ public class SpringConfigServerStoreTest {
                     .put("timeout", 10000))));
 
 
-    retriever.getConfig(json -> {
-      assertThat(json.succeeded()).isTrue();
-      JsonObject config = json.result();
+    retriever.getConfig(tc.asyncAssertSuccess(config -> {
       assertThat(config.getString("eureka.client.serviceUrl.defaultZone"))
-          .isEqualToIgnoringCase("http://localhost:8761/eureka/");
-      async.complete();
-    });
+        .isEqualToIgnoringCase("http://localhost:8761/eureka/");
+    }));
   }
 
   @Test
   public void testJsonWithUnknownConfiguration(TestContext tc) {
-    Async async = tc.async();
     retriever = ConfigRetriever.create(vertx,
       new ConfigRetrieverOptions().addStore(
         new ConfigStoreOptions()
@@ -207,18 +175,14 @@ public class SpringConfigServerStoreTest {
             .put("timeout", 10000))));
 
 
-    retriever.getConfig(json -> {
-      assertThat(json.succeeded()).isTrue();
-      JsonObject config = json.result();
+    retriever.getConfig(tc.asyncAssertSuccess(config -> {
       assertThat(config.getJsonObject("eureka").getJsonObject("client").getJsonObject("serviceUrl").getString("defaultZone"))
         .isEqualToIgnoringCase("http://localhost:8761/eureka/");
-      async.complete();
-    });
+    }));
   }
 
   @Test
   public void testWithErrorConfiguration(TestContext tc) {
-    Async async = tc.async();
     retriever = ConfigRetriever.create(vertx,
         new ConfigRetrieverOptions().addStore(
             new ConfigStoreOptions()
@@ -228,15 +192,11 @@ public class SpringConfigServerStoreTest {
                     .put("timeout", 10000))));
 
 
-    retriever.getConfig(json -> {
-      assertThat(json.succeeded()).isFalse();
-      async.complete();
-    });
+    retriever.getConfig(tc.asyncAssertFailure());
   }
 
   @Test
   public void testJsonWithErrorConfiguration(TestContext tc) {
-    Async async = tc.async();
     retriever = ConfigRetriever.create(vertx,
       new ConfigRetrieverOptions().addStore(
         new ConfigStoreOptions()
@@ -246,15 +206,11 @@ public class SpringConfigServerStoreTest {
             .put("timeout", 10000))));
 
 
-    retriever.getConfig(json -> {
-      assertThat(json.succeeded()).isFalse();
-      async.complete();
-    });
+    retriever.getConfig(tc.asyncAssertFailure());
   }
 
   @Test
   public void testWithWrongServerConfiguration(TestContext tc) {
-    Async async = tc.async();
     retriever = ConfigRetriever.create(vertx,
         new ConfigRetrieverOptions().addStore(
             new ConfigStoreOptions()
@@ -264,10 +220,7 @@ public class SpringConfigServerStoreTest {
                     .put("timeout", 10000))));
 
 
-    retriever.getConfig(json -> {
-      assertThat(json.succeeded()).isFalse();
-      async.complete();
-    });
+    retriever.getConfig(tc.asyncAssertFailure());
   }
 
 }
