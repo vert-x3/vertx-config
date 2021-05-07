@@ -97,11 +97,11 @@ public class PropertiesConfigProcessor implements ConfigProcessor {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(byteStream));
         Stream<String> stream = bufferedReader.lines()
       ) {
-        return toJson(stream);
+        return toJson(stream, rawData);
       }
     }
 
-    private JsonObject toJson(Stream<String> stream) {
+    private JsonObject toJson(Stream<String> stream, Boolean rawData) {
       return stream
         .filter(line -> {
           line = line.trim();
@@ -117,7 +117,7 @@ public class PropertiesConfigProcessor implements ConfigProcessor {
           if (paths.size() == 1) {
             return new JsonObject().put(property, value);
           }
-          JsonObject json = toJson(paths.subList(1, paths.size()), value);
+          JsonObject json = rawData ? value : toJson(paths.subList(1, paths.size()), value);
           return new JsonObject().put(paths.get(0), json);
         })
         .reduce((json, other) -> json.mergeIn(other, true))
