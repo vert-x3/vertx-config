@@ -116,7 +116,7 @@ public class JsonObjectHelper {
         return null;
       }
     } else if (!s.startsWith("[") && !s.endsWith("]") && s.contains(",")) {
-      // Allow same comma-separated syntax as for .properties files
+      // Allow comma-separated syntax
       return asJsonArray("[" + s + "]");
     }
 
