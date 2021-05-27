@@ -36,6 +36,7 @@ public class SystemPropertiesConfigStore implements ConfigStore {
   private final VertxInternal vertx;
   private final boolean cache;
   private final Boolean rawData;
+  private final Boolean hierarchical;
 
   private AtomicReference<Buffer> cached = new AtomicReference<>();
 
@@ -43,13 +44,14 @@ public class SystemPropertiesConfigStore implements ConfigStore {
     this.vertx = (VertxInternal) vertx;
     cache = configuration.getBoolean("cache", true);
     rawData = configuration.getBoolean("raw-data", false);
+    hierarchical = configuration.getBoolean("hierarchical", false);
   }
 
   @Override
   public Future<Buffer> get() {
     Buffer value = cached.get();
     if (value == null) {
-      value = JsonObjectHelper.from(System.getProperties(), rawData).toBuffer();
+      value = JsonObjectHelper.from(System.getProperties(), rawData, hierarchical).toBuffer();
       if (cache) {
         cached.set(value);
       }

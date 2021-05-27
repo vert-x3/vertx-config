@@ -41,6 +41,14 @@ public class SystemPropertiesConfigStoreTest extends ConfigStoreTestBase {
     System.setProperty("float", "25.3");
     System.setProperty("true", "true");
     System.setProperty("false", "false");
+
+    System.setProperty("hierarchical.key", "value");
+    System.setProperty("hierarchical.sub.foo", "bar");
+    System.setProperty("hierarchical.array", "[1, 2, 3]");
+    System.setProperty("hierarchical.int", "5");
+    System.setProperty("hierarchical.float", "25.3");
+    System.setProperty("hierarchical.true", "true");
+    System.setProperty("hierarchical.false", "false");
   }
 
   @After
@@ -68,6 +76,17 @@ public class SystemPropertiesConfigStoreTest extends ConfigStoreTestBase {
     getJsonConfiguration(vertx, store, ar -> {
       ConfigChecker.check(ar);
 
+      // Check that properties were loaded to a flat object (hierarchical = false)
+      // At this point we know that the ar is successful (otherwise ConfigChecker.check would have failed)
+      JsonObject json = ar.result();
+      assertThat(json.getString("hierarchical.key")).isEqualTo("value");
+      assertThat(json.getString("hierarchical.sub.foo")).isEqualTo("bar");
+      assertThat(json.getJsonArray("hierarchical.array")).containsExactly(1, 2, 3);
+      assertThat(json.getInteger("hierarchical.int")).isEqualTo(5);
+      assertThat(json.getDouble("hierarchical.float")).isEqualTo(25.3);
+      assertThat(json.getBoolean("true")).isTrue();
+      assertThat(json.getBoolean("false")).isFalse();
+
       // By default, the configuration is cached, try adding some entries
       System.setProperty("new", "some new value");
       getJsonConfiguration(vertx, store, ar2 -> {
@@ -75,6 +94,20 @@ public class SystemPropertiesConfigStoreTest extends ConfigStoreTestBase {
         assertThat(ar2.result().getString("new")).isNull();
         async.complete();
       });
+    });
+  }
+
+  @Test
+  public void testHierarchicalLoadingFromSystemProperties(TestContext context) {
+    Async async = context.async();
+    store = factory.create(vertx, new JsonObject().put("hierarchical", true));
+    getJsonConfiguration(vertx, store, ar -> {
+      // Check that the flat keys are still present
+      ConfigChecker.check(ar);
+
+      // Check that the "hierarchical" key was mapped to a deep JSON object
+      ConfigChecker.check(ar.map(json -> json.getJsonObject("hierarchical", new JsonObject())));
+      async.complete();
     });
   }
 
