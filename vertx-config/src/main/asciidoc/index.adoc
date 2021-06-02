@@ -39,6 +39,7 @@ _dependencies_ section of your build descriptor:
 * Gradle (in your `build.gradle` file):
 
 [source,groovy,subs="+attributes"]
+----
 compile 'io.vertx:vertx-config:${maven.version}'
 ----
 
