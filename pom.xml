@@ -15,117 +15,209 @@
   ~ under the License.
   ~
   --><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-
-  <parent>
-    <groupId>io.vertx</groupId>
-    <artifactId>vertx-ext-parent</artifactId>
-    <version>38</version>
-  </parent>
-
-  <artifactId>vertx-config-parent</artifactId>
-  <version>4.1.4-SNAPSHOT</version>
-  <packaging>pom</packaging>
-
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <stack.version>4.1.4-SNAPSHOT</stack.version>
-    <doc.skip>true</doc.skip>
-    <jar.manifest>${project.basedir}/src/main/resources/META-INF/MANIFEST.MF</jar.manifest>
-  </properties>
-
-  <modules>
-    <module>vertx-config</module>
-    <module>vertx-config-hocon</module>
-    <module>vertx-config-yaml</module>
-    <module>vertx-config-spring-config-server</module>
-    <module>vertx-config-kubernetes-configmap</module>
-    <module>vertx-config-redis</module>
-    <module>vertx-config-git</module>
-    <module>vertx-config-zookeeper</module>
-    <module>vertx-config-consul</module>
-    <module>vertx-config-vault</module>
-  </modules>
-
-  <scm>
-    <url>https://github.com/vert-x3/vertx-config</url>
-    <connection>scm:git:https://github.com/vert-x3/vertx-config.git</connection>
-    <developerConnection>scm:git:git:@github.com:vert-x3/vertx-config.git</developerConnection>
-    <tag>HEAD</tag>
-  </scm>
-
-  <licenses>
-    <license>
-      <name>Apache License, Version 2.0</name>
-      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>
-      <comments>A business-friendly OSS license</comments>
-    </license>
-  </licenses>
-
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
+      
+    <modelVersion>4.0.0</modelVersion>
+      
+    <parent>
+            
         <groupId>io.vertx</groupId>
-        <artifactId>vertx-dependencies</artifactId>
-        <version>${stack.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
+            
+        <artifactId>vertx-ext-parent</artifactId>
+            
+        <version>38</version>
+          
+    </parent>
+      
+    <artifactId>vertx-config-parent</artifactId>
+      
+    <version>4.1.4</version>
+      
+    <packaging>pom</packaging>
+      
+    <properties>
+            
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+            
+        <stack.version>4.1.4</stack.version>
+            
+        <doc.skip>true</doc.skip>
+            
+        <jar.manifest>${project.basedir}/src/main/resources/META-INF/MANIFEST.MF</jar.manifest>
+          
+    </properties>
+      
+    <modules>
+            
+        <module>vertx-config</module>
+            
+        <module>vertx-config-hocon</module>
+            
+        <module>vertx-config-yaml</module>
+            
+        <module>vertx-config-spring-config-server</module>
+            
+        <module>vertx-config-kubernetes-configmap</module>
+            
+        <module>vertx-config-redis</module>
+            
+        <module>vertx-config-git</module>
+            
+        <module>vertx-config-zookeeper</module>
+            
+        <module>vertx-config-consul</module>
+            
+        <module>vertx-config-vault</module>
+          
+    </modules>
+      
+    <scm>
+            
+        <url>https://github.com/vert-x3/vertx-config</url>
+            
+        <connection>scm:git:https://github.com/vert-x3/vertx-config.git</connection>
+            
+        <developerConnection>scm:git:git:@github.com:vert-x3/vertx-config.git</developerConnection>
+            
+        <tag>HEAD</tag>
+          
+    </scm>
+      
+    <licenses>
+            
+        <license>
+                  
+            <name>Apache License, Version 2.0</name>
+                  
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+                  
+            <distribution>repo</distribution>
+                  
+            <comments>A business-friendly OSS license</comments>
+                
+        </license>
+          
+    </licenses>
+      
+    <build>
+            
+        <plugins>
+                  
+            <plugin>
+                        
+                <artifactId>maven-compiler-plugin</artifactId>
+                        
+                <configuration>
+                              
+                    <source>1.8</source>
+                              
+                    <target>1.8</target>
+                            
+                </configuration>
+                      
+            </plugin>
+                
+        </plugins>
+          
+    </build>
+      
+    <dependencyManagement>
+            
+        <dependencies>
+                  
+            <dependency>
+                        
+                <groupId>io.vertx</groupId>
+                        
+                <artifactId>vertx-dependencies</artifactId>
+                        
+                <version>${stack.version}</version>
+                        
+                <type>pom</type>
+                        
+                <scope>import</scope>
+                      
+            </dependency>
+                
+        </dependencies>
+          
+    </dependencyManagement>
+      
+    <dependencies>
+            
+        <dependency>
+                  
+            <groupId>io.vertx</groupId>
+                  
+            <artifactId>vertx-core</artifactId>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>io.vertx</groupId>
+                  
+            <artifactId>vertx-codegen</artifactId>
+                  
+            <optional>true</optional>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>io.vertx</groupId>
+                  
+            <artifactId>vertx-docgen</artifactId>
+                  
+            <optional>true</optional>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>io.vertx</groupId>
+                  
+            <artifactId>vertx-unit</artifactId>
+                  
+            <scope>test</scope>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>org.assertj</groupId>
+                  
+            <artifactId>assertj-core</artifactId>
+                  
+            <version>3.6.2</version>
+                  
+            <scope>test</scope>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>junit</groupId>
+                  
+            <artifactId>junit</artifactId>
+                  
+            <version>4.13.1</version>
+                  
+            <scope>test</scope>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>org.awaitility</groupId>
+                  
+            <artifactId>awaitility</artifactId>
+                  
+            <version>3.0.0</version>
+                  
+            <scope>test</scope>
+                
+        </dependency>
+          
     </dependencies>
-  </dependencyManagement>
-
-  <dependencies>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-codegen</artifactId>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-docgen</artifactId>
-      <optional>true</optional>
-    </dependency>
-
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-unit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.assertj</groupId>
-      <artifactId>assertj-core</artifactId>
-      <version>3.6.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.13.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.awaitility</groupId>
-      <artifactId>awaitility</artifactId>
-      <version>3.0.0</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-
+    
 </project>
