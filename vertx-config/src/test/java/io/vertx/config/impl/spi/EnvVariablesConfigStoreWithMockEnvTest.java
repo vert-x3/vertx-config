@@ -21,10 +21,9 @@ import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.json.JsonObject;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.EnvironmentVariables;
 
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,19 +37,18 @@ import static org.hamcrest.Matchers.is;
  */
 public class EnvVariablesConfigStoreWithMockEnvTest extends ConfigStoreTestBase {
 
-  @Rule
-  public final EnvironmentVariables env = new EnvironmentVariables();
-
   @Test
   public void testLoadingFromEnvUsingRawData() {
     retriever = ConfigRetriever.create(vertx,
       new ConfigRetrieverOptions()
-        .addStore(new ConfigStoreOptions().setType("env").setConfig(new JsonObject().put("raw-data", true)))
+        .addStore(new ConfigStoreOptions().setType("mock-env").setConfig(new JsonObject()
+          .put("raw-data", true)
+          .put("env", Collections.singletonMap("name", "12345678901234567890"))
+          )
+        )
     );
 
     AtomicBoolean done = new AtomicBoolean();
-
-    env.set("name", "12345678901234567890");
 
     retriever.getConfig(ar -> {
       assertThat(ar.succeeded()).isTrue();
@@ -65,12 +63,10 @@ public class EnvVariablesConfigStoreWithMockEnvTest extends ConfigStoreTestBase 
   public void testLoadingFromEnvWithoutRawData() {
     retriever = ConfigRetriever.create(vertx,
       new ConfigRetrieverOptions()
-        .addStore(new ConfigStoreOptions().setType("env"))
+        .addStore(new ConfigStoreOptions().setType("mock-env").setConfig(new JsonObject().put("env", Collections.singletonMap("name", "12345678901234567890"))))
     );
 
     AtomicBoolean done = new AtomicBoolean();
-
-    env.set("name", "12345678901234567891");
 
     retriever.getConfig(ar -> {
       assertThat(ar.succeeded()).isTrue();

@@ -22,9 +22,7 @@ import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.runner.RunWith;
 
 import java.util.HashMap;
@@ -40,21 +38,18 @@ public class RawDataFalseEnvVariablesConfigStoreTest extends ConfigStoreTestBase
   private static final String KEY_2 = "SOME_BOOLEAN";
   private static final String VAL_2 = "true";
 
-  @Rule
-  public final EnvironmentVariables environmentVariables
-    = new EnvironmentVariables();
-
   @Before
   public void init() {
-    environmentVariables.set(KEY_1, VAL_1);
-    environmentVariables.set(KEY_2, VAL_2);
-    factory = new EnvVariablesConfigStoreFactory();
-    store = factory.create(vertx, new JsonObject().put("raw-data", false));
+    Map<String, String> env = new HashMap<>();
+    env.put(KEY_1, VAL_1);
+    env.put(KEY_2, VAL_2);
+    factory = new MockEnvVariablesConfigStoreFactory();
+    store = factory.create(vertx, new JsonObject().put("raw-data", false).put("env", env));
   }
 
   @Test
   public void testName() {
-    assertThat(factory.name()).isNotNull().isEqualTo("env");
+    assertThat(factory.name()).isNotNull().isEqualTo("mock-env");
   }
 
   @Test

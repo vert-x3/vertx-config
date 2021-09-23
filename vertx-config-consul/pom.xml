@@ -45,12 +45,12 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>vertx-consul-client</artifactId>
     </dependency>
+
     <dependency>
-      <groupId>com.pszymczyk.consul</groupId>
-      <artifactId>embedded-consul</artifactId>
-      <version>${embedded.consul.version}</version>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers</artifactId>
+      <version>${testcontainers.version}</version>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
 </project>

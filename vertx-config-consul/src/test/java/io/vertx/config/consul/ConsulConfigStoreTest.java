@@ -17,9 +17,6 @@
 
 package io.vertx.config.consul;
 
-import com.pszymczyk.consul.ConsulProcess;
-import com.pszymczyk.consul.ConsulStarterBuilder;
-import com.pszymczyk.consul.LogLevel;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
@@ -33,8 +30,9 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.*;
 import org.junit.runner.RunWith;
-
-import java.io.IOException;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.utility.DockerImageName;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -46,21 +44,30 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @RunWith(VertxUnitRunner.class)
 public class ConsulConfigStoreTest {
 
-  private static final String CONSUL_VERSION = "0.7.5";
-  private static ConsulProcess consulProcess;
+  private static final String CONSUL_VERSION = "1.0.7";
+
+  static GenericContainer<?> CONSUL_CONTAINER;
 
   @BeforeClass
-  public static void consulUp() {
-    consulProcess = ConsulStarterBuilder.consulStarter()
-      .withLogLevel(LogLevel.ERR)
-      .withConsulVersion(CONSUL_VERSION)
-      .build()
-      .start();
+  public static void start() {
+    CONSUL_CONTAINER = new GenericContainer<>(DockerImageName.parse("consul:" + CONSUL_VERSION))
+      .withExposedPorts(8500);
+
+    CONSUL_CONTAINER.start();
+    CONSUL_CONTAINER.waitingFor(Wait.forLogMessage("Synced node info", 1));
+    CONSUL_CONTAINER.followOutput(frame -> {
+      System.out.print("CONSUL: " + frame.getUtf8String());
+    });
+
   }
 
   @AfterClass
-  public static void consulDown() {
-    consulProcess.close();
+  public static void stop() {
+    if (CONSUL_CONTAINER != null) {
+      GenericContainer<?> container = CONSUL_CONTAINER;
+      CONSUL_CONTAINER = null;
+      container.stop();
+    }
   }
 
   private ConfigRetriever retriever;
@@ -72,7 +79,7 @@ public class ConsulConfigStoreTest {
     vertx = Vertx.vertx();
     vertx.exceptionHandler(tc.exceptionHandler());
 
-    client = ConsulClient.create(vertx, new ConsulClientOptions().setPort(consulProcess.getHttpPort()));
+    client = ConsulClient.create(vertx, new ConsulClientOptions().setPort(CONSUL_CONTAINER.getMappedPort(8500)));
   }
 
   @After
@@ -111,11 +118,9 @@ public class ConsulConfigStoreTest {
 
   @Test
   public void listenConfigChange(TestContext tc) {
-    Async async = tc.async();
     createRetriever();
-    client.putValue("foo/bar", "value", ar -> {
-      tc.assertTrue(ar.succeeded());
-      retriever.getConfig(init -> {
+    client.putValue("foo/bar", "value", tc.asyncAssertSuccess(v -> {
+      retriever.getConfig(tc.asyncAssertSuccess(v2 -> {
         retriever.listen(change -> {
           JsonObject prev = change.getPreviousConfiguration();
           tc.assertTrue(!prev.isEmpty());
@@ -123,25 +128,21 @@ public class ConsulConfigStoreTest {
           JsonObject next = change.getNewConfiguration();
           tc.assertTrue(!next.isEmpty());
           tc.assertEquals(next.getString("bar"), "new_value");
-          client.deleteValues("foo", h -> async.complete());
+          client.deleteValues("foo", tc.asyncAssertSuccess());
         });
         client.putValue("foo/bar", "new_value", ignore -> {});
-      });
-    });
+      }));
+    }));
   }
 
   @Test
   public void testNotRaw(TestContext tc) {
-    Async async = tc.async();
     createRetriever(false);
     String testStr = "{\"str\": \"bar\", \"double\": 1.2, \"bool1\": true, " +
       "\"bool0\": false, \"int\": 1234, \"long\": 9223372036854775807, " +
       "\"obj\": {\"int\": -321}, \"arr\": [\"1\", 2, false]}";
-    client.putValue("foo/bar", testStr, ar -> {
-      tc.assertTrue(ar.succeeded());
-      retriever.getConfig(init -> {
-        assertThat(init.succeeded()).isTrue();
-        JsonObject result = init.result();
+    client.putValue("foo/bar", testStr, tc.asyncAssertSuccess(v -> {
+      retriever.getConfig(tc.asyncAssertSuccess(result -> {
         tc.assertFalse(result.isEmpty());
         JsonObject bar = result.getJsonObject("bar");
         tc.assertEquals("bar", bar.getString("str"));
@@ -152,9 +153,9 @@ public class ConsulConfigStoreTest {
         tc.assertTrue(bar.getBoolean("bool1"));
         tc.assertEquals(new JsonObject().put("int", -321), bar.getJsonObject("obj"));
         tc.assertEquals(new JsonArray().add("1").add(2).add(false), bar.getJsonArray("arr"));
-        client.deleteValues("foo", h -> async.complete());
-      });
-    });
+        client.deleteValues("foo", tc.asyncAssertSuccess());
+      }));
+    }));
   }
 
   private void createRetriever() {
@@ -167,7 +168,7 @@ public class ConsulConfigStoreTest {
         new ConfigStoreOptions()
           .setType("consul")
           .setConfig(new JsonObject()
-            .put("port", consulProcess.getHttpPort())
+            .put("port", CONSUL_CONTAINER.getMappedPort(8500))
             .put("prefix", "foo")
             .put("raw-data", raw))));
   }

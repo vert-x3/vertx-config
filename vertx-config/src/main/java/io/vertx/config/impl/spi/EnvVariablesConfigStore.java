@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 /**
  * An implementation of configuration store loading the content from the environment variables.
@@ -44,20 +45,21 @@ public class EnvVariablesConfigStore implements ConfigStore {
   private final VertxInternal vertx;
   private final boolean rawData;
   private final Set<String> keys;
-
+  private final Supplier<Map<String, String>> getenv;
   private final AtomicReference<Buffer> cached = new AtomicReference<>();
 
-  public EnvVariablesConfigStore(Vertx vertx, boolean rawData, JsonArray keys) {
+  public EnvVariablesConfigStore(Vertx vertx, boolean rawData, JsonArray keys, Supplier<Map<String, String>> getenv) {
     this.vertx = (VertxInternal) vertx;
     this.rawData = rawData;
     this.keys = (keys == null) ? null : new HashSet<>(keys.getList());
+    this.getenv = getenv;
   }
 
   @Override
   public Future<Buffer> get() {
     Buffer value = cached.get();
     if (value == null) {
-      value = all(System.getenv(), rawData, keys).toBuffer();
+      value = all(getenv.get(), rawData, keys).toBuffer();
       cached.set(value);
     }
     return vertx.getOrCreateContext().succeededFuture(value);
