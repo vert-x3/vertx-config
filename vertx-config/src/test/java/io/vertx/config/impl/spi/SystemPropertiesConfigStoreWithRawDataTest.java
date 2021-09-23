@@ -21,9 +21,7 @@ import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.json.JsonObject;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -38,8 +36,8 @@ import static org.hamcrest.Matchers.is;
  */
 public class SystemPropertiesConfigStoreWithRawDataTest extends ConfigStoreTestBase {
 
-  @Rule
-  public final RestoreSystemProperties restoreSystemProperties = new RestoreSystemProperties();
+//  @Rule
+//  public final RestoreSystemProperties restoreSystemProperties = new RestoreSystemProperties();
 
   @Test
   public void testLoadingFromSysUsingRawData() {

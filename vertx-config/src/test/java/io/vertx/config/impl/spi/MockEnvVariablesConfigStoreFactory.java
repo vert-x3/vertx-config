@@ -22,6 +22,7 @@ import io.vertx.config.spi.ConfigStoreFactory;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -30,25 +31,27 @@ import java.util.function.Supplier;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class EnvVariablesConfigStoreFactory implements ConfigStoreFactory {
+public class MockEnvVariablesConfigStoreFactory implements ConfigStoreFactory {
 
-  private final Supplier<Map<String, String>> getenv;
-
-  public EnvVariablesConfigStoreFactory() {
-    this(System::getenv);
-  }
-
-  public EnvVariablesConfigStoreFactory(Supplier<Map<String, String>> getenv) {
-    this.getenv = getenv;
+  public MockEnvVariablesConfigStoreFactory() {
   }
 
   @Override
   public String name() {
-    return "env";
+    return "mock-env";
   }
 
   @Override
   public ConfigStore create(Vertx vertx, JsonObject configuration) {
-    return new EnvVariablesConfigStore(vertx, configuration.getBoolean("raw-data", false), configuration.getJsonArray("keys"), getenv);
+    JsonObject envConfig = configuration.getJsonObject("env");
+    return new EnvVariablesConfigStore(vertx, configuration.getBoolean("raw-data", false), configuration.getJsonArray("keys"), () -> {
+      Map<String, String> env = new HashMap<>(System.getenv());
+      if (envConfig != null) {
+        for (Map.Entry entry : envConfig) {
+          env.put(entry.getKey().toString(), entry.getValue().toString());
+        }
+      }
+      return env;
+    });
   }
 }
