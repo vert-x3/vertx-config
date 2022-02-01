@@ -19,12 +19,12 @@ package io.vertx.config.redis;
 
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
+import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.config.ConfigStoreOptions;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
@@ -46,13 +46,13 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 @RunWith(VertxUnitRunner.class)
-public class RedisConfigStoreTest {
+public class Redis6ConfigStoreTest {
 
   @Rule
   public final RunTestOnContext rule = new RunTestOnContext();
 
   @ClassRule
-  public static final GenericContainer<?> redis = new GenericContainer<>("redis:5")
+  public static final GenericContainer<?> redis = new GenericContainer<>("redis:6.2")
     .withExposedPorts(6379);
 
   private Redis client;

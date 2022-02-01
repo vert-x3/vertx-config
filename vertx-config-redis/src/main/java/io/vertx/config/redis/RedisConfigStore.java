@@ -21,11 +21,8 @@ import io.vertx.config.spi.ConfigStore;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonObject;
 import io.vertx.redis.client.*;
-
-import java.util.Iterator;
 
 /**
  * An implementation of configuration store reading hash from Redis.
@@ -34,14 +31,10 @@ import java.util.Iterator;
  */
 public class RedisConfigStore implements ConfigStore {
 
-  private final VertxInternal vertx;
   private final Redis redis;
   private final String field;
 
-  private boolean closed;
-
   public RedisConfigStore(Vertx vertx, JsonObject config) {
-    this.vertx = (VertxInternal) vertx;
     this.field = config.getString("key", "configuration");
     this.redis = Redis.createClient(vertx, new RedisOptions(config));
   }
@@ -49,7 +42,7 @@ public class RedisConfigStore implements ConfigStore {
   @Override
   public Future<Void> close() {
     redis.close();
-    return vertx.getOrCreateContext().succeededFuture();
+    return Future.succeededFuture();
   }
 
   @Override
@@ -57,11 +50,8 @@ public class RedisConfigStore implements ConfigStore {
     return redis.send(Request.cmd(Command.HGETALL).arg(field))
       .map(resp -> {
         JsonObject result = new JsonObject();
-        Iterator<Response> it = resp.iterator();
-        while (it.hasNext()) {
-          String key = it.next().toString();
-          String value = it.next().toString();
-          result.put(key, value);
+        for (String key : resp.getKeys()) {
+          result.put(key, resp.get(key).toString());
         }
         return result.toBuffer();
       });
