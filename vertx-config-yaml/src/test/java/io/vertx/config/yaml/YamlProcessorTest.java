@@ -133,7 +133,7 @@ public class YamlProcessorTest {
       expectSuccess(ar);
       JsonObject json = ar.result();
       assertThat(json.getInteger("invoice")).isEqualTo(34843);
-      assertThat(json.getString("date")).isEqualTo("2001-01-23");
+      assertThat(json.getInstant("date").toString()).isEqualTo("2001-01-23T00:00:00Z");
       JsonObject bill = json.getJsonObject("bill-to");
       assertThat(bill).contains(entry("given", "Chris"), entry("family", "Dumars"));
       assertThat(bill.getJsonObject("address")).isNotNull().isNotEmpty();
