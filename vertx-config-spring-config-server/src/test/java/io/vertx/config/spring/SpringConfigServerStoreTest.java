@@ -121,7 +121,7 @@ public class SpringConfigServerStoreTest {
       assertThat(config.getString("eureka.password")).isEqualToIgnoringCase("password");
       assertThat(config.getString("spring.data.mongodb.uri")).isEqualToIgnoringCase("${vcap.services.${PREFIX:}mongodb.credentials.uri}");
       assertThat(config.getString("eureka.client.serviceUrl.defaultZone"))
-        .isEqualToIgnoringCase("${vcap.services.${PREFIX:}eureka.credentials.uri:http://user:${eureka.password:}@${PREFIX:}eureka.${application.domain:cfapps.io}}/eureka/");
+        .isEqualToIgnoringCase("http://${EUREKA_1_PORT_8761_TCP_ADDR:localhost}:8761/eureka/");
     }));
 
   }
@@ -143,7 +143,7 @@ public class SpringConfigServerStoreTest {
       assertThat(config.getJsonObject("eureka").getString("password")).isEqualToIgnoringCase("password");
       assertThat(config.getJsonObject("spring").getJsonObject("data").getJsonObject("mongodb").getString("uri")).isEqualToIgnoringCase("${vcap.services.${PREFIX:}mongodb.credentials.uri}");
       assertThat(config.getJsonObject("eureka").getJsonObject("client").getJsonObject("serviceUrl").getString("defaultZone"))
-        .isEqualToIgnoringCase("http://user:password@eureka.cfapps.io/eureka/");
+        .isEqualToIgnoringCase("http://localhost:8761/eureka/");
     }));
   }
 
@@ -160,7 +160,7 @@ public class SpringConfigServerStoreTest {
 
     retriever.getConfig(tc.asyncAssertSuccess(config -> {
       assertThat(config.getString("eureka.client.serviceUrl.defaultZone"))
-        .isEqualToIgnoringCase("http://localhost:8761/eureka/");
+        .isEqualToIgnoringCase("http://${EUREKA_1_PORT_8761_TCP_ADDR:localhost}:8761/eureka/");
     }));
   }
 
