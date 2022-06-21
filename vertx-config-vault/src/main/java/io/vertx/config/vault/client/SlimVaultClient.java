@@ -297,7 +297,7 @@ public class SlimVaultClient {
 
     Handler<AsyncResult<HttpResponse<Buffer>>> handler = ar -> {
       if (ar.failed()) {
-        resultHandler.handle(VaultException.toFailure("Unable to access the Vault", ar.cause()));
+        resultHandler.handle(VaultException.toFailure("Unable to access the Vault: " + ar.cause().getMessage(), ar.cause()));
         return;
       }
       manageAuthResult(resultHandler, ar.result());
