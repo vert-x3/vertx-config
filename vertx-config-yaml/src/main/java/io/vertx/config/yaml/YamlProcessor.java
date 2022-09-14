@@ -25,6 +25,7 @@ import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -37,7 +38,7 @@ import java.util.Map;
  */
 public class YamlProcessor implements ConfigProcessor {
 
-  private final Yaml yamlMapper = new Yaml();
+  private final Yaml yamlMapper = new Yaml(new SafeConstructor());
 
   @Override
   public String name() {
