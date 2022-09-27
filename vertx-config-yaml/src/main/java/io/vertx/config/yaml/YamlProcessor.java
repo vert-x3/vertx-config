@@ -38,8 +38,6 @@ import java.util.Map;
  */
 public class YamlProcessor implements ConfigProcessor {
 
-  private final Yaml yamlMapper = new Yaml(new SafeConstructor());
-
   @Override
   public String name() {
     return "yaml";
@@ -55,6 +53,7 @@ public class YamlProcessor implements ConfigProcessor {
     // Use executeBlocking even if the bytes are in memory
     return vertx.executeBlocking(promise -> {
       try {
+        final Yaml yamlMapper = new Yaml(new SafeConstructor());
         Map<Object, Object> doc = yamlMapper.load(input.toString(StandardCharsets.UTF_8));
         promise.complete(jsonify(doc));
       } catch (ClassCastException e) {
