@@ -47,6 +47,8 @@ public class Secret {
 
   private JsonObject data;
 
+  private JsonObject metadata;
+
   public String getLeaseId() {
     return leaseId;
   }
@@ -63,10 +65,17 @@ public class Secret {
     return data;
   }
 
+  public JsonObject getMetadata()
+  {
+    return metadata;
+  }
+
   @JsonProperty("data")
   private void setData(Map<String, Object> data) {
     if (data.containsKey("data")) {
-      this.data = JsonObject.mapFrom(data).getJsonObject("data");
+      JsonObject secretData = JsonObject.mapFrom(data);
+      this.data = secretData.getJsonObject("data");
+      this.metadata = secretData.getJsonObject("metadata", null);
     }
     else {
       this.data = new JsonObject(data);

@@ -105,6 +105,7 @@ public class VaultConfigStore implements ConfigStore {
       copy.put("vault-lease-id", result.getLeaseId());
       copy.put("vault-lease-duration", result.getLeaseDuration());
       copy.put("vault-renewable", result.isRenewable());
+      copy.put("vault-metadata", result.getMetadata());
       return copy;
     }).recover(throwable -> {
       if (throwable instanceof VaultException) {

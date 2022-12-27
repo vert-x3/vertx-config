@@ -160,6 +160,7 @@ public abstract class VaultConfigStoreTestBase {
     retriever.getConfig(json -> {
       tc.assertTrue(json.succeeded());
       JsonObject content = json.result();
+      tc.assertNotNull(content.getJsonObject("vault-metadata"));
       tc.assertEquals("hello", content.getString("message"));
       tc.assertEquals(10, content.getInteger("counter"));
 
