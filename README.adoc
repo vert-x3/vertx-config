@@ -9,8 +9,4 @@ Vert.x Config provide an extensible way to configure Vert.x applications:
 
 Please see the main documentation on the web-site for a full description:
 
-* https://vertx.io/docs/vertx-config/java/[Java documentation]
-* https://vertx.io/docs/vertx-config/js/[JavaScript documentation]
-* https://vertx.io/docs/vertx-config/kotlin/[Kotlin documentation]
-* https://vertx.io/docs/vertx-config/groovy/[Groovy documentation]
-* https://vertx.io/docs/vertx-config/ruby/[Ruby documentation]
+* https://vertx.io/docs/vertx-config/java/[Java/Kotlin/Groovy documentation]
