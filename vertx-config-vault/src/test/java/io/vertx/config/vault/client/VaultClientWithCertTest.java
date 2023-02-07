@@ -64,7 +64,7 @@ public class VaultClientWithCertTest {
     String value = "world " + UUID.randomUUID().toString();
     return ar -> {
       tc.assertTrue(ar.succeeded());
-      String token = ar.result().getToken();
+      String token = ar.result().getClientToken();
       tc.assertNotNull(token);
 
       client.setToken(token);

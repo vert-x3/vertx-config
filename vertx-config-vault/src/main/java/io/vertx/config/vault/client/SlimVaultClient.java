@@ -96,7 +96,7 @@ public class SlimVaultClient {
           responseHandler.handle(VaultException.toFailure(result.statusMessage(), result.statusCode(),
             result.bodyAsString()));
         } else {
-          Secret secret = result.bodyAsJson(Secret.class);
+          Secret secret = new Secret(result.bodyAsJsonObject());
           responseHandler.handle(Future.succeededFuture(secret));
         }
       });
@@ -120,11 +120,16 @@ public class SlimVaultClient {
           }
 
           HttpResponse<Buffer> response = ar.result();
-          if (response.statusCode() == 200 || response.statusCode() == 204) {
-            resultHandler.handle(Future.succeededFuture(response.bodyAsJson(Secret.class)));
-          } else {
-            resultHandler.handle(VaultException.toFailure(response.statusMessage(), response.statusCode(),
-              response.bodyAsString()));
+          switch (response.statusCode()) {
+            case 200:
+              resultHandler.handle(Future.succeededFuture(new Secret(response.bodyAsJsonObject())));
+              break;
+            case 204:
+              resultHandler.handle(Future.succeededFuture());
+              break;
+            default:
+              resultHandler.handle(VaultException.toFailure(response.statusMessage(), response.statusCode(),
+                response.bodyAsString()));
           }
         });
   }
@@ -212,8 +217,7 @@ public class SlimVaultClient {
         response.bodyAsString()));
     } else {
       JsonObject object = response.bodyAsJsonObject();
-      Auth auth = object.getJsonObject("auth").mapTo(Auth.class);
-      resultHandler.handle(Future.succeededFuture(auth));
+      resultHandler.handle(Future.succeededFuture(new Auth(object.getJsonObject("auth"))));
     }
   }
 
@@ -329,8 +333,12 @@ public class SlimVaultClient {
             response.bodyAsString()));
         } else {
           JsonObject object = response.bodyAsJsonObject();
-          Lookup lookup = object.getJsonObject("data").mapTo(Lookup.class);
-          resultHandler.handle(Future.succeededFuture(lookup));
+          JsonObject data = object.getJsonObject("data");
+          if (data == null) {
+            resultHandler.handle(Future.succeededFuture());
+          } else {
+            resultHandler.handle(Future.succeededFuture(new Lookup(data)));
+          }
         }
       });
   }

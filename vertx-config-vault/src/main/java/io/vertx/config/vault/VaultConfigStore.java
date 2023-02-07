@@ -230,10 +230,10 @@ public class VaultConfigStore implements ConfigStore {
       future.fail(auth.cause());
     } else {
       Auth authentication = auth.result();
-      if (authentication.getToken() == null) {
+      if (authentication.getClientToken() == null) {
         future.fail("Authentication failed, the token is null");
       } else {
-        client.setToken(authentication.getToken());
+        client.setToken(authentication.getClientToken());
         this.renewable = authentication.isRenewable();
         this.validity = System.currentTimeMillis() + (authentication.getLeaseDuration() * 1000);
         future.complete();

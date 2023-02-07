@@ -239,14 +239,14 @@ public class VaultClientTest {
 
     client.createToken(new TokenRequest().setTTL("1h"), ar -> {
       tc.assertTrue(ar.succeeded());
-      tc.assertNotNull(ar.result().getToken());
+      tc.assertNotNull(ar.result().getClientToken());
       tc.assertNotNull(ar.result().getAccessor());
       tc.assertEquals(3600L, ar.result().getLeaseDuration());
       tc.assertTrue(ar.result().isRenewable());
 
 
       client = new SlimVaultClient(vertx,
-        process.getConfiguration().put("token", ar.result().getToken()));
+        process.getConfiguration().put("token", ar.result().getClientToken()));
 
       final String path = "secret/hello";
       final String value = "world " + UUID.randomUUID().toString();
@@ -272,7 +272,7 @@ public class VaultClientTest {
     // 1 - Generate a client token
     client.createToken(new TokenRequest().setTTL("1h"), step1 -> {
       tc.assertTrue(step1.succeeded());
-      String token = step1.result().getToken();
+      String token = step1.result().getClientToken();
       tc.assertNotNull(token);
       client = new SlimVaultClient(vertx,
         process.getConfiguration().put("token", token));
@@ -280,7 +280,7 @@ public class VaultClientTest {
       // 2 - renew with -1
       client.renewSelf(-1, step2 -> {
         tc.assertTrue(step2.succeeded());
-        String token_2 = step2.result().getToken();
+        String token_2 = step2.result().getClientToken();
         tc.assertNotNull(token_2);
         tc.assertEquals(token, token_2);
         client = new SlimVaultClient(vertx,
@@ -289,7 +289,7 @@ public class VaultClientTest {
         // 3 - renew with an explicit increment (duration in second)
         client.renewSelf(20, step3 -> {
           tc.assertTrue(step3.succeeded());
-          String token_3 = step3.result().getToken();
+          String token_3 = step3.result().getClientToken();
           tc.assertNotNull(token_3);
           tc.assertEquals(token, token_2);
           tc.assertEquals(20L, step3.result().getLeaseDuration());
@@ -310,7 +310,7 @@ public class VaultClientTest {
     // 1 - Generate a client token
     client.createToken(new TokenRequest().setTTL("1h"), step1 -> {
       tc.assertTrue(step1.succeeded());
-      String token = step1.result().getToken();
+      String token = step1.result().getClientToken();
       tc.assertNotNull(token);
       client = new SlimVaultClient(vertx,
         process.getConfiguration().put("token", token));
@@ -321,7 +321,7 @@ public class VaultClientTest {
         String token_2 = step2.result().getId();
         tc.assertEquals(token, token_2);
         tc.assertEquals(3600L, step2.result().getCreationTTL());
-        tc.assertTrue(step2.result().getTTL() <= 3600);
+        tc.assertTrue(step2.result().getTtl() <= 3600);
         async.complete();
       });
     });

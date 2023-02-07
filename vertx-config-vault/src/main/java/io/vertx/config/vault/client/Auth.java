@@ -17,9 +17,7 @@
 
 package io.vertx.config.vault.client;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;
@@ -30,50 +28,80 @@ import java.util.Map;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-@JsonIgnoreProperties(ignoreUnknown = true)
+@DataObject(generateConverter = true, jsonPropertyNameFormatter = io.vertx.codegen.format.SnakeCase.class)
 public class Auth {
 
-  @JsonProperty("accessor")
   private String accessor;
 
-  @JsonProperty("lease_duration")
   private long leaseDuration;
 
-  @JsonProperty("renewable")
   private boolean renewable;
 
   private JsonObject metadata;
 
-  @JsonProperty("client_token")
-  private String token;
+  private String clientToken;
 
-  @JsonProperty("policies")
   private List<String> policies;
+
+  public Auth() {
+  }
+
+  public Auth(JsonObject json) {
+    AuthConverter.fromJson(json, this);
+  }
+
+  public String getAccessor() {
+    return accessor;
+  }
+
+  public Auth setAccessor(String accessor) {
+    this.accessor = accessor;
+    return this;
+  }
 
   public long getLeaseDuration() {
     return leaseDuration;
+  }
+
+  public Auth setLeaseDuration(long leaseDuration) {
+    this.leaseDuration = leaseDuration;
+    return this;
   }
 
   public boolean isRenewable() {
     return renewable;
   }
 
+  public Auth setRenewable(boolean renewable) {
+    this.renewable = renewable;
+    return this;
+  }
+
   public JsonObject getMetadata() {
     return metadata;
   }
 
-  @JsonProperty("metadata")
-  private void setMetadata(Map<String, Object> meta) {
-    this.metadata = meta != null ? new JsonObject(meta) : null;
+  public Auth setMetadata(JsonObject metadata) {
+    this.metadata = metadata;
+    return this;
   }
 
-  public String getToken() {
-    return token;
+  public String getClientToken() {
+    return clientToken;
+  }
+
+  public Auth setClientToken(String clientToken) {
+    this.clientToken = clientToken;
+    return this;
   }
 
   public List<String> getPolicies() {
     return policies;
+  }
+
+  public Auth setPolicies(List<String> policies) {
+    this.policies = policies;
+    return this;
   }
 
   public String getApplicationId() {
@@ -88,18 +116,15 @@ public class Auth {
     return getMetadata() != null ? getMetadata().getString("username") : null;
   }
 
-  public String getAccessor() {
-    return accessor;
+  public JsonObject toJson() {
+    final JsonObject json = new JsonObject();
+    AuthConverter.toJson(this, json);
+    return json;
   }
+
 
   @Override
   public String toString() {
-    return "Auth{" + "accessor='" + accessor + '\'' +
-      ", leaseDuration=" + leaseDuration +
-      ", renewable=" + renewable +
-      ", metadata=" + metadata +
-      ", token='" + token + '\'' +
-      ", policies=" + policies +
-      '}';
+    return toJson().encode();
   }
 }

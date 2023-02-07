@@ -17,126 +17,188 @@
 
 package io.vertx.config.vault.client;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Represents Lookup result
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-@JsonIgnoreProperties(ignoreUnknown = true)
+@DataObject(generateConverter = true, jsonPropertyNameFormatter = io.vertx.codegen.format.SnakeCase.class)
 public class Lookup {
 
-  @JsonProperty("accessor")
   private String accessor;
 
-  @JsonProperty(value = "creation_time", defaultValue = "0")
-  private long creationTime;
+  private long creationTime = 0;
 
-  @JsonProperty(value = "creation_ttl", defaultValue = "0")
-  private long creationTTL;
+  private long creationTTL = 0;
 
-  @JsonProperty("display_name")
   private String displayName;
 
-  @JsonProperty(value = "explicit_max_ttl", defaultValue = "0")
-  private long explicitMaxTTL;
+  private long explicitMaxTTL = 0;
 
-  @JsonProperty("id")
   private String id;
 
-  @JsonProperty(value = "last_renewal_time", defaultValue = "-1")
-  private long lastRenewalTime;
+  private long lastRenewalTime = -1;
 
-  @JsonProperty(value = "num_uses", defaultValue = "0")
-  private long numUses;
+  private long numUses = 0;
 
-  @JsonProperty(value = "orphan", defaultValue = "true")
-  private boolean orphan;
+  private boolean orphan = true;
 
-  @JsonProperty(value = "path")
   private String path;
 
-  @JsonProperty("policies")
   private List<String> policies;
 
-  @JsonProperty("ttl")
   private long ttl;
 
-  @JsonProperty("renewable")
   private boolean renewable;
 
   private JsonObject metadata;
 
+  public Lookup() {
+  }
+
+  public Lookup(JsonObject json) {
+    LookupConverter.fromJson(json, this);
+  }
+
   public String getAccessor() {
     return accessor;
+  }
+
+  public Lookup setAccessor(String accessor) {
+    this.accessor = accessor;
+    return this;
   }
 
   public long getCreationTime() {
     return creationTime;
   }
 
+  public Lookup setCreationTime(long creationTime) {
+    this.creationTime = creationTime;
+    return this;
+  }
+
   public long getCreationTTL() {
     return creationTTL;
+  }
+
+  public Lookup setCreationTTL(long creationTTL) {
+    this.creationTTL = creationTTL;
+    return this;
   }
 
   public String getDisplayName() {
     return displayName;
   }
 
+  public Lookup setDisplayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+  }
+
   public long getExplicitMaxTTL() {
     return explicitMaxTTL;
+  }
+
+  public Lookup setExplicitMaxTTL(long explicitMaxTTL) {
+    this.explicitMaxTTL = explicitMaxTTL;
+    return this;
   }
 
   public String getId() {
     return id;
   }
 
+  public Lookup setId(String id) {
+    this.id = id;
+    return this;
+  }
+
   public long getLastRenewalTime() {
     return lastRenewalTime;
+  }
+
+  public Lookup setLastRenewalTime(long lastRenewalTime) {
+    this.lastRenewalTime = lastRenewalTime;
+    return this;
   }
 
   public long getNumUses() {
     return numUses;
   }
 
+  public Lookup setNumUses(long numUses) {
+    this.numUses = numUses;
+    return this;
+  }
+
   public boolean isOrphan() {
     return orphan;
+  }
+
+  public Lookup setOrphan(boolean orphan) {
+    this.orphan = orphan;
+    return this;
   }
 
   public String getPath() {
     return path;
   }
 
+  public Lookup setPath(String path) {
+    this.path = path;
+    return this;
+  }
+
   public List<String> getPolicies() {
     return policies;
   }
 
-  public long getTTL() {
+  public Lookup setPolicies(List<String> policies) {
+    this.policies = policies;
+    return this;
+  }
+
+  public long getTtl() {
     return ttl;
+  }
+
+  public Lookup setTtl(long ttl) {
+    this.ttl = ttl;
+    return this;
   }
 
   public boolean isRenewable() {
     return renewable;
   }
 
+  public Lookup setRenewable(boolean renewable) {
+    this.renewable = renewable;
+    return this;
+  }
+
   public JsonObject getMetadata() {
     return metadata;
   }
 
-  @JsonProperty("metadata")
-  private void setMetadata(Map<String, Object> meta) {
-    this.metadata = new JsonObject(meta);
+  public Lookup setMetadata(JsonObject metadata) {
+    this.metadata = metadata;
+    return this;
   }
 
-  public String getUsername() {
-    return getMetadata() != null ? getMetadata().getString("username") : null;
+  public JsonObject toJson() {
+    final JsonObject json = new JsonObject();
+    LookupConverter.toJson(this, json);
+    return json;
+  }
+
+  @Override
+  public String toString() {
+    return toJson().encode();
   }
 }
