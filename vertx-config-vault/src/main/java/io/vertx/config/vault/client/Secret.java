@@ -17,9 +17,7 @@
 
 package io.vertx.config.vault.client;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Map;
@@ -29,51 +27,85 @@ import java.util.Map;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-@JsonIgnoreProperties(ignoreUnknown = true)
+@DataObject(generateConverter = true, jsonPropertyNameFormatter = io.vertx.codegen.format.SnakeCase.class)
 public class Secret {
 
-  @JsonProperty("lease_id")
   private String leaseId;
 
-  @JsonProperty("renewable")
   private boolean renewable;
 
-  @JsonProperty("lease_duration")
   private long leaseDuration;
 
-  @JsonProperty("request_id")
   private String requestId;
 
   private JsonObject data;
 
+  public Secret() {
+  }
+
+  public Secret(JsonObject json) {
+    SecretConverter.fromJson(json, this);
+  }
+
   public String getLeaseId() {
     return leaseId;
+  }
+
+  public Secret setLeaseId(String leaseId) {
+    this.leaseId = leaseId;
+    return this;
   }
 
   public boolean isRenewable() {
     return renewable;
   }
 
+  public Secret setRenewable(boolean renewable) {
+    this.renewable = renewable;
+    return this;
+  }
+
   public long getLeaseDuration() {
     return leaseDuration;
+  }
+
+  public Secret setLeaseDuration(long leaseDuration) {
+    this.leaseDuration = leaseDuration;
+    return this;
+  }
+
+  public String getRequestId() {
+    return requestId;
+  }
+
+  public Secret setRequestId(String requestId) {
+    this.requestId = requestId;
+    return this;
   }
 
   public JsonObject getData() {
     return data;
   }
 
-  @JsonProperty("data")
-  private void setData(Map<String, Object> data) {
-    if (data.containsKey("data")) {
-      this.data = JsonObject.mapFrom(data).getJsonObject("data");
+  public Secret setData(JsonObject data) {
+    this.data = data;
+    if (this.data != null) {
+      // unwrap the data
+      if (this.data.containsKey("data")) {
+        this.data = data.getJsonObject("data");
+      }
     }
-    else {
-      this.data = new JsonObject(data);
-    }
+    return this;
   }
 
-  public String getRequestId() {
-    return requestId;
+  public JsonObject toJson() {
+    final JsonObject json = new JsonObject();
+    SecretConverter.toJson(this, json);
+    return json;
+  }
+
+  @Override
+  public String toString() {
+    return toJson().encode();
   }
 }
