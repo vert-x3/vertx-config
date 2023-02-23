@@ -47,4 +47,28 @@
     </dependency>
   </dependencies>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>default-test</id>
+            <phase>test</phase>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <environmentVariables>
+                <CONFIG_FORCE_some__macro>hocon</CONFIG_FORCE_some__macro>
+                <CONFIG_FORCE_int>10</CONFIG_FORCE_int>
+                <CONFIG_FORCE_sub>{"foo": "bar2"}</CONFIG_FORCE_sub>
+              </environmentVariables>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>

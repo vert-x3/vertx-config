@@ -249,4 +249,39 @@ public class HoconProcessorTest {
 
   }
 
+  @Test
+  public void testSimpleHoconConfigurationEnvOverride(TestContext tc) {
+    Async async = tc.async();
+    retriever = ConfigRetriever.create(vertx,
+      new ConfigRetrieverOptions().addStore(
+        new ConfigStoreOptions()
+          .setType("file")
+          .setFormat("hocon")
+          .setConfig(new JsonObject().put("path", "src/test/resources/simple.conf")
+            .put("hocon.env.override", true))));
+
+    retriever.getConfig(ar -> {
+      if (ar.failed()) {
+        ar.cause().printStackTrace();
+      }
+      assertThat(ar.succeeded()).isTrue();
+      JsonObject json = ar.result();
+      assertThat(json.getString("key")).isEqualTo("value");
+      assertThat(json.getBoolean("true")).isTrue();
+      assertThat(json.getBoolean("false")).isFalse();
+      assertThat(json.getString("missing")).isNull();
+      assertThat(json.getDouble("float")).isEqualTo(25.3);
+      assertThat(json.getJsonArray("array").size()).isEqualTo(3);
+      assertThat(json.getJsonArray("array").contains(1)).isTrue();
+      assertThat(json.getJsonArray("array").contains(2)).isTrue();
+      assertThat(json.getJsonArray("array").contains(3)).isTrue();
+
+      assertThat(json.getInteger("int")).isEqualTo(10);
+      assertThat(json.getJsonObject("sub").getString("foo")).isEqualTo("bar2");
+      assertThat(json.getString("some-macro")).isEqualToIgnoringCase("hocon");
+
+      async.complete();
+    });
+  }
+
 }

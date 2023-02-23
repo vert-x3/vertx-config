@@ -1,7 +1,7 @@
 === Hocon Configuration Format
 
 The Hocon Configuration Format extends the Vert.x Configuration Retriever and provides the
-support for the HOCON(https://github.com/typesafehub/config/blob/master/HOCON.md) format.
+support for the https://github.com/lightbend/config/blob/master/HOCON.md[HOCON] format.
 
 It supports includes, json, properties, macros...
 
@@ -45,3 +45,12 @@ Once added to your classpath or dependencies, you need to configure the
 ----
 
 You just need to set `format` to `hocon`.
+
+==== Override configuration using system environment variables
+
+Hocon supports https://github.com/lightbend/config#optional-system-or-env-variable-overrides[system environment variable overrides] using keys with `CONFIG_FORCE_` prefix. You can use this feature by specifying `hocon.env.override` to `true` in the configuration:
+
+[source, $lang]
+----
+{@link examples.ConfigHoconExamples#exampleWithEnvOverrides(io.vertx.core.Vertx)}
+----

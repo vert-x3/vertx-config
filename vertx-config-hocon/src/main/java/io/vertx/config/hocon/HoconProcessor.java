@@ -21,6 +21,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigRenderOptions;
 import io.vertx.config.spi.ConfigProcessor;
+import io.vertx.config.spi.utils.JsonObjectHelper;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
@@ -37,6 +38,8 @@ import java.io.StringReader;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 public class HoconProcessor implements ConfigProcessor {
+  private static final String ENV_OVERRIDE_KEY = "hocon.env.override";
+  private static final String RAW_DATA_KEY = "raw-data";
   @Override
   public String name() {
     return "hocon";
@@ -53,6 +56,15 @@ public class HoconProcessor implements ConfigProcessor {
           String output = conf.root().render(ConfigRenderOptions.concise()
             .setJson(true).setComments(false).setFormatted(false));
           JsonObject json = new JsonObject(output);
+          if (configuration != null && configuration.getBoolean(ENV_OVERRIDE_KEY, false)) {
+            final JsonObject envOverrideJson = new JsonObject();
+            ConfigFactory.systemEnvironmentOverrides().entrySet()
+              .forEach(e -> JsonObjectHelper.put(envOverrideJson, e.getKey(), e.getValue().unwrapped().toString(),
+                configuration.getBoolean(RAW_DATA_KEY, false)));
+            if (!envOverrideJson.isEmpty()) {
+              json = json.mergeIn(envOverrideJson);
+            }
+          }
           promise.complete(json);
         } catch (Exception e) {
           promise.fail(e);
