@@ -41,5 +41,17 @@ public class ConfigHoconExamples {
         new ConfigRetrieverOptions().addStore(store));
   }
 
+  public void exampleWithEnvOverrides(Vertx vertx) {
+    ConfigStoreOptions store = new ConfigStoreOptions()
+      .setType("file")
+      .setFormat("hocon")
+      .setConfig(new JsonObject()
+        .put("hocon.env.override", true)
+        .put("path", "my-config.conf")
+      );
+
+    ConfigRetriever retriever = ConfigRetriever.create(vertx,
+      new ConfigRetrieverOptions().addStore(store));
+  }
 
 }
