@@ -72,7 +72,9 @@ public interface ConfigRetriever {
    *
    * @param completionHandler handler receiving the computed configuration, or a failure if the
    *                          configuration cannot be retrieved
+   * @deprecated use {@link #getConfig()} instead
    */
+  @Deprecated
   void getConfig(Handler<AsyncResult<JsonObject>> completionHandler);
 
   /**

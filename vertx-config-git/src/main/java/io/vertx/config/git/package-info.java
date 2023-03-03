@@ -14,7 +14,7 @@
  * under the License.
  *
  */
-@ModuleGen(name = "vertx-config", groupPackage = "io.vertx")
+@ModuleGen(name = "vertx-config", groupPackage = "io.vertx", checkCallbackDeprecation = true)
 package io.vertx.config.git;
 
 import io.vertx.codegen.annotations.ModuleGen;

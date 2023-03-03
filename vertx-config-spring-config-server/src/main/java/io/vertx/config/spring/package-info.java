@@ -15,7 +15,7 @@
  *
  */
 
-@ModuleGen(name = "vertx-config", groupPackage = "io.vertx")
+@ModuleGen(name = "vertx-config", groupPackage = "io.vertx", checkCallbackDeprecation = true)
 package io.vertx.config.spring;
 
 import io.vertx.codegen.annotations.ModuleGen;
