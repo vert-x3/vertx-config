@@ -1,16 +1,9 @@
 = Vert.x Config
 
-image:https://github.com/vert-x3/vertx-config/workflows/CI/badge.svg?branch=master["Build Status", link="https://github.com/vert-x3/vertx-config/actions?query=workflow%3ACI"]
+image:https://github.com/vert-x3/vertx-config/actions/workflows/ci-5.x.yml/badge.svg["Build Status (5.x)",link="https://github.com/vert-x3/vertx-config/actions/workflows/ci-5.x.yml"]
+image:https://github.com/vert-x3/vertx-config/actions/workflows/ci-4.x.yml/badge.svg["Build Status (4.x)",link="https://github.com/vert-x3/vertx-config/actions/workflows/ci-4.x.yml"]
 
 Vert.x Config provide an extensible way to configure Vert.x applications:
 
 * retrieve configuration from anywhere (file, directory, HTTP location, Git repository, Zookeeper...)
 * write your configuration in any format (properties, json, yaml, hocon...)
-
-Please see the main documentation on the web-site for a full description:
-
-* https://vertx.io/docs/vertx-config/java/[Java documentation]
-* https://vertx.io/docs/vertx-config/js/[JavaScript documentation]
-* https://vertx.io/docs/vertx-config/kotlin/[Kotlin documentation]
-* https://vertx.io/docs/vertx-config/groovy/[Groovy documentation]
-* https://vertx.io/docs/vertx-config/ruby/[Ruby documentation]
