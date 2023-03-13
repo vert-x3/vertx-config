@@ -85,7 +85,7 @@ public class SlimVaultClient {
 
     client.get("/v1/" + Objects.requireNonNull(path))
       .putHeader(TOKEN_HEADER, Objects.requireNonNull(getToken(), "No token to access the vault"))
-      .send(response -> {
+      .send().onComplete(response -> {
         if (response.failed()) {
           responseHandler.handle(VaultException.toFailure("Unable to access the Vault", response.cause()));
           return;
@@ -112,8 +112,7 @@ public class SlimVaultClient {
     Objects.requireNonNull(resultHandler);
     client.post("/v1/" + Objects.requireNonNull(path))
       .putHeader(TOKEN_HEADER, Objects.requireNonNull(getToken(), "The token must be set"))
-      .sendJsonObject(Objects.requireNonNull(secrets, "The secret must be set"),
-        ar -> {
+      .sendJsonObject(Objects.requireNonNull(secrets, "The secret must be set")).onComplete(ar -> {
           if (ar.failed()) {
             resultHandler.handle(VaultException.toFailure("Unable to access the Vault", ar.cause()));
             return;
@@ -177,7 +176,7 @@ public class SlimVaultClient {
     Objects.requireNonNull(resultHandler);
     client.delete("/v1/" + Objects.requireNonNull(path))
       .putHeader(TOKEN_HEADER, Objects.requireNonNull(getToken(), "The token must be set"))
-      .send(ar -> {
+      .send().onComplete(ar -> {
         if (ar.failed()) {
           resultHandler.handle(VaultException.toFailure("Unable to access the Vault", ar.cause()));
           return;
@@ -202,7 +201,7 @@ public class SlimVaultClient {
   public void createToken(TokenRequest tokenRequest, Handler<AsyncResult<Auth>> resultHandler) {
     client.post("/v1/auth/token/create" + ((tokenRequest.getRole() == null) ? "" : "/" + tokenRequest.getRole()))
       .putHeader(TOKEN_HEADER, Objects.requireNonNull(getToken(), "The token must be set"))
-      .sendJsonObject(tokenRequest.toPayload(), ar -> {
+      .sendJsonObject(tokenRequest.toPayload()).onComplete(ar -> {
         if (ar.failed()) {
           resultHandler.handle(VaultException.toFailure("Unable to access the Vault", ar.cause()));
           return;
@@ -235,7 +234,7 @@ public class SlimVaultClient {
       .put("secret_id", Objects.requireNonNull(secretId, "The secret must not be null"));
 
     client.post("/v1/auth/approle/login")
-      .sendJsonObject(payload, ar -> {
+      .sendJsonObject(payload).onComplete(ar -> {
         if (ar.failed()) {
           resultHandler.handle(VaultException.toFailure("Unable to access the Vault", ar.cause()));
           return;
@@ -258,7 +257,7 @@ public class SlimVaultClient {
       .put("password", Objects.requireNonNull(password, "The password must not be null"));
 
     client.post("/v1/auth/userpass/login/" + Objects.requireNonNull(username, "The username must not be null"))
-      .sendJsonObject(payload, ar -> {
+      .sendJsonObject(payload).onComplete(ar -> {
         if (ar.failed()) {
           resultHandler.handle(VaultException.toFailure("Unable to access the Vault", ar.cause()));
           return;
@@ -275,7 +274,7 @@ public class SlimVaultClient {
    */
   public void loginWithCert(Handler<AsyncResult<Auth>> resultHandler) {
     client.post("/v1/auth/cert/login")
-      .send(ar -> {
+      .send().onComplete(ar -> {
         if (ar.failed()) {
           resultHandler.handle(VaultException.toFailure("Unable to access the Vault", ar.cause()));
           return;
@@ -308,9 +307,9 @@ public class SlimVaultClient {
     };
 
     if (payload != null) {
-      request.sendJsonObject(payload, handler);
+      request.sendJsonObject(payload).onComplete(handler);
     } else {
-      request.send(handler);
+      request.send().onComplete(handler);
     }
   }
 
@@ -322,7 +321,7 @@ public class SlimVaultClient {
   public void lookupSelf(Handler<AsyncResult<Lookup>> resultHandler) {
     client.get("/v1/auth/token/lookup-self")
       .putHeader(TOKEN_HEADER, Objects.requireNonNull(getToken(), "The token must not be null"))
-      .send(ar -> {
+      .send().onComplete(ar -> {
         if (ar.failed()) {
           resultHandler.handle(VaultException.toFailure("Unable to access the Vault", ar.cause()));
           return;

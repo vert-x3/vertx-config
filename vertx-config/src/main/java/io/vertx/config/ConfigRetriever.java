@@ -25,7 +25,6 @@ import io.vertx.config.spi.ConfigStore;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.streams.ReadStream;

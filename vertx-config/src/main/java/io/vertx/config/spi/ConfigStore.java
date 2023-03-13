@@ -17,9 +17,10 @@
 
 package io.vertx.config.spi;
 
-import io.vertx.core.*;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.impl.ContextInternal;
 
 /**
  * Defines a configuration store.
@@ -52,29 +53,15 @@ public interface ConfigStore {
 
   /**
    * Retrieves the configuration store in this store.
+   *
+   * @return a {@code Future} of the asynchronous result.
    */
-  default Future<Buffer> get() {
-    ContextInternal context = (ContextInternal) Vertx.currentContext();
-    /*
-     We don't have access to the Vert.x instance here.
-     So, for the transition period, we must be prepared in the rare cases this is not invoked on a Vert.x thread
-     */
-    Promise<Buffer> promise = context != null ? context.promise() : Promise.promise();
-    get(promise);
-    return promise.future();
-  }
+  Future<Buffer> get();
 
   /**
    * Closes the configuration store.
+   *
+   * @return a {@code Future} of the asynchronous result.
    */
-  default Future<Void> close() {
-    ContextInternal context = (ContextInternal) Vertx.currentContext();
-    /*
-     We don't have access to the Vert.x instance here.
-     So, for the transition period, we must be prepared in the rare cases this is not invoked on a Vert.x thread
-     */
-    Promise<Void> promise = context != null ? context.promise() : Promise.promise();
-    close(v -> promise.complete());
-    return promise.future();
-  }
+  Future<Void> close();
 }
