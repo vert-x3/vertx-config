@@ -71,7 +71,7 @@ public abstract class ConfigStoreTestBase {
       retriever.close();
     }
 
-    vertx.close(v -> done.set(true));
+    vertx.close().onComplete(v -> done.set(true));
 
     await().untilAtomic(done, is(true));
   }

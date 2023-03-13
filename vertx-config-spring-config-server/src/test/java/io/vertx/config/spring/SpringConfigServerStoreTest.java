@@ -80,7 +80,7 @@ public class SpringConfigServerStoreTest {
                 .setConfig(new JsonObject().put("url", "http://localhost:8888/foo/development").put("timeout", 10000))));
 
 
-    retriever.getConfig(tc.asyncAssertSuccess(config -> {
+    retriever.getConfig().onComplete(tc.asyncAssertSuccess(config -> {
 
       assertThat(config.getString("bar")).isEqualToIgnoringCase("spam");
       assertThat(config.getString("foo")).isEqualToIgnoringCase("from foo development");
@@ -97,7 +97,7 @@ public class SpringConfigServerStoreTest {
           .setConfig(new JsonObject().put("url", "http://localhost:8888/foo-development.json").put("timeout", 10000))));
 
 
-    retriever.getConfig(tc.asyncAssertSuccess(config -> {
+    retriever.getConfig().onComplete(tc.asyncAssertSuccess(config -> {
       assertThat(config.getString("bar")).isEqualToIgnoringCase("spam");
       assertThat(config.getString("foo")).isEqualToIgnoringCase("from foo development");
       assertThat(config.getJsonObject("info").getString("description")).isEqualToIgnoringCase("Spring Cloud Samples");
@@ -115,7 +115,7 @@ public class SpringConfigServerStoreTest {
                     .put("timeout", 10000))));
 
 
-    retriever.getConfig(tc.asyncAssertSuccess(config -> {
+    retriever.getConfig().onComplete(tc.asyncAssertSuccess(config -> {
       assertThat(config.getInteger("hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds"))
         .isEqualTo(60000);
       assertThat(config.getString("eureka.password")).isEqualToIgnoringCase("password");
@@ -137,7 +137,7 @@ public class SpringConfigServerStoreTest {
             .put("timeout", 10000))));
 
 
-    retriever.getConfig(tc.asyncAssertSuccess(config -> {
+    retriever.getConfig().onComplete(tc.asyncAssertSuccess(config -> {
       assertThat(config.getJsonObject("hystrix").getJsonObject("command").getJsonObject("default").getJsonObject("execution").getJsonObject("isolation").getJsonObject("thread").getInteger("timeoutInMilliseconds"))
         .isEqualTo(60000);
       assertThat(config.getJsonObject("eureka").getString("password")).isEqualToIgnoringCase("password");
@@ -158,7 +158,7 @@ public class SpringConfigServerStoreTest {
                     .put("timeout", 10000))));
 
 
-    retriever.getConfig(tc.asyncAssertSuccess(config -> {
+    retriever.getConfig().onComplete(tc.asyncAssertSuccess(config -> {
       assertThat(config.getString("eureka.client.serviceUrl.defaultZone"))
         .isEqualToIgnoringCase("http://${EUREKA_1_PORT_8761_TCP_ADDR:localhost}:8761/eureka/");
     }));
@@ -175,7 +175,7 @@ public class SpringConfigServerStoreTest {
             .put("timeout", 10000))));
 
 
-    retriever.getConfig(tc.asyncAssertSuccess(config -> {
+    retriever.getConfig().onComplete(tc.asyncAssertSuccess(config -> {
       assertThat(config.getJsonObject("eureka").getJsonObject("client").getJsonObject("serviceUrl").getString("defaultZone"))
         .isEqualToIgnoringCase("http://localhost:8761/eureka/");
     }));
@@ -192,7 +192,7 @@ public class SpringConfigServerStoreTest {
                     .put("timeout", 10000))));
 
 
-    retriever.getConfig(tc.asyncAssertFailure());
+    retriever.getConfig().onComplete(tc.asyncAssertFailure());
   }
 
   @Test
@@ -206,7 +206,7 @@ public class SpringConfigServerStoreTest {
             .put("timeout", 10000))));
 
 
-    retriever.getConfig(tc.asyncAssertFailure());
+    retriever.getConfig().onComplete(tc.asyncAssertFailure());
   }
 
   @Test
@@ -220,7 +220,7 @@ public class SpringConfigServerStoreTest {
                     .put("timeout", 10000))));
 
 
-    retriever.getConfig(tc.asyncAssertFailure());
+    retriever.getConfig().onComplete(tc.asyncAssertFailure());
   }
 
 }

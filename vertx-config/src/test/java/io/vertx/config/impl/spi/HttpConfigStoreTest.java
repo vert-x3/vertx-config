@@ -83,7 +83,7 @@ public class HttpConfigStoreTest extends ConfigStoreTestBase {
           request.response().setStatusCode(302).putHeader("Location", "/A").end();
         }
       })
-      .listen(8080, s -> {
+      .listen(8080).onComplete(s -> {
         done.set(true);
       });
 

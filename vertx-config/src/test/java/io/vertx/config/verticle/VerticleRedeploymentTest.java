@@ -51,17 +51,21 @@ public class VerticleRedeploymentTest {
     http = new JsonObject().put("mark", "v1");
 
     AtomicBoolean done = new AtomicBoolean();
-    server = vertx.createHttpServer()
+    vertx.createHttpServer()
         .requestHandler(request -> {
           if (request.path().endsWith("/conf")) {
             request.response().end(http.encodePrettily());
           }
-        }).listen(8080, s -> done.set(true));
+        })
+        .listen(8080).onComplete(tc.asyncAssertSuccess(s -> {
+          done.set(true);
+          server = s;
+        }));
 
     await().untilAtomic(done, is(true));
     done.set(false);
 
-    vertx.deployVerticle(MyMainVerticle.class.getName(), deployed -> done.set(deployed.succeeded()));
+    vertx.deployVerticle(MyMainVerticle.class.getName()).onComplete(deployed -> done.set(deployed.succeeded()));
 
     await().untilAtomic(done, is(true));
   }

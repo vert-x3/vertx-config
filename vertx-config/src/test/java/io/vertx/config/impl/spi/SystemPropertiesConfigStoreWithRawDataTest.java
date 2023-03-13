@@ -50,7 +50,7 @@ public class SystemPropertiesConfigStoreWithRawDataTest extends ConfigStoreTestB
 
     System.setProperty("name", "12345678901234567890");
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result().getString("name")).isEqualTo("12345678901234567890");
       done.set(true);
@@ -70,7 +70,7 @@ public class SystemPropertiesConfigStoreWithRawDataTest extends ConfigStoreTestB
     System.setProperty("name", "12345678901234567891");
 
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isTrue();
       try {
         // We don't mind the value (truncated, we just want to make sure it doesn't throw an exception)

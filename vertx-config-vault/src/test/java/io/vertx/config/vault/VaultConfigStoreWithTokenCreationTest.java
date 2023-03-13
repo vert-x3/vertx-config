@@ -61,7 +61,7 @@ public class VaultConfigStoreWithTokenCreationTest extends VaultConfigStoreTestB
     Async async = tc.async();
 
     // Step 1 - First retrieval, we should still be below the expiration limit
-    retriever.getConfig(json -> {
+    retriever.getConfig().onComplete(json -> {
       tc.assertTrue(json.succeeded());
 
       // Step 2 - Wait until expiration
@@ -72,8 +72,8 @@ public class VaultConfigStoreWithTokenCreationTest extends VaultConfigStoreTestB
           // Ignore it.
         }
         f.complete();
-      }, x ->
-        retriever.getConfig(json2 -> {
+      }).onComplete(x ->
+        retriever.getConfig().onComplete(json2 -> {
           tc.assertTrue(json2.succeeded());
           async.complete();
         }));

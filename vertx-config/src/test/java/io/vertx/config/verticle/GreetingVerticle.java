@@ -22,12 +22,11 @@ public class GreetingVerticle extends AbstractVerticle {
       .handler(json -> {
         message = json.body().getString("message");
         json.reply("OK");
-      })
-      .completionHandler(updateReady);
+      }).completion().onComplete(updateReady);
 
     vertx.eventBus().consumer(address)
       .handler(msg -> msg.reply(message))
-      .completionHandler(endpointReady);
+      .completion().onComplete(endpointReady);
 
     CompositeFuture.all(endpointReady.future(), updateReady.future()).onComplete(x -> future.handle(x.mapEmpty()));
   }

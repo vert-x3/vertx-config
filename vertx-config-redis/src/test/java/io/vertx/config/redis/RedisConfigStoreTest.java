@@ -90,13 +90,13 @@ public class RedisConfigStoreTest {
                 .setType("redis")
                 .setConfig(new JsonObject()
                   .put("endpoints", new JsonArray().add("redis://" + redis.getContainerIpAddress() + ":" + redis.getFirstMappedPort())))));
-    retriever.getConfig(json -> {
+    retriever.getConfig().onComplete(json -> {
       assertThat(json.succeeded()).isTrue();
       JsonObject config = json.result();
       tc.assertTrue(config.isEmpty());
       writeSomeConf("configuration", ar -> {
         tc.assertTrue(ar.succeeded());
-        retriever.getConfig(json2 -> {
+        retriever.getConfig().onComplete(json2 -> {
           assertThat(json2.succeeded()).isTrue();
           JsonObject config2 = json2.result();
           tc.assertTrue(!config2.isEmpty());
@@ -120,7 +120,7 @@ public class RedisConfigStoreTest {
                   .put("endpoints", new JsonArray().add("redis://" + redis.getContainerIpAddress() + ":" + redis.getFirstMappedPort())))));
 
 
-    retriever.getConfig(json -> {
+    retriever.getConfig().onComplete(json -> {
       assertThat(json.succeeded()).isTrue();
       JsonObject config = json.result();
       tc.assertTrue(config.isEmpty());
@@ -128,7 +128,7 @@ public class RedisConfigStoreTest {
       writeSomeConf("my-config", ar -> {
         tc.assertTrue(ar.succeeded());
 
-        retriever.getConfig(json2 -> {
+        retriever.getConfig().onComplete(json2 -> {
           assertThat(json2.succeeded()).isTrue();
           JsonObject config2 = json2.result();
           tc.assertTrue(!config2.isEmpty());

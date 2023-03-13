@@ -78,7 +78,7 @@ public class YamlMultipleVerticlesTest {
   public void testReadYamlConcurrent(TestContext testContext) {
     int instances = 4;
     vertx.deployVerticle(ConfigYamlVerticle::new, new DeploymentOptions().setInstances(instances))
-      .onComplete(testContext.asyncAssertSuccess(va -> vertx.undeploy(va, testContext.asyncAssertSuccess())));
+      .onComplete(testContext.asyncAssertSuccess(va -> vertx.undeploy(va).onComplete(testContext.asyncAssertSuccess())));
   }
 
 }

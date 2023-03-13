@@ -106,7 +106,7 @@ public class GitConfigStoreTest {
         .put("path", "target/junk/work")
         .put("filesets", new JsonArray().add(new JsonObject().put("pattern", "**/*.json"))))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result()).isEmpty();
       async.complete();
@@ -127,7 +127,7 @@ public class GitConfigStoreTest {
         .put("path", "target/junk/work")
         .put("filesets", new JsonArray().add(new JsonObject().put("pattern", "*.json"))))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result()).isNotEmpty();
       JsonObject json = ar.result();
@@ -169,7 +169,7 @@ public class GitConfigStoreTest {
         .put("branch", branch)
         .put("filesets", new JsonArray().add(new JsonObject().put("pattern", "*.json"))))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result()).isNotEmpty();
       JsonObject json = ar.result();
@@ -200,7 +200,7 @@ public class GitConfigStoreTest {
         .put("remote", remote)
         .put("filesets", new JsonArray().add(new JsonObject().put("pattern", "*.json"))))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       if (ar.failed()) {
         ar.cause().printStackTrace();
       }
@@ -229,7 +229,7 @@ public class GitConfigStoreTest {
         .put("filesets", new JsonArray().add(new JsonObject().put("pattern", "*.properties")
             .put("format", "properties"))))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       if (ar.failed()) {
         ar.cause().printStackTrace();
       }
@@ -297,7 +297,7 @@ public class GitConfigStoreTest {
         .put("url", bareRoot.getAbsolutePath())
         .put("path", "target/junk/do-not-exist")
         .put("filesets", new JsonArray().add(new JsonObject().put("pattern", "*.json"))))));
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result()).isNotEmpty();
       async.complete();
@@ -329,7 +329,7 @@ public class GitConfigStoreTest {
         .put("url", bareRoot.getAbsolutePath())
         .put("path", "target/junk/do-not-exist")
         .put("filesets", new JsonArray().add(new JsonObject().put("pattern", "*.json"))))));
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.failed()).isTrue();
       assertThat(ar.cause().getMessage()).contains("origin", "master");
       async.complete();
@@ -352,7 +352,7 @@ public class GitConfigStoreTest {
             .add(new JsonObject().put("pattern", "dir/a.*son"))
         ))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.result().getString("key")).isEqualTo("value");
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       async.complete();
@@ -376,7 +376,7 @@ public class GitConfigStoreTest {
             .add(new JsonObject().put("pattern", "dir/a.*son"))
         ))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       assertThat(ar.result().getString("b.name")).isEqualTo("B");
       assertThat(ar.result().getString("conflict")).isEqualTo("A");
@@ -401,7 +401,7 @@ public class GitConfigStoreTest {
             .add(new JsonObject().put("pattern", "dir/b.json"))
         ))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.result().getString("conflict")).isEqualTo("B");
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       assertThat(ar.result().getString("b.name")).isEqualTo("B");
@@ -426,7 +426,7 @@ public class GitConfigStoreTest {
         .add(new JsonObject().put("pattern", "dir/a.*son"))
       ))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       // Both level-3 objects must exist.
       assertThat(ar.result().getJsonObject("parent").getJsonObject("level_2").getString("key1")).isEqualTo("A");
       assertThat(ar.result().getJsonObject("parent").getJsonObject("level_2").getString("key2")).isEqualTo("B");
@@ -450,7 +450,7 @@ public class GitConfigStoreTest {
             .add(new JsonObject().put("pattern", "dir/?.*son"))
         ))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.result().getString("b.name")).isEqualTo("B");
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       // Alphabetical order, so B is last.
@@ -475,7 +475,7 @@ public class GitConfigStoreTest {
             .add(new JsonObject().put("pattern", "dir/a?*.*son"))
         ))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.failed());
       assertThat(ar.cause()).isInstanceOf(DecodeException.class);
       async.complete();
@@ -498,7 +498,7 @@ public class GitConfigStoreTest {
             ))));
 
     AtomicBoolean done = new AtomicBoolean();
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       done.set(true);
@@ -527,7 +527,7 @@ public class GitConfigStoreTest {
             ))));
 
     AtomicBoolean done = new AtomicBoolean();
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       done.set(true);
@@ -545,7 +545,7 @@ public class GitConfigStoreTest {
         .setCommitter("clement", "clement@apache.org").call();
 
     done.set(false);
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       assertThat(ar.result().getString("added")).isEqualTo("added");
@@ -556,7 +556,7 @@ public class GitConfigStoreTest {
     updateA();
 
     Async async = tc.async();
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isFalse();
       assertThat(ar.cause().getMessage()).containsIgnoringCase("conflict");
       async.complete();
@@ -578,7 +578,7 @@ public class GitConfigStoreTest {
             ))));
 
     AtomicBoolean done = new AtomicBoolean();
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       done.set(true);
@@ -592,7 +592,7 @@ public class GitConfigStoreTest {
     FileUtils.write(a, new JsonObject().put("a.name", "A-modified").put("conflict", "A").encodePrettily(), StandardCharsets.UTF_8);
 
     done.set(false);
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result().getString("a.name")).isEqualTo("A-modified");
       done.set(true);
@@ -602,7 +602,7 @@ public class GitConfigStoreTest {
     updateA();
 
     Async async = tc.async();
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isFalse();
       assertThat(ar.cause().getMessage()).containsIgnoringCase("conflict");
       async.complete();
@@ -627,7 +627,7 @@ public class GitConfigStoreTest {
             ))));
 
     AtomicBoolean done = new AtomicBoolean();
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       done.set(true);
@@ -662,7 +662,7 @@ public class GitConfigStoreTest {
             ))));
 
     AtomicBoolean done = new AtomicBoolean();
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       done.set(true);

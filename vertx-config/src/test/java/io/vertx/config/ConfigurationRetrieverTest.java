@@ -94,7 +94,7 @@ public class ConfigurationRetrieverTest {
       addStores(new ConfigRetrieverOptions()));
     Async async = tc.async();
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       ConfigChecker.check(ar);
       assertThat(ar.result().getString("foo")).isEqualToIgnoringCase("bar");
       ConfigChecker.check(retriever.getCachedConfig());
@@ -114,7 +114,7 @@ public class ConfigurationRetrieverTest {
     });
     Async async = tc.async();
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       ConfigChecker.check(ar);
       assertThat(ar.result().getString("foo")).isEqualToIgnoringCase("BAR");
       ConfigChecker.check(retriever.getCachedConfig());
@@ -131,7 +131,7 @@ public class ConfigurationRetrieverTest {
       });
     Async async = tc.async();
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       tc.assertTrue(ar.failed());
       async.complete();
     });
@@ -173,7 +173,7 @@ public class ConfigurationRetrieverTest {
       System.setProperty("foo", "bar");
       retriever = ConfigRetriever.create(vertx);
 
-      retriever.getConfig(ar -> {
+      retriever.getConfig().onComplete(ar -> {
         assertThat(ar.result().getString("foo")).isEqualToIgnoringCase("bar");
         assertThat(ar.result().getString("hello")).isEqualToIgnoringCase("hello");
         assertThat(ar.result().getString("PATH")).isNotNull();
@@ -187,7 +187,7 @@ public class ConfigurationRetrieverTest {
     Async async = tc.async();
     System.setProperty("vertx-config-path", "src/test/resources/file/regular.json");
     retriever = ConfigRetriever.create(vertx);
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.result().getString("key")).isEqualToIgnoringCase("value");
       assertThat(ar.result().getString("PATH")).isNotNull();
       async.complete();
@@ -209,7 +209,7 @@ public class ConfigurationRetrieverTest {
             .put("from", "file-system").toBuffer());
 
       retriever = ConfigRetriever.create(vertx);
-      retriever.getConfig(ar -> {
+      retriever.getConfig().onComplete(ar -> {
         assertThat(ar.result().getString("name")).isEqualToIgnoringCase("config.json");
         assertThat(ar.result().getString("some-key")).isEqualToIgnoringCase("some-message");
         assertThat(ar.result().getString("from")).isEqualToIgnoringCase("file-system");
@@ -235,7 +235,7 @@ public class ConfigurationRetrieverTest {
     Async async = tc.async();
 
     retriever = ConfigRetriever.create(vertx);
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.result().getString("name")).isEqualToIgnoringCase("config.json");
       assertThat(ar.result().getString("some-key")).isEqualToIgnoringCase("some-message");
       assertThat(ar.result().getString("from")).isEqualToIgnoringCase("class-path");
@@ -255,7 +255,7 @@ public class ConfigurationRetrieverTest {
 
     try {
       retriever = ConfigRetriever.create(vertx);
-      retriever.getConfig(ar -> {
+      retriever.getConfig().onComplete(ar -> {
         assertThat(ar.result().getString("name")).isEqualToIgnoringCase("config2.json");
         assertThat(ar.result().getString("some-key")).isEqualToIgnoringCase("some-message");
         assertThat(ar.result().getString("from")).isEqualToIgnoringCase("class-path");
@@ -280,7 +280,7 @@ public class ConfigurationRetrieverTest {
       System.setProperty("foo", "baz");
       retriever = ConfigRetriever.create(vertx);
 
-      retriever.getConfig(ar -> {
+      retriever.getConfig().onComplete(ar -> {
         assertThat(ar.result().getString("foo")).isEqualToIgnoringCase("baz");
         assertThat(ar.result().getString("hello")).isEqualToIgnoringCase("hello");
         assertThat(ar.result().getString("PATH")).isNotNull();
@@ -296,7 +296,7 @@ public class ConfigurationRetrieverTest {
       addStores(new ConfigRetrieverOptions()));
     Async async = tc.async();
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.result().getString("key")).isEqualToIgnoringCase("new-value");
       async.complete();
     });
@@ -307,7 +307,7 @@ public class ConfigurationRetrieverTest {
     System.setProperty("key", "new-value");
     retriever = ConfigRetriever.create(vertx, addReversedStores(new ConfigRetrieverOptions()));
     Async async = tc.async();
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.result().getString("key")).isEqualToIgnoringCase("value");
       async.complete();
     });
@@ -323,7 +323,7 @@ public class ConfigurationRetrieverTest {
     AtomicReference<Throwable> reference = new AtomicReference<>();
     vertx.exceptionHandler(reference::set);
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       tc.assertTrue(ar.succeeded());
       tc.assertNotNull(ar.result());
 
@@ -345,7 +345,7 @@ public class ConfigurationRetrieverTest {
     AtomicReference<Throwable> reference = new AtomicReference<>();
     vertx.exceptionHandler(reference::set);
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       tc.assertTrue(ar.succeeded());
       tc.assertNotNull(ar.result());
       assertThat(ar.result().getString("key")).isEqualTo("value");
@@ -362,7 +362,7 @@ public class ConfigurationRetrieverTest {
     AtomicReference<Throwable> reference = new AtomicReference<>();
     vertx.exceptionHandler(reference::set);
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       if (ar.failed()) {
         ar.cause().printStackTrace();
       }
@@ -384,7 +384,7 @@ public class ConfigurationRetrieverTest {
     AtomicReference<Throwable> reference = new AtomicReference<>();
     vertx.exceptionHandler(reference::set);
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       tc.assertTrue(ar.succeeded());
       tc.assertNotNull(ar.result());
       assertThat(ar.result()).isEmpty();
