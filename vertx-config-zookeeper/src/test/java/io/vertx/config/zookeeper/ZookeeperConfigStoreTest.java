@@ -85,7 +85,7 @@ public class ZookeeperConfigStoreTest {
                     .put("path", "/config/A"))));
 
 
-    retriever.getConfig(json -> {
+    retriever.getConfig().onComplete(json -> {
       assertThat(json.succeeded()).isTrue();
       JsonObject config = json.result();
       tc.assertTrue(config.isEmpty());
@@ -93,7 +93,7 @@ public class ZookeeperConfigStoreTest {
       writeSomeConf("/config/A", true, ar -> {
         tc.assertTrue(ar.succeeded());
 
-        retriever.getConfig(json2 -> {
+        retriever.getConfig().onComplete(json2 -> {
           assertThat(json2.succeeded()).isTrue();
           JsonObject config2 = json2.result();
           tc.assertTrue(!config2.isEmpty());
@@ -118,7 +118,7 @@ public class ZookeeperConfigStoreTest {
                       .put("connection", server.getConnectString())
                       .put("path", "/config/A"))));
 
-      retriever.getConfig(json2 -> {
+      retriever.getConfig().onComplete(json2 -> {
         assertThat(json2.succeeded()).isTrue();
         JsonObject config2 = json2.result();
         tc.assertTrue(!config2.isEmpty());
@@ -126,7 +126,7 @@ public class ZookeeperConfigStoreTest {
 
         // Update the conf
         writeSomeConf("/config/A", false, update -> {
-          retriever.getConfig(json3 -> {
+          retriever.getConfig().onComplete(json3 -> {
             assertThat(json3.succeeded()).isTrue();
             JsonObject config3 = json3.result();
             tc.assertTrue(!config3.isEmpty());
@@ -134,7 +134,7 @@ public class ZookeeperConfigStoreTest {
 
             // Delete
             delete("/config/A", deletion -> {
-              retriever.getConfig(json4 -> {
+              retriever.getConfig().onComplete(json4 -> {
                 assertThat(json4.succeeded()).isTrue();
                 JsonObject config4 = json4.result();
                 tc.assertTrue(config4.isEmpty());

@@ -66,7 +66,7 @@ public class HoconProcessorTest {
                 .setFormat("hocon")
                 .setConfig(new JsonObject().put("path", "src/test/resources/empty.conf"))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.result()).isNotNull();
       assertThat(ar.result()).isEmpty();
       async.complete();
@@ -83,7 +83,7 @@ public class HoconProcessorTest {
                 .setFormat("hocon")
                 .setConfig(new JsonObject().put("path", "src/test/resources/some-text.txt"))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.failed()).isTrue();
       assertThat(ar.cause()).isNotNull().isInstanceOf(ConfigException.class);
       async.complete();
@@ -100,7 +100,7 @@ public class HoconProcessorTest {
                 .setFormat("hocon")
                 .setConfig(new JsonObject().put("path", "src/test/resources/some-missing-file.conf"))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.failed()).isTrue();
       assertThat(ar.cause()).isNotNull().isInstanceOf(FileSystemException.class);
       async.complete();
@@ -117,7 +117,7 @@ public class HoconProcessorTest {
                 .setFormat("hocon")
                 .setConfig(new JsonObject().put("path", "src/test/resources/simple.conf"))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       if (ar.failed()) {
         ar.cause().printStackTrace();
       }
@@ -156,7 +156,7 @@ public class HoconProcessorTest {
                 .setFormat("hocon")
                 .setConfig(new JsonObject().put("path", "src/test/resources/regular.json"))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isTrue();
       JsonObject json = ar.result();
       assertThat(json.getString("key")).isEqualTo("value");
@@ -190,7 +190,7 @@ public class HoconProcessorTest {
                 .setFormat("hocon")
                 .setConfig(new JsonObject().put("path", "src/test/resources/regular.properties"))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isTrue();
       JsonObject json = ar.result();
       assertThat(json.getString("key")).isEqualTo("value");
@@ -217,7 +217,7 @@ public class HoconProcessorTest {
                 .setFormat("hocon")
                 .setConfig(new JsonObject().put("path", "src/test/resources/complex.conf"))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isTrue();
       JsonObject json = ar.result();
       JsonObject complex = json.getJsonObject("complex");
@@ -260,7 +260,7 @@ public class HoconProcessorTest {
           .setConfig(new JsonObject().put("path", "src/test/resources/simple.conf")
             .put("hocon.env.override", true))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       if (ar.failed()) {
         ar.cause().printStackTrace();
       }

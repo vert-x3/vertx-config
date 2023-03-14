@@ -61,13 +61,16 @@ public class ScanAndBroadcastTest {
     http = new JsonObject();
 
     AtomicBoolean done = new AtomicBoolean();
-    server = vertx.createHttpServer()
+    vertx.createHttpServer()
       .requestHandler(request -> {
         if (request.path().endsWith("/conf")) {
           request.response().end(http.encodePrettily());
         }
       })
-      .listen(8080, s -> done.set(true));
+      .listen(8080).onComplete(tc.asyncAssertSuccess(s -> {
+        done.set(true);
+        server = s;
+      }));
 
     await().untilAtomic(done, is(true));
   }
@@ -76,10 +79,10 @@ public class ScanAndBroadcastTest {
   public void tearDown() {
     retriever.close();
     AtomicBoolean done = new AtomicBoolean();
-    server.close(x -> done.set(true));
+    server.close().onComplete(x -> done.set(true));
     await().untilAtomic(done, is(true));
     done.set(false);
-    vertx.close(x -> done.set(true));
+    vertx.close().onComplete(x -> done.set(true));
     await().untilAtomic(done, is(true));
   }
 
@@ -105,7 +108,7 @@ public class ScanAndBroadcastTest {
         new ConfigRetrieverOptions().setScanPeriod(1000).setStores(stores()));
 
       AtomicReference<JsonObject> current = new AtomicReference<>();
-      retriever.getConfig(json -> {
+      retriever.getConfig().onComplete(json -> {
         retriever.listen(change -> {
           if (current.get() != null && !current.get().equals(change.getPreviousConfiguration())) {
             throw new IllegalStateException("Previous configuration not correct");
@@ -143,7 +146,7 @@ public class ScanAndBroadcastTest {
       });
 
       AtomicReference<JsonObject> current = new AtomicReference<>();
-      retriever.getConfig(json -> {
+      retriever.getConfig().onComplete(json -> {
         retriever.listen(change -> {
           if (current.get() != null && !current.get().equals(change.getPreviousConfiguration())) {
             throw new IllegalStateException("Previous configuration not correct");
@@ -198,7 +201,7 @@ public class ScanAndBroadcastTest {
         new ConfigRetrieverOptions().setScanPeriod(500).setStores(stores()));
 
       AtomicReference<JsonObject> current = new AtomicReference<>();
-      retriever.getConfig(json -> {
+      retriever.getConfig().onComplete(json -> {
         retriever.listen(change -> {
           if (current.get() != null && !current.get().equals(change.getPreviousConfiguration())) {
             throw new IllegalStateException("Previous configuration not correct");

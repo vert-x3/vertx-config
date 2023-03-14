@@ -43,21 +43,21 @@ public class VerticleDeploymentTest {
     ConfigRetriever retriever = ConfigRetriever.create(vertx, new ConfigRetrieverOptions()
       .addStore(new ConfigStoreOptions().setType("file").setConfig(new JsonObject().put("path", "verticles.json"))));
 
-    retriever.getConfig(json -> {
+    retriever.getConfig().onComplete(json -> {
       ctxt.assertTrue(json.succeeded());
       JsonObject a = json.result().getJsonObject("a");
       JsonObject b = json.result().getJsonObject("b");
 
-      vertx.deployVerticle(GreetingVerticle.class.getName(), new DeploymentOptions().setConfig(a), d1 -> {
+      vertx.deployVerticle(GreetingVerticle.class.getName(), new DeploymentOptions().setConfig(a)).onComplete(d1 -> {
         if (d1.failed()) {
           ctxt.fail(d1.cause());
         }
-        vertx.deployVerticle(GreetingVerticle.class.getName(), new DeploymentOptions().setConfig(b), d2 -> {
+        vertx.deployVerticle(GreetingVerticle.class.getName(), new DeploymentOptions().setConfig(b)).onComplete(d2 -> {
           if (d2.failed()) {
             ctxt.fail(d2.cause());
           }
 
-          vertx.eventBus().<String>request("greeting/hello", "", response -> {
+          vertx.eventBus().<String>request("greeting/hello", "").onComplete(response -> {
             if (response.failed()) {
               ctxt.fail(response.cause());
               return;
@@ -68,7 +68,7 @@ public class VerticleDeploymentTest {
             async1.complete();
           });
 
-          vertx.eventBus().<String>request("greeting/bonjour", "", response -> {
+          vertx.eventBus().<String>request("greeting/bonjour", "").onComplete(response -> {
             if (response.failed()) {
               ctxt.fail(response.cause());
               return;

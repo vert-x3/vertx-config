@@ -102,7 +102,7 @@ public abstract class VaultConfigStoreTestBase {
       vertx.executeBlocking(future -> {
         configureVault();
         future.complete();
-      }, x -> async.complete());
+      }).onComplete(x -> async.complete());
     });
   }
 
@@ -118,7 +118,7 @@ public abstract class VaultConfigStoreTestBase {
     if (retriever != null) {
       retriever.close();
     }
-    vertx.close(tc.asyncAssertSuccess());
+    vertx.close().onComplete(tc.asyncAssertSuccess());
   }
 
   /**
@@ -134,7 +134,7 @@ public abstract class VaultConfigStoreTestBase {
 
     Async async = tc.async();
 
-    retriever.getConfig(json -> {
+    retriever.getConfig().onComplete(json -> {
       tc.assertTrue(json.succeeded());
       JsonObject content = json.result();
       tc.assertEquals("hello", content.getString("message"));
@@ -157,7 +157,7 @@ public abstract class VaultConfigStoreTestBase {
 
     Async async = tc.async();
 
-    retriever.getConfig(json -> {
+    retriever.getConfig().onComplete(json -> {
       tc.assertTrue(json.succeeded());
       JsonObject content = json.result();
       tc.assertEquals("hello", content.getString("message"));
@@ -182,7 +182,7 @@ public abstract class VaultConfigStoreTestBase {
 
     Async async = tc.async();
 
-    retriever.getConfig(json -> {
+    retriever.getConfig().onComplete(json -> {
       if (json.failed()) {
         json.cause().printStackTrace();
       }
@@ -208,7 +208,7 @@ public abstract class VaultConfigStoreTestBase {
 
     Async async = tc.async();
 
-    retriever.getConfig(json -> {
+    retriever.getConfig().onComplete(json -> {
       if (json.failed()) {
         json.cause().printStackTrace();
       }
@@ -234,7 +234,7 @@ public abstract class VaultConfigStoreTestBase {
 
     Async async = tc.async();
 
-    retriever.getConfig(json -> {
+    retriever.getConfig().onComplete(json -> {
       tc.assertTrue(json.succeeded());
       JsonObject content = json.result();
       tc.assertEquals(content.getString("key"), "val");
@@ -258,7 +258,7 @@ public abstract class VaultConfigStoreTestBase {
 
     Async async = tc.async();
 
-    retriever.getConfig(json -> {
+    retriever.getConfig().onComplete(json -> {
       tc.assertTrue(json.succeeded());
       JsonObject content = json.result();
       tc.assertEquals(content.getString("key"), "val");
@@ -291,7 +291,7 @@ public abstract class VaultConfigStoreTestBase {
     });
 
     AtomicBoolean done = new AtomicBoolean();
-    retriever.getConfig(json -> {
+    retriever.getConfig().onComplete(json -> {
       tc.assertTrue(json.succeeded());
       JsonObject content = json.result();
       tc.assertEquals("hello", content.getString("message"));
@@ -318,7 +318,7 @@ public abstract class VaultConfigStoreTestBase {
 
     Async async = tc.async();
 
-    retriever.getConfig(json -> {
+    retriever.getConfig().onComplete(json -> {
       tc.assertTrue(json.succeeded());
       JsonObject content = json.result();
       tc.assertTrue(content.isEmpty());
@@ -341,7 +341,7 @@ public abstract class VaultConfigStoreTestBase {
 
     Async async = tc.async();
 
-    retriever.getConfig(json -> {
+    retriever.getConfig().onComplete(json -> {
       tc.assertTrue(json.succeeded());
       tc.assertTrue(json.result().isEmpty());
       async.complete();
@@ -363,7 +363,7 @@ public abstract class VaultConfigStoreTestBase {
 
     Async async = tc.async();
 
-    retriever.getConfig(json -> {
+    retriever.getConfig().onComplete(json -> {
       tc.assertTrue(json.succeeded());
       tc.assertTrue(json.result().isEmpty());
       async.complete();
@@ -384,7 +384,7 @@ public abstract class VaultConfigStoreTestBase {
       .addStore(new ConfigStoreOptions().setType("vault").setConfig(config)));
 
     // Step 1 - we are able to read the config
-    retriever.getConfig(json -> {
+    retriever.getConfig().onComplete(json -> {
       tc.assertTrue(json.succeeded());
       JsonObject content = json.result();
       tc.assertEquals("hello", content.getString("message"));
@@ -397,10 +397,10 @@ public abstract class VaultConfigStoreTestBase {
         process.initAndUnsealVault();
         await().until(process::isRunning);
         future.complete();
-      }, step2 -> {
+      }).onComplete(step2 -> {
         tc.assertTrue(process.isRunning());
         // Step 3 - attempt to retrieve the config
-        retriever.getConfig(json2 -> {
+        retriever.getConfig().onComplete(json2 -> {
           tc.assertTrue(json2.failed());
           String msg = json2.cause().getMessage();
           tc.assertTrue(msg.contains("permission denied"), "Was expected <" + msg + "> to contain <permission denied>");
@@ -424,7 +424,7 @@ public abstract class VaultConfigStoreTestBase {
       .addStore(new ConfigStoreOptions().setType("vault").setConfig(config)));
 
     // Step 1 - we are able to read the config
-    retriever.getConfig(json -> {
+    retriever.getConfig().onComplete(json -> {
       tc.assertTrue(json.succeeded());
       JsonObject content = json.result();
       tc.assertEquals("hello", content.getString("message"));
@@ -432,9 +432,9 @@ public abstract class VaultConfigStoreTestBase {
       vertx.executeBlocking(future -> {
         process.run("operator seal " + VaultProcess.CA_CERT_ARG);
         future.complete();
-      }, step2 -> {
+      }).onComplete(step2 -> {
         // Step 3 - attempt to retrieve the config
-        retriever.getConfig(json2 -> {
+        retriever.getConfig().onComplete(json2 -> {
           tc.assertTrue(json2.failed());
           tc.assertTrue(json2.cause().getMessage().contains("Vault is sealed"));
 
@@ -442,7 +442,7 @@ public abstract class VaultConfigStoreTestBase {
           vertx.executeBlocking(fut -> {
             process.unseal();
             fut.complete();
-          }, x -> {
+          }).onComplete(x -> {
             tc.assertTrue(x.succeeded());
             async.complete();
           });
@@ -465,7 +465,7 @@ public abstract class VaultConfigStoreTestBase {
       .addStore(new ConfigStoreOptions().setType("vault").setConfig(config)));
 
     // Step 1 - we are able to read the config
-    retriever.getConfig(json -> {
+    retriever.getConfig().onComplete(json -> {
       tc.assertTrue(json.succeeded());
       JsonObject content = json.result();
       tc.assertEquals("hello", content.getString("message"));
@@ -473,9 +473,9 @@ public abstract class VaultConfigStoreTestBase {
       vertx.executeBlocking(future -> {
         process.run("token revoke " + VaultProcess.CA_CERT_ARG + " " + extractCurrentToken());
         future.complete();
-      }, step2 -> {
+      }).onComplete(step2 -> {
         // Step 3 - attempt to retrieve the config
-        retriever.getConfig(json2 -> {
+        retriever.getConfig().onComplete(json2 -> {
           tc.assertTrue(json2.failed());
           tc.assertTrue(json2.cause().getMessage().contains("permission denied"));
           async.complete();

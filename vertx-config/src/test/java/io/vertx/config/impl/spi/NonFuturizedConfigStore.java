@@ -17,8 +17,7 @@
 package io.vertx.config.impl.spi;
 
 import io.vertx.config.spi.ConfigStore;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
@@ -34,9 +33,12 @@ public class NonFuturizedConfigStore implements ConfigStore {
   }
 
   @Override
-  public void get(Handler<AsyncResult<Buffer>> completionHandler) {
-    vertx.executeBlocking(promise -> {
-      promise.complete(configuration.getBuffer("foo"));
-    }, completionHandler);
+  public Future<Buffer> get() {
+    return Future.succeededFuture(configuration.getBuffer("foo"));
+  }
+
+  @Override
+  public Future<Void> close() {
+    return Future.succeededFuture();
   }
 }

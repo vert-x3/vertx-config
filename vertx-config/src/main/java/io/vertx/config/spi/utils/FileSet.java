@@ -104,8 +104,7 @@ public class FileSet {
         Promise<JsonObject> promise = Promise.promise();
         futures.add(promise.future());
         try {
-          vertx.fileSystem().readFile(file.getAbsolutePath(),
-            buffer -> {
+          vertx.fileSystem().readFile(file.getAbsolutePath()).onComplete(buffer -> {
               if (buffer.failed()) {
                 promise.fail(buffer.cause());
               } else {

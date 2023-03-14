@@ -80,7 +80,7 @@ public class RawProcessorTest {
             )
     );
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.result()).isNotNull().isNotEmpty();
       assertThat(ar.result().getString("username")).isEqualTo("admin");
       assertThat(ar.result().getString("pwd")).isEqualTo("c2VjcmV0");
@@ -104,7 +104,7 @@ public class RawProcessorTest {
                             .put("raw.key", "some-json")))
     );
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.result()).isNotNull().isNotEmpty();
       assertThat(ar.result().getJsonObject("some-json").encode()).contains("foo", "bar", "num", "1");
       async.complete();
@@ -127,7 +127,7 @@ public class RawProcessorTest {
                             .put("raw.key", "some-json")))
     );
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.result()).isNotNull().isNotEmpty();
       assertThat(ar.result().getJsonArray("some-json").encode()).contains("1", "2", "3");
       async.complete();
@@ -150,7 +150,7 @@ public class RawProcessorTest {
                             .put("raw.key", "logo")))
     );
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.result()).isNotNull().isNotEmpty();
       assertThat(ar.result().getBinary("logo")).isNotEmpty();
       async.complete();
@@ -172,7 +172,7 @@ public class RawProcessorTest {
                             .put("raw.type", "binary")))
     );
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.failed());
       assertThat(ar.cause().getMessage()).contains("raw.key");
       async.complete();
@@ -195,7 +195,7 @@ public class RawProcessorTest {
                             .put("raw.type", "not a valid type")))
     );
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.failed());
       assertThat(ar.cause().getMessage()).contains("raw.type");
       async.complete();
@@ -218,7 +218,7 @@ public class RawProcessorTest {
                             .put("raw.key", "some-json")))
     );
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.failed());
       assertThat(ar.cause())
         .isInstanceOf(DecodeException.class)

@@ -19,7 +19,6 @@ package io.vertx.config.spi;
 
 import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -63,10 +62,5 @@ public interface ConfigProcessor {
    * @param configuration the processor configuration, may be {@code null}
    * @param input         the input, must not be {@code null}
    */
-  default Future<JsonObject> process(Vertx vertx, JsonObject configuration, Buffer input) {
-    VertxInternal vertxInternal = (VertxInternal) vertx;
-    Promise<JsonObject> promise = vertxInternal.promise();
-    process(vertx, configuration, input, promise);
-    return promise.future();
-  }
+  Future<JsonObject> process(Vertx vertx, JsonObject configuration, Buffer input);
 }

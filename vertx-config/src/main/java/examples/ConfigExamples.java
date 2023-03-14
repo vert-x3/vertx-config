@@ -67,7 +67,7 @@ public class ConfigExamples {
   }
 
   public void example3(ConfigRetriever retriever) {
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       if (ar.failed()) {
         // Failed to retrieve the configuration
       } else {
@@ -221,7 +221,7 @@ public class ConfigExamples {
       .addStore(store2);
 
     ConfigRetriever retriever = ConfigRetriever.create(Vertx.vertx(), options);
-    retriever.getConfig(json -> {
+    retriever.getConfig().onComplete(json -> {
       // Initial retrieval of the configuration
     });
 

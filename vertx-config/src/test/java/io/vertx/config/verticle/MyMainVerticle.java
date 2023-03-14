@@ -53,7 +53,7 @@ public class MyMainVerticle extends AbstractVerticle {
     });
 
     // Retrieve the current configuration.
-    configurationRetriever.getConfig(ar -> {
+    configurationRetriever.getConfig().onComplete(ar -> {
       JsonObject configuration = ar.result();
       deployMyVerticle(configuration, future);
     });
@@ -61,8 +61,7 @@ public class MyMainVerticle extends AbstractVerticle {
 
   private void deployMyVerticle(JsonObject conf, Promise<Void> completion) {
     vertx.deployVerticle(MyVerticle.class.getName(),
-        new DeploymentOptions().setConfig(conf),
-        deployed -> {
+        new DeploymentOptions().setConfig(conf)).onComplete(deployed -> {
           deploymentId = deployed.result();
           if (completion != null) {
             completion.complete();

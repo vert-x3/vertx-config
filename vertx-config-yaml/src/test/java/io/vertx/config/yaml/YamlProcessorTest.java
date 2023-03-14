@@ -69,7 +69,7 @@ public class YamlProcessorTest {
                 .setFormat("yaml")
                 .setConfig(new JsonObject().put("path", "src/test/resources/empty.yaml"))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       expectSuccess(ar);
       assertThat(ar.result()).isNotNull();
       assertThat(ar.result()).isEmpty();
@@ -95,7 +95,7 @@ public class YamlProcessorTest {
                 .setFormat("yaml")
                 .setConfig(new JsonObject().put("path", "src/test/resources/some-text.txt"))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.failed()).isTrue();
       assertThat(ar.cause()).isNotNull().isInstanceOf(DecodeException.class);
       async.complete();
@@ -112,7 +112,7 @@ public class YamlProcessorTest {
                 .setFormat("yaml")
                 .setConfig(new JsonObject().put("path", "src/test/resources/some-missing-file.yaml"))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.failed()).isTrue();
       assertThat(ar.cause()).isNotNull().isInstanceOf(FileSystemException.class);
       async.complete();
@@ -129,7 +129,7 @@ public class YamlProcessorTest {
                 .setFormat("yaml")
                 .setConfig(new JsonObject().put("path", "src/test/resources/basic.yaml"))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       expectSuccess(ar);
       JsonObject json = ar.result();
       assertThat(json.getInteger("invoice")).isEqualTo(34843);
@@ -156,7 +156,7 @@ public class YamlProcessorTest {
                 .setFormat("yaml")
                 .setConfig(new JsonObject().put("path", "src/test/resources/simple.yaml"))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       if (ar.failed()) {
         ar.cause().printStackTrace();
       }
@@ -193,7 +193,7 @@ public class YamlProcessorTest {
                 .setFormat("yaml")
                 .setConfig(new JsonObject().put("path", "src/test/resources/structure.yaml"))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       expectSuccess(ar);
       JsonObject json = ar.result();
       // Lists

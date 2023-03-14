@@ -95,7 +95,7 @@ public class GitConfigStoreWithGithubTest {
         .put("path", "target/junk/work")
         .put("filesets", new JsonArray().add(new JsonObject().put("pattern", "a.json"))))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result()).isNotEmpty();
       JsonObject json = ar.result();
@@ -118,7 +118,7 @@ public class GitConfigStoreWithGithubTest {
         .put("branch", "dev")
         .put("filesets", new JsonArray().add(new JsonObject().put("pattern", "*.json"))))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result()).isNotEmpty();
       JsonObject json = ar.result();

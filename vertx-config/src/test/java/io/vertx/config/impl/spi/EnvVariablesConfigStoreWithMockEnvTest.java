@@ -50,7 +50,7 @@ public class EnvVariablesConfigStoreWithMockEnvTest extends ConfigStoreTestBase 
 
     AtomicBoolean done = new AtomicBoolean();
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result().getString("PATH")).isNotNull();
       assertThat(ar.result().getString("name")).isEqualTo("12345678901234567890");
@@ -68,7 +68,7 @@ public class EnvVariablesConfigStoreWithMockEnvTest extends ConfigStoreTestBase 
 
     AtomicBoolean done = new AtomicBoolean();
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isTrue();
       try {
         // We don't mind the value (truncated, we just want to make sure it doesn't throw an exception)

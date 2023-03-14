@@ -117,7 +117,7 @@ public class FileConfigStoreTest extends ConfigStoreTestBase {
         .setConfig(new JsonObject().put("path", "src/test/resources/file/raw.properties").put("raw-data", true))
       )
     );
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isTrue();
       JsonObject json = ar.result();
       assertThat(json.getString("key")).isEqualTo("value");

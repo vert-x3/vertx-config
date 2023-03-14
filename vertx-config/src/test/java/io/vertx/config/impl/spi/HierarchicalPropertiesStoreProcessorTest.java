@@ -64,7 +64,7 @@ public class HierarchicalPropertiesStoreProcessorTest {
       )
       .put("single", 0);
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       JsonObject config = ar.result();
       assertThat(config).isEqualTo(expected);
       async.complete();

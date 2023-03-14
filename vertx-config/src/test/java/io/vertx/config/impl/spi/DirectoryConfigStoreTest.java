@@ -97,7 +97,7 @@ public class DirectoryConfigStoreTest extends ConfigStoreTestBase {
             .setType("directory")
             .setConfig(new JsonObject().put("path", "src/test/resources")
                 .put("filesets", new JsonArray().add(new JsonObject().put("pattern", "file/reg*.json"))))));
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       ConfigChecker.check(ar);
       async.complete();
     });
@@ -114,7 +114,7 @@ public class DirectoryConfigStoreTest extends ConfigStoreTestBase {
                     .put("format", "properties")
                     .put("pattern", "**/reg*.properties"))))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isTrue();
       JsonObject json = ar.result();
       assertThat(json.getString("key")).isEqualTo("value");
@@ -143,7 +143,7 @@ public class DirectoryConfigStoreTest extends ConfigStoreTestBase {
             .put("pattern", "**/raw.properties")
             .put("raw-data", true))))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isTrue();
       JsonObject json = ar.result();
       assertThat(json.getString("key")).isEqualTo("value");
@@ -180,7 +180,7 @@ public class DirectoryConfigStoreTest extends ConfigStoreTestBase {
       )
       .put("single", 0);
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isTrue();
       JsonObject json = ar.result();
       assertThat(json).isEqualTo(expected);
@@ -201,7 +201,7 @@ public class DirectoryConfigStoreTest extends ConfigStoreTestBase {
                     .put("format", "properties")
                     .put("pattern", "**/reg*.stuff"))))));
 
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isTrue();
       JsonObject json = ar.result();
       assertThat(json.isEmpty());
@@ -220,7 +220,7 @@ public class DirectoryConfigStoreTest extends ConfigStoreTestBase {
                     .add(new JsonObject().put("pattern", "file/reg*.json"))
                     .add(new JsonObject().put("pattern", "dir/a.*son"))
                 ))));
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       ConfigChecker.check(ar);
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       async.complete();
@@ -238,7 +238,7 @@ public class DirectoryConfigStoreTest extends ConfigStoreTestBase {
                     .add(new JsonObject().put("pattern", "dir/b.json"))
                     .add(new JsonObject().put("pattern", "dir/a.*son"))
                 ))));
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       assertThat(ar.result().getString("b.name")).isEqualTo("B");
       assertThat(ar.result().getString("conflict")).isEqualTo("A");
@@ -257,7 +257,7 @@ public class DirectoryConfigStoreTest extends ConfigStoreTestBase {
                     .add(new JsonObject().put("pattern", "dir/a.*son"))
                     .add(new JsonObject().put("pattern", "dir/b.json"))
                 ))));
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       assertThat(ar.result().getString("b.name")).isEqualTo("B");
       assertThat(ar.result().getString("conflict")).isEqualTo("B");
@@ -275,7 +275,7 @@ public class DirectoryConfigStoreTest extends ConfigStoreTestBase {
                 .put("filesets", new JsonArray()
                     .add(new JsonObject().put("pattern", "dir/?.json"))
                 ))));
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.result().getString("b.name")).isEqualTo("B");
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       // Alphabetical order, so B is last.
@@ -294,7 +294,7 @@ public class DirectoryConfigStoreTest extends ConfigStoreTestBase {
           .put("filesets", new JsonArray()
             .add(new JsonObject().put("pattern", "dir/?.json"))
           ))));
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       // Both level-3 objects must exist.
       assertThat(ar.result().getJsonObject("parent").getJsonObject("level_2").getString("key1")).isEqualTo("A");
       assertThat(ar.result().getJsonObject("parent").getJsonObject("level_2").getString("key2")).isEqualTo("B");
@@ -312,7 +312,7 @@ public class DirectoryConfigStoreTest extends ConfigStoreTestBase {
                 .put("filesets", new JsonArray()
                     .add(new JsonObject().put("pattern", "dir/a?.json"))
                 ))));
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.result().getString("b.name")).isNull();
       assertThat(ar.result().getString("a.name")).isEqualTo("A");
       assertThat(ar.result().getString("c.name")).isEqualTo("C");
@@ -331,7 +331,7 @@ public class DirectoryConfigStoreTest extends ConfigStoreTestBase {
                 .put("filesets", new JsonArray()
                     .add(new JsonObject().put("pattern", "dir/a?*.json"))
                 ))));
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       assertThat(ar.failed());
       assertThat(ar.cause()).isInstanceOf(DecodeException.class);
       async.complete();

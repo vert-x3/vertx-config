@@ -86,14 +86,14 @@ public class ConsulConfigStoreTest {
   public void tearDown(TestContext tc) {
     retriever.close();
     client.close();
-    vertx.close(tc.asyncAssertSuccess());
+    vertx.close().onComplete(tc.asyncAssertSuccess());
   }
 
   @Test
   public void getEmptyConfig(TestContext tc) {
     Async async = tc.async();
     createRetriever();
-    retriever.getConfig(json -> {
+    retriever.getConfig().onComplete(json -> {
       tc.assertTrue(json.succeeded());
       tc.assertTrue(json.result().isEmpty());
       async.complete();
@@ -104,14 +104,14 @@ public class ConsulConfigStoreTest {
   public void getSimpleConfig(TestContext tc) {
     Async async = tc.async();
     createRetriever();
-    client.putValue("foo/bar", "value", ar -> {
+    client.putValue("foo/bar", "value").onComplete(ar -> {
       tc.assertTrue(ar.succeeded());
-      retriever.getConfig(json2 -> {
+      retriever.getConfig().onComplete(json2 -> {
         assertThat(json2.succeeded()).isTrue();
         JsonObject config2 = json2.result();
         tc.assertTrue(!config2.isEmpty());
         tc.assertEquals(config2.getString("bar"), "value");
-        client.deleteValues("foo", h -> async.complete());
+        client.deleteValues("foo").onComplete(h -> async.complete());
       });
     });
   }
@@ -119,8 +119,8 @@ public class ConsulConfigStoreTest {
   @Test
   public void listenConfigChange(TestContext tc) {
     createRetriever();
-    client.putValue("foo/bar", "value", tc.asyncAssertSuccess(v -> {
-      retriever.getConfig(tc.asyncAssertSuccess(v2 -> {
+    client.putValue("foo/bar", "value").onComplete(tc.asyncAssertSuccess(v -> {
+      retriever.getConfig().onComplete(tc.asyncAssertSuccess(v2 -> {
         retriever.listen(change -> {
           JsonObject prev = change.getPreviousConfiguration();
           tc.assertTrue(!prev.isEmpty());
@@ -128,9 +128,9 @@ public class ConsulConfigStoreTest {
           JsonObject next = change.getNewConfiguration();
           tc.assertTrue(!next.isEmpty());
           tc.assertEquals(next.getString("bar"), "new_value");
-          client.deleteValues("foo", tc.asyncAssertSuccess());
+          client.deleteValues("foo").onComplete(tc.asyncAssertSuccess());
         });
-        client.putValue("foo/bar", "new_value", ignore -> {});
+        client.putValue("foo/bar", "new_value").onComplete(ignore -> {});
       }));
     }));
   }
@@ -141,8 +141,8 @@ public class ConsulConfigStoreTest {
     String testStr = "{\"str\": \"bar\", \"double\": 1.2, \"bool1\": true, " +
       "\"bool0\": false, \"int\": 1234, \"long\": 9223372036854775807, " +
       "\"obj\": {\"int\": -321}, \"arr\": [\"1\", 2, false]}";
-    client.putValue("foo/bar", testStr, tc.asyncAssertSuccess(v -> {
-      retriever.getConfig(tc.asyncAssertSuccess(result -> {
+    client.putValue("foo/bar", testStr).onComplete(tc.asyncAssertSuccess(v -> {
+      retriever.getConfig().onComplete(tc.asyncAssertSuccess(result -> {
         tc.assertFalse(result.isEmpty());
         JsonObject bar = result.getJsonObject("bar");
         tc.assertEquals("bar", bar.getString("str"));
@@ -153,7 +153,7 @@ public class ConsulConfigStoreTest {
         tc.assertTrue(bar.getBoolean("bool1"));
         tc.assertEquals(new JsonObject().put("int", -321), bar.getJsonObject("obj"));
         tc.assertEquals(new JsonArray().add("1").add(2).add(false), bar.getJsonArray("arr"));
-        client.deleteValues("foo", tc.asyncAssertSuccess());
+        client.deleteValues("foo").onComplete(tc.asyncAssertSuccess());
       }));
     }));
   }

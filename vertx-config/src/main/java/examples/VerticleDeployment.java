@@ -17,7 +17,7 @@ public class VerticleDeployment {
     ConfigRetriever retriever = ConfigRetriever.create(vertx, new ConfigRetrieverOptions()
       .addStore(new ConfigStoreOptions().setType("file").setConfig(new JsonObject().put("path", "verticles.json"))));
 
-    retriever.getConfig(json -> {
+    retriever.getConfig().onComplete(json -> {
       JsonObject a = json.result().getJsonObject("a");
       JsonObject b = json.result().getJsonObject("b");
       vertx.deployVerticle(GreetingVerticle.class.getName(), new DeploymentOptions().setConfig(a));
@@ -29,7 +29,7 @@ public class VerticleDeployment {
     ConfigRetriever retriever = ConfigRetriever.create(vertx, new ConfigRetrieverOptions()
       .addStore(new ConfigStoreOptions().setType("file").setConfig(new JsonObject().put("path", "verticles.json"))));
 
-    retriever.getConfig(json -> {
+    retriever.getConfig().onComplete(json -> {
       //...
     });
 
@@ -47,7 +47,7 @@ public class VerticleDeployment {
       .addStore(new ConfigStoreOptions().setType("file").setConfig(new JsonObject().put("path", "vertx.json"))));
 
     // Retrieve the configuration
-    retriever.getConfig(json -> {
+    retriever.getConfig().onComplete(json -> {
       JsonObject result = json.result();
       // Close the vert.x instance, we don't need it anymore.
       vertx.close();

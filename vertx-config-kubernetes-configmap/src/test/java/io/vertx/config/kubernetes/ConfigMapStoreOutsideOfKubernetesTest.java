@@ -61,7 +61,7 @@ public class ConfigMapStoreOutsideOfKubernetesTest {
   @Test
   public void test(TestContext tc) {
     Async async = tc.async();
-    retriever.getConfig(ar -> {
+    retriever.getConfig().onComplete(ar -> {
       if (ar.failed()) {
         ar.cause().printStackTrace();
       }
