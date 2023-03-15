@@ -69,15 +69,8 @@ public interface ConfigRetriever {
    * Reads the configuration from the different {@link ConfigStore}
    * and computes the final configuration.
    *
-   * @param completionHandler handler receiving the computed configuration, or a failure if the
+   * @return a future notified the computed configuration, or a failure if the
    *                          configuration cannot be retrieved
-   * @deprecated use {@link #getConfig()} instead
-   */
-  @Deprecated
-  void getConfig(Handler<AsyncResult<JsonObject>> completionHandler);
-
-  /**
-   * Like {@link #getConfig(Handler)} but returns a {@code Future} of the asynchronous result
    */
   Future<JsonObject> getConfig();
 

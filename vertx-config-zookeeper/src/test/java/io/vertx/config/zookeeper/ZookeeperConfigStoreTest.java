@@ -69,7 +69,7 @@ public class ZookeeperConfigStoreTest {
   public void tearDown(TestContext tc) throws IOException {
     retriever.close();
     client.close();
-    vertx.close(tc.asyncAssertSuccess());
+    vertx.close().onComplete(tc.asyncAssertSuccess());
     server.close();
   }
 

@@ -170,12 +170,6 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
   }
 
   @Override
-  public void getConfig(Handler<AsyncResult<JsonObject>> completionHandler) {
-    Objects.requireNonNull(completionHandler);
-    getConfig().onComplete(completionHandler);
-  }
-
-  @Override
   public Future<JsonObject> getConfig() {
     return compute().onSuccess(result -> {
       synchronized (this) {

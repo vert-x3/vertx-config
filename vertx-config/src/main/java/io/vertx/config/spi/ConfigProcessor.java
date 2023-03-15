@@ -38,29 +38,13 @@ public interface ConfigProcessor {
 
   /**
    * Transforms the given {@code input} into a {@link JsonObject}. This is an asynchronous non-blocking
-   * transformation. The result is passed to the given {@code Handler}. If the transformation fails, the passed
+   * transformation. If the transformation fails, the passed
    * {@link AsyncResult} would be marked as failed. On success, the result contains the {@link JsonObject}.
    *
    * @param vertx         the Vert.x instance
    * @param configuration the processor configuration, may be {@code null}
    * @param input         the input, must not be {@code null}
-   * @param handler       the result handler, must not be {@code null}. The handler will be called in the same context as
-   *                      the caller.
-   * @deprecated implement {@link #process(Vertx, JsonObject, Buffer)} instead
-   */
-  @Deprecated
-  default void process(Vertx vertx, JsonObject configuration, Buffer input, Handler<AsyncResult<JsonObject>> handler) {
-    vertx.runOnContext(v -> handler.handle(Future.failedFuture("Deprecated")));
-  }
-
-  /**
-   * Transforms the given {@code input} into a {@link JsonObject}.
-   * <p>
-   * This is an asynchronous non-blocking transformation.
-   *
-   * @param vertx         the Vert.x instance
-   * @param configuration the processor configuration, may be {@code null}
-   * @param input         the input, must not be {@code null}
+   * @return a future notified  with the result
    */
   Future<JsonObject> process(Vertx vertx, JsonObject configuration, Buffer input);
 }

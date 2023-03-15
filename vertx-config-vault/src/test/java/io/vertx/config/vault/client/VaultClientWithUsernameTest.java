@@ -58,7 +58,7 @@ public class VaultClientWithUsernameTest {
 
   @After
   public void tearDown(TestContext tc) {
-    vertx.close(tc.asyncAssertSuccess());
+    vertx.close().onComplete(tc.asyncAssertSuccess());
   }
 
   /**

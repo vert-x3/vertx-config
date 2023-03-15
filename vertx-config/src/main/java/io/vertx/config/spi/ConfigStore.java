@@ -30,28 +30,6 @@ import io.vertx.core.buffer.Buffer;
 public interface ConfigStore {
 
   /**
-   * Closes the configuration store.
-   *
-   * @param completionHandler handler called when the cleanup has been completed
-   * @deprecated implement {@link #close()} instead
-   */
-  @Deprecated
-  default void close(Handler<Void> completionHandler) {
-    completionHandler.handle(null);
-  }
-
-  /**
-   * Retrieves the configuration store in this store.
-   *
-   * @param completionHandler the handler to pass the configuration
-   * @deprecated implement {@link #get()} instead
-   */
-  @Deprecated
-  default void get(Handler<AsyncResult<Buffer>> completionHandler) {
-    completionHandler.handle(Future.failedFuture("Deprecated"));
-  }
-
-  /**
    * Retrieves the configuration store in this store.
    *
    * @return a {@code Future} of the asynchronous result.

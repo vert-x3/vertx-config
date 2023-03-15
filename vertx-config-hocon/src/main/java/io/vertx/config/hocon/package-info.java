@@ -15,7 +15,7 @@
  *
  */
 
-@ModuleGen(name = "vertx-config", groupPackage = "io.vertx", checkCallbackDeprecation = true)
+@ModuleGen(name = "vertx-config", groupPackage = "io.vertx", useFutures = true)
 package io.vertx.config.hocon;
 
 import io.vertx.codegen.annotations.ModuleGen;
