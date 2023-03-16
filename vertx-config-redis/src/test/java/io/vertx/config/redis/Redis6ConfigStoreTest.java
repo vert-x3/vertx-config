@@ -66,7 +66,7 @@ public class Redis6ConfigStoreTest {
       rule.vertx(),
       new RedisOptions().setConnectionString("redis://" + redis.getContainerIpAddress() + ":" + redis.getFirstMappedPort() + "?client=tester"));
 
-    client.connect(onConnect -> {
+    client.connect().onComplete(onConnect -> {
       should.assertTrue(onConnect.succeeded());
       onConnect.result().close();
       before.complete();
@@ -142,7 +142,7 @@ public class Redis6ConfigStoreTest {
 
   private void writeSomeConf(String key, Handler<AsyncResult<Void>> handler) {
     RedisAPI api = RedisAPI.api(client);
-    api.hmset(Arrays.asList(key, "some-key", "some-value"), ar -> {
+    api.hmset(Arrays.asList(key, "some-key", "some-value")).onComplete(ar -> {
       if (ar.succeeded()) {
         handler.handle(Future.succeededFuture());
       } else {
