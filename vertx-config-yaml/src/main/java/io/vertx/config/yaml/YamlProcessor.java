@@ -24,6 +24,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 
@@ -37,6 +38,8 @@ import java.util.Map;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 public class YamlProcessor implements ConfigProcessor {
+
+  private static final LoaderOptions DEFAULT_OPTIONS = new LoaderOptions();
 
   @Override
   public String name() {
@@ -53,7 +56,7 @@ public class YamlProcessor implements ConfigProcessor {
     // Use executeBlocking even if the bytes are in memory
     return vertx.executeBlocking(promise -> {
       try {
-        final Yaml yamlMapper = new Yaml(new SafeConstructor());
+        final Yaml yamlMapper = new Yaml(new SafeConstructor(DEFAULT_OPTIONS));
         Map<Object, Object> doc = yamlMapper.load(input.toString(StandardCharsets.UTF_8));
         promise.complete(jsonify(doc));
       } catch (ClassCastException e) {
