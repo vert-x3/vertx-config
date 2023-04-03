@@ -26,7 +26,6 @@ import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -44,13 +43,15 @@ public class EnvVariablesConfigStore implements ConfigStore {
 
   private final VertxInternal vertx;
   private final boolean rawData;
+  private final boolean hierarchical;
   private final Set<String> keys;
   private final Supplier<Map<String, String>> getenv;
   private final AtomicReference<Buffer> cached = new AtomicReference<>();
 
-  public EnvVariablesConfigStore(Vertx vertx, boolean rawData, JsonArray keys, Supplier<Map<String, String>> getenv) {
+  public EnvVariablesConfigStore(Vertx vertx, boolean rawData, boolean hierarchical, JsonArray keys, Supplier<Map<String, String>> getenv) {
     this.vertx = (VertxInternal) vertx;
     this.rawData = rawData;
+    this.hierarchical = hierarchical;
     this.keys = (keys == null) ? null : new HashSet<>(keys.getList());
     this.getenv = getenv;
   }
@@ -59,20 +60,19 @@ public class EnvVariablesConfigStore implements ConfigStore {
   public Future<Buffer> get() {
     Buffer value = cached.get();
     if (value == null) {
-      value = all(getenv.get(), rawData, keys).toBuffer();
+      value = all(getenv.get(), rawData, hierarchical, keys).toBuffer();
       cached.set(value);
     }
     return vertx.getOrCreateContext().succeededFuture(value);
   }
 
-  private static JsonObject all(Map<String, String> env, boolean rawData, Set<String> keys) {
+  private static JsonObject all(Map<String, String> env, boolean rawData, boolean hierarchical, Set<String> keys) {
     JsonObject json = new JsonObject();
-    Collection<String> localKeys = keys == null ? env.keySet() : keys;
-    env.forEach((key, value) -> {
-      if (localKeys.contains(key)) {
-        JsonObjectHelper.put(json, key, value, rawData);
+    for (Map.Entry<String, String> entry : env.entrySet()) {
+      if (keys == null || keys.contains(entry.getKey())) {
+        JsonObjectHelper.put(json, entry.getKey(), entry.getValue(), rawData, hierarchical);
       }
-    });
+    }
     return json;
   }
 
