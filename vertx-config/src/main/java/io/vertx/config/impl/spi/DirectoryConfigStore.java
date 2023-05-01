@@ -77,7 +77,7 @@ public class DirectoryConfigStore implements ConfigStore {
         promise.fail(e);
       }
     }).flatMap(files -> {
-      List<Future> futures = new ArrayList<>();
+      List<Future<JsonObject>> futures = new ArrayList<>();
       for (FileSet set : filesets) {
         Promise<JsonObject> promise = vertx.promise();
         set.buildConfiguration(files, json -> {

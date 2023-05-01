@@ -83,7 +83,7 @@ public class FileSet {
    * @param handler the handler called with the computed configuration
    */
   public void buildConfiguration(List<File> files, Handler<AsyncResult<JsonObject>> handler) {
-    List<Future> futures = new ArrayList<>();
+    List<Future<JsonObject>> futures = new ArrayList<>();
 
     files.stream()
       .map(file -> {

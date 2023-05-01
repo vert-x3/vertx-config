@@ -253,7 +253,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
   }
 
   private Future<JsonObject> compute() {
-    List<Future> futures = providers.stream()
+    List<Future<JsonObject>> futures = providers.stream()
       .map(s -> s.get(context.owner()))
       .collect(Collectors.toList());
 

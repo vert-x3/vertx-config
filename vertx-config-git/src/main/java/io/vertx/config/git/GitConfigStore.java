@@ -168,7 +168,7 @@ public class GitConfigStore implements ConfigStore {
   }
 
   private Future<Buffer> compute(List<File> files) {
-    List<Future> futures = new ArrayList<>();
+    List<Future<JsonObject>> futures = new ArrayList<>();
     for (FileSet set : filesets) {
       Promise<JsonObject> future = Promise.promise();
       set.buildConfiguration(files, json -> {
