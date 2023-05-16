@@ -181,7 +181,7 @@ public class GitConfigStore implements ConfigStore {
       futures.add(future.future());
     }
 
-    return CompositeFuture.all(futures).map(compositeFuture -> {
+    return Future.all(futures).map(compositeFuture -> {
       JsonObject json = new JsonObject();
       compositeFuture.<JsonObject>list().stream().forEach(config -> json.mergeIn(config, true));
       return json.toBuffer();

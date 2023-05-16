@@ -1,7 +1,7 @@
 package io.vertx.config.verticle;
 
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.CompositeFuture;
+import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 
@@ -28,6 +28,6 @@ public class GreetingVerticle extends AbstractVerticle {
       .handler(msg -> msg.reply(message))
       .completion().onComplete(endpointReady);
 
-    CompositeFuture.all(endpointReady.future(), updateReady.future()).onComplete(x -> future.handle(x.mapEmpty()));
+    Future.all(endpointReady.future(), updateReady.future()).onComplete(x -> future.handle(x.mapEmpty()));
   }
 }

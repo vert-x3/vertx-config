@@ -24,7 +24,7 @@ import io.vertx.config.impl.ConfigRetrieverImpl;
 import io.vertx.config.impl.ConfigurationProvider;
 import io.vertx.config.vault.client.SlimVaultClient;
 import io.vertx.config.vault.utils.VaultProcess;
-import io.vertx.core.CompositeFuture;
+import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -98,7 +98,7 @@ public abstract class VaultConfigStoreTestBase {
       });
     });
 
-    CompositeFuture.all(keyValueV1Promise.future(), keyValueV2Promise.future()).onComplete(h -> {
+    Future.all(keyValueV1Promise.future(), keyValueV2Promise.future()).onComplete(h -> {
       vertx.executeBlocking(future -> {
         configureVault();
         future.complete();

@@ -119,7 +119,7 @@ public class FileSet {
         }
       });
 
-    CompositeFuture.all(futures).onComplete(ar -> {
+    Future.all(futures).onComplete(ar -> {
       if (ar.failed()) {
         handler.handle(Future.failedFuture(ar.cause()));
       } else {

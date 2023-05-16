@@ -89,7 +89,7 @@ public class DirectoryConfigStore implements ConfigStore {
         });
         futures.add(promise.future());
       }
-      return CompositeFuture.all(futures);
+      return Future.all(futures);
     }).map(compositeFuture -> {
       JsonObject json = new JsonObject();
       compositeFuture.<JsonObject>list().forEach(config -> json.mergeIn(config, true));
