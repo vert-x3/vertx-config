@@ -189,16 +189,8 @@ public class GitConfigStore implements ConfigStore {
   }
 
   private Future<Void> update() {
-    return vertx.<PullResult>executeBlocking(promise -> {
-      PullResult call;
-      try {
-        call = git.pull().setRemote(remote).setRemoteBranchName(branch).setCredentialsProvider(credentialProvider)
-          .setTransportConfigCallback(transportConfigCallback).call();
-        promise.complete(call);
-      } catch (GitAPIException e) {
-        promise.fail(e);
-      }
-    }).flatMap(call -> {
+    return vertx.executeBlocking(() -> git.pull().setRemote(remote).setRemoteBranchName(branch).setCredentialsProvider(credentialProvider)
+      .setTransportConfigCallback(transportConfigCallback).call()).flatMap(call -> {
       if (call.isSuccessful()) {
         return Future.succeededFuture();
       }
@@ -212,16 +204,14 @@ public class GitConfigStore implements ConfigStore {
   }
 
   private Future<List<File>> read() {
-    return vertx.executeBlocking(promise -> {
-      promise.complete(FileSet.traverse(path).stream().sorted().collect(toList()));
-    });
+    return vertx.executeBlocking(() -> FileSet.traverse(path).stream().sorted().collect(toList()));
   }
 
   @Override
   public Future<Void> close() {
-    return vertx.executeBlocking(promise -> {
+    return vertx.executeBlocking(() -> {
       git.close();
-      promise.complete();
+      return null;
     });
   }
 }

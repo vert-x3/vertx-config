@@ -49,7 +49,7 @@ public class HoconProcessor implements ConfigProcessor {
   public Future<JsonObject> process(Vertx vertx, JsonObject configuration, Buffer input) {
     // Use executeBlocking even if the bytes are in memory
     // Indeed, HOCON resolution can read others files (includes).
-    return vertx.executeBlocking(promise -> {
+    return vertx.executeBlocking(() -> {
         try (Reader reader = new StringReader(input.toString("UTF-8"))) {
           Config conf = ConfigFactory.parseReader(reader);
           conf = conf.resolve();
@@ -65,9 +65,7 @@ public class HoconProcessor implements ConfigProcessor {
               json = json.mergeIn(envOverrideJson);
             }
           }
-          promise.complete(json);
-        } catch (Exception e) {
-          promise.fail(e);
+          return json;
         }
       }
     );

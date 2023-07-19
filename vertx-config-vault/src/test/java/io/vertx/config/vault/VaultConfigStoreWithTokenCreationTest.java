@@ -65,13 +65,13 @@ public class VaultConfigStoreWithTokenCreationTest extends VaultConfigStoreTestB
       tc.assertTrue(json.succeeded());
 
       // Step 2 - Wait until expiration
-      vertx.executeBlocking(f -> {
+      vertx.executeBlocking(() -> {
         try {
           Thread.sleep(10000L);
         } catch (InterruptedException e) {
           // Ignore it.
         }
-        f.complete();
+        return null;
       }).onComplete(x ->
         retriever.getConfig().onComplete(json2 -> {
           tc.assertTrue(json2.succeeded());

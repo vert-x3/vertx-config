@@ -99,9 +99,9 @@ public abstract class VaultConfigStoreTestBase {
     });
 
     Future.all(keyValueV1Promise.future(), keyValueV2Promise.future()).onComplete(h -> {
-      vertx.executeBlocking(future -> {
+      vertx.executeBlocking(() -> {
         configureVault();
-        future.complete();
+        return null;
       }).onComplete(x -> async.complete());
     });
   }
@@ -389,14 +389,14 @@ public abstract class VaultConfigStoreTestBase {
       JsonObject content = json.result();
       tc.assertEquals("hello", content.getString("message"));
       // Step 2 - revoke the (here it's the root token) token
-      vertx.executeBlocking(future -> {
+      vertx.executeBlocking(() -> {
         process.run("token revoke " + VaultProcess.CA_CERT_ARG + " -self");
         // Generate another token - restart vault.
         process.shutdown();
         process = new VaultProcess();
         process.initAndUnsealVault();
         await().until(process::isRunning);
-        future.complete();
+        return null;
       }).onComplete(step2 -> {
         tc.assertTrue(process.isRunning());
         // Step 3 - attempt to retrieve the config
@@ -429,9 +429,9 @@ public abstract class VaultConfigStoreTestBase {
       JsonObject content = json.result();
       tc.assertEquals("hello", content.getString("message"));
       // Step 2 - revoke the (here it's the root token) token
-      vertx.executeBlocking(future -> {
+      vertx.executeBlocking(() -> {
         process.run("operator seal " + VaultProcess.CA_CERT_ARG);
-        future.complete();
+        return null;
       }).onComplete(step2 -> {
         // Step 3 - attempt to retrieve the config
         retriever.getConfig().onComplete(json2 -> {
@@ -439,9 +439,9 @@ public abstract class VaultConfigStoreTestBase {
           tc.assertTrue(json2.cause().getMessage().contains("Vault is sealed"));
 
           // Step 4 - Unseal
-          vertx.executeBlocking(fut -> {
+          vertx.executeBlocking(() -> {
             process.unseal();
-            fut.complete();
+            return null;
           }).onComplete(x -> {
             tc.assertTrue(x.succeeded());
             async.complete();
@@ -470,9 +470,9 @@ public abstract class VaultConfigStoreTestBase {
       JsonObject content = json.result();
       tc.assertEquals("hello", content.getString("message"));
       // Step 2 - revoke the (here it's the root token) token
-      vertx.executeBlocking(future -> {
+      vertx.executeBlocking(() -> {
         process.run("token revoke " + VaultProcess.CA_CERT_ARG + " " + extractCurrentToken());
-        future.complete();
+        return null;
       }).onComplete(step2 -> {
         // Step 3 - attempt to retrieve the config
         retriever.getConfig().onComplete(json2 -> {

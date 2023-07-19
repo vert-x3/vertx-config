@@ -55,13 +55,9 @@ public class ZookeeperConfigStore implements ConfigStore {
 
   @Override
   public Future<Buffer> get() {
-    return vertx.executeBlocking(promise -> {
-      try {
-        client.blockUntilConnected();
-        promise.complete();
-      } catch (InterruptedException e) {
-        promise.fail(e);
-      }
+    return vertx.executeBlocking(() -> {
+      client.blockUntilConnected();
+      return null;
     }).flatMap(v -> {
       // We are connected.
       Promise<Buffer> promise = vertx.promise();

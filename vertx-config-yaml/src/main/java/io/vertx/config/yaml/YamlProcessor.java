@@ -54,15 +54,13 @@ public class YamlProcessor implements ConfigProcessor {
     }
 
     // Use executeBlocking even if the bytes are in memory
-    return vertx.executeBlocking(promise -> {
+    return vertx.executeBlocking(() -> {
       try {
         final Yaml yamlMapper = new Yaml(new SafeConstructor(DEFAULT_OPTIONS));
         Map<Object, Object> doc = yamlMapper.load(input.toString(StandardCharsets.UTF_8));
-        promise.complete(jsonify(doc));
+        return jsonify(doc);
       } catch (ClassCastException e) {
-        promise.fail(new DecodeException("Failed to decode YAML", e));
-      } catch (RuntimeException e) {
-        promise.fail(e);
+        throw new DecodeException("Failed to decode YAML", e);
       }
     });
   }

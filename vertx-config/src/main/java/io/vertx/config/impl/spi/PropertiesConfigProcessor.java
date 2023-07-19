@@ -50,13 +50,10 @@ public class PropertiesConfigProcessor implements ConfigProcessor {
     // I'm not sure the executeBlocking is really required here as the
     // buffer is in memory,
     // so the input stream is not blocking
-    return vertx.executeBlocking(future -> {
+    return vertx.executeBlocking(() -> {
       byte[] bytes = input.getBytes();
       try (ByteArrayInputStream stream = new ByteArrayInputStream(bytes)) {
-        JsonObject parsed = readAsJson(stream, rawData, hierarchicalData);
-        future.complete(parsed);
-      } catch (Exception e) {
-        future.fail(e);
+        return readAsJson(stream, rawData, hierarchicalData);
       }
     });
   }

@@ -70,13 +70,7 @@ public class DirectoryConfigStore implements ConfigStore {
 
   @Override
   public Future<Buffer> get() {
-    return vertx.<List<File>>executeBlocking(promise -> {
-      try {
-        promise.complete(FileSet.traverse(path).stream().sorted().collect(Collectors.toList()));
-      } catch (Throwable e) {
-        promise.fail(e);
-      }
-    }).flatMap(files -> {
+    return vertx.executeBlocking(() -> FileSet.traverse(path).stream().sorted().collect(Collectors.toList())).flatMap(files -> {
       List<Future<JsonObject>> futures = new ArrayList<>();
       for (FileSet set : filesets) {
         Promise<JsonObject> promise = vertx.promise();
