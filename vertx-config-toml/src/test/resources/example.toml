@@ -1,0 +1,19 @@
+# Comments should be ignored
+
+abc = 123
+array = [1, 2, 3]
+simple = {x = "y"} # literal/inline table
+
+[object]
+a = 1
+b = 2
+c = 3
+d = ["do", "rae", "me"]
+
+[a123.a.b]
+a = "hi"
+b = 1.23
+c = """
+abc
+efg
+""" # multi-lines
