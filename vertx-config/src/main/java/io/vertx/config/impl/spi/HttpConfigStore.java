@@ -52,7 +52,7 @@ public class HttpConfigStore implements ConfigStore {
       .setHost(host)
       .setPort(port)
       .setURI(path)
-      .setIdleTimeout(timeout)
+      .setTimeout(timeout)
       .setFollowRedirects(followRedirects);
     configuration.getJsonObject("headers", new JsonObject()).stream()
       .filter(h -> h.getValue() != null)

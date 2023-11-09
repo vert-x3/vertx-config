@@ -93,7 +93,7 @@ class SpringConfigServerStore implements ConfigStore {
 
   @Override
   public Future<Buffer> get() {
-    RequestOptions options = new RequestOptions().setURI(path).setIdleTimeout(timeout);
+    RequestOptions options = new RequestOptions().setURI(path).setTimeout(timeout);
     if (authHeaderValue != null) {
       options.addHeader("Authorization", authHeaderValue);
     }
