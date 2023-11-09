@@ -20,16 +20,6 @@ public class SecretConverter {
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, Secret obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
-        case "data":
-          if (member.getValue() instanceof JsonObject) {
-            obj.setData(((JsonObject)member.getValue()).copy());
-          }
-          break;
-        case "lease_duration":
-          if (member.getValue() instanceof Number) {
-            obj.setLeaseDuration(((Number)member.getValue()).longValue());
-          }
-          break;
         case "lease_id":
           if (member.getValue() instanceof String) {
             obj.setLeaseId((String)member.getValue());
@@ -40,9 +30,19 @@ public class SecretConverter {
             obj.setRenewable((Boolean)member.getValue());
           }
           break;
+        case "lease_duration":
+          if (member.getValue() instanceof Number) {
+            obj.setLeaseDuration(((Number)member.getValue()).longValue());
+          }
+          break;
         case "request_id":
           if (member.getValue() instanceof String) {
             obj.setRequestId((String)member.getValue());
+          }
+          break;
+        case "data":
+          if (member.getValue() instanceof JsonObject) {
+            obj.setData(((JsonObject)member.getValue()).copy());
           }
           break;
       }
@@ -54,16 +54,16 @@ public class SecretConverter {
   }
 
   public static void toJson(Secret obj, java.util.Map<String, Object> json) {
-    if (obj.getData() != null) {
-      json.put("data", obj.getData());
-    }
-    json.put("lease_duration", obj.getLeaseDuration());
     if (obj.getLeaseId() != null) {
       json.put("lease_id", obj.getLeaseId());
     }
     json.put("renewable", obj.isRenewable());
+    json.put("lease_duration", obj.getLeaseDuration());
     if (obj.getRequestId() != null) {
       json.put("request_id", obj.getRequestId());
+    }
+    if (obj.getData() != null) {
+      json.put("data", obj.getData());
     }
   }
 }

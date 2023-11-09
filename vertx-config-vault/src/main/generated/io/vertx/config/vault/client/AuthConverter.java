@@ -25,21 +25,24 @@ public class AuthConverter {
             obj.setAccessor((String)member.getValue());
           }
           break;
-        case "application_id":
-          break;
-        case "client_token":
-          if (member.getValue() instanceof String) {
-            obj.setClientToken((String)member.getValue());
-          }
-          break;
         case "lease_duration":
           if (member.getValue() instanceof Number) {
             obj.setLeaseDuration(((Number)member.getValue()).longValue());
           }
           break;
+        case "renewable":
+          if (member.getValue() instanceof Boolean) {
+            obj.setRenewable((Boolean)member.getValue());
+          }
+          break;
         case "metadata":
           if (member.getValue() instanceof JsonObject) {
             obj.setMetadata(((JsonObject)member.getValue()).copy());
+          }
+          break;
+        case "client_token":
+          if (member.getValue() instanceof String) {
+            obj.setClientToken((String)member.getValue());
           }
           break;
         case "policies":
@@ -52,10 +55,7 @@ public class AuthConverter {
             obj.setPolicies(list);
           }
           break;
-        case "renewable":
-          if (member.getValue() instanceof Boolean) {
-            obj.setRenewable((Boolean)member.getValue());
-          }
+        case "application_id":
           break;
         case "user_id":
           break;
@@ -73,22 +73,22 @@ public class AuthConverter {
     if (obj.getAccessor() != null) {
       json.put("accessor", obj.getAccessor());
     }
-    if (obj.getApplicationId() != null) {
-      json.put("application_id", obj.getApplicationId());
+    json.put("lease_duration", obj.getLeaseDuration());
+    json.put("renewable", obj.isRenewable());
+    if (obj.getMetadata() != null) {
+      json.put("metadata", obj.getMetadata());
     }
     if (obj.getClientToken() != null) {
       json.put("client_token", obj.getClientToken());
-    }
-    json.put("lease_duration", obj.getLeaseDuration());
-    if (obj.getMetadata() != null) {
-      json.put("metadata", obj.getMetadata());
     }
     if (obj.getPolicies() != null) {
       JsonArray array = new JsonArray();
       obj.getPolicies().forEach(item -> array.add(item));
       json.put("policies", array);
     }
-    json.put("renewable", obj.isRenewable());
+    if (obj.getApplicationId() != null) {
+      json.put("application_id", obj.getApplicationId());
+    }
     if (obj.getUserId() != null) {
       json.put("user_id", obj.getUserId());
     }

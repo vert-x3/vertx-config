@@ -25,14 +25,14 @@ public class LookupConverter {
             obj.setAccessor((String)member.getValue());
           }
           break;
-        case "creation_ttl":
-          if (member.getValue() instanceof Number) {
-            obj.setCreationTTL(((Number)member.getValue()).longValue());
-          }
-          break;
         case "creation_time":
           if (member.getValue() instanceof Number) {
             obj.setCreationTime(((Number)member.getValue()).longValue());
+          }
+          break;
+        case "creation_ttl":
+          if (member.getValue() instanceof Number) {
+            obj.setCreationTTL(((Number)member.getValue()).longValue());
           }
           break;
         case "display_name":
@@ -53,11 +53,6 @@ public class LookupConverter {
         case "last_renewal_time":
           if (member.getValue() instanceof Number) {
             obj.setLastRenewalTime(((Number)member.getValue()).longValue());
-          }
-          break;
-        case "metadata":
-          if (member.getValue() instanceof JsonObject) {
-            obj.setMetadata(((JsonObject)member.getValue()).copy());
           }
           break;
         case "num_uses":
@@ -85,14 +80,19 @@ public class LookupConverter {
             obj.setPolicies(list);
           }
           break;
+        case "ttl":
+          if (member.getValue() instanceof Number) {
+            obj.setTtl(((Number)member.getValue()).longValue());
+          }
+          break;
         case "renewable":
           if (member.getValue() instanceof Boolean) {
             obj.setRenewable((Boolean)member.getValue());
           }
           break;
-        case "ttl":
-          if (member.getValue() instanceof Number) {
-            obj.setTtl(((Number)member.getValue()).longValue());
+        case "metadata":
+          if (member.getValue() instanceof JsonObject) {
+            obj.setMetadata(((JsonObject)member.getValue()).copy());
           }
           break;
       }
@@ -107,8 +107,8 @@ public class LookupConverter {
     if (obj.getAccessor() != null) {
       json.put("accessor", obj.getAccessor());
     }
-    json.put("creation_ttl", obj.getCreationTTL());
     json.put("creation_time", obj.getCreationTime());
+    json.put("creation_ttl", obj.getCreationTTL());
     if (obj.getDisplayName() != null) {
       json.put("display_name", obj.getDisplayName());
     }
@@ -117,9 +117,6 @@ public class LookupConverter {
       json.put("id", obj.getId());
     }
     json.put("last_renewal_time", obj.getLastRenewalTime());
-    if (obj.getMetadata() != null) {
-      json.put("metadata", obj.getMetadata());
-    }
     json.put("num_uses", obj.getNumUses());
     json.put("orphan", obj.isOrphan());
     if (obj.getPath() != null) {
@@ -130,7 +127,10 @@ public class LookupConverter {
       obj.getPolicies().forEach(item -> array.add(item));
       json.put("policies", array);
     }
-    json.put("renewable", obj.isRenewable());
     json.put("ttl", obj.getTtl());
+    json.put("renewable", obj.isRenewable());
+    if (obj.getMetadata() != null) {
+      json.put("metadata", obj.getMetadata());
+    }
   }
 }
