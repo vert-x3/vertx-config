@@ -18,6 +18,7 @@
 package io.vertx.config.vault.client;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.json.annotations.JsonGen;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;
@@ -28,7 +29,8 @@ import java.util.Map;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-@DataObject(generateConverter = true, jsonPropertyNameFormatter = io.vertx.codegen.format.SnakeCase.class)
+@DataObject
+@JsonGen(publicConverter = false, jsonPropertyNameFormatter = io.vertx.codegen.format.SnakeCase.class)
 public class Auth {
 
   private String accessor;
