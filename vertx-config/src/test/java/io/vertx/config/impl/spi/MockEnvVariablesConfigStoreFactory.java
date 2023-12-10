@@ -44,7 +44,7 @@ public class MockEnvVariablesConfigStoreFactory implements ConfigStoreFactory {
   @Override
   public ConfigStore create(Vertx vertx, JsonObject configuration) {
     JsonObject envConfig = configuration.getJsonObject("env");
-    return new EnvVariablesConfigStore(vertx, configuration.getBoolean("raw-data", false), configuration.getJsonArray("keys"), () -> {
+    return new EnvVariablesConfigStore(vertx, configuration.getBoolean("raw-data", false), configuration.getBoolean("hierarchical", false), configuration.getJsonArray("keys"), () -> {
       Map<String, String> env = new HashMap<>(System.getenv());
       if (envConfig != null) {
         for (Map.Entry entry : envConfig) {

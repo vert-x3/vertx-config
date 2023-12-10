@@ -129,6 +129,11 @@ public class ConfigExamples {
       .setConfig(new JsonObject().put("keys", new JsonArray().add("SERVICE1_HOST").add("SERVICE2_HOST")));
   }
 
+  public void envHierarchical() {
+    ConfigStoreOptions envHierarchical = new ConfigStoreOptions()
+      .setType("env")
+      .setConfig(new JsonObject().put("hierarchical", true));
+  }
 
   public void http() {
     ConfigStoreOptions http = new ConfigStoreOptions()

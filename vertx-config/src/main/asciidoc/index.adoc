@@ -217,6 +217,15 @@ must be listed individually:
 {@link examples.ConfigExamples#env3()}
 ----
 
+Furthermore, there is the `hierarchical` attribute (`false` by default). If `hierarchical` is `true`, the environment variables will be parsed as a nested JSON object, using the dot-separated property name as the path in the JSON object.
+
+Example:
+
+[source, $lang]
+----
+{@link examples.ConfigExamples#envHierarchical()}
+----
+
 === System Properties
 
 This configuration store transforms system properties to a JSON Object contributed to the
