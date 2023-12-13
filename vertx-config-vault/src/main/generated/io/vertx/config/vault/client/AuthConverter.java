@@ -17,7 +17,7 @@ public class AuthConverter {
   private static final Base64.Decoder BASE64_DECODER = JsonUtil.BASE64_DECODER;
   private static final Base64.Encoder BASE64_ENCODER = JsonUtil.BASE64_ENCODER;
 
-  public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, Auth obj) {
+   static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, Auth obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
         case "accessor":
@@ -65,11 +65,11 @@ public class AuthConverter {
     }
   }
 
-  public static void toJson(Auth obj, JsonObject json) {
+   static void toJson(Auth obj, JsonObject json) {
     toJson(obj, json.getMap());
   }
 
-  public static void toJson(Auth obj, java.util.Map<String, Object> json) {
+   static void toJson(Auth obj, java.util.Map<String, Object> json) {
     if (obj.getAccessor() != null) {
       json.put("accessor", obj.getAccessor());
     }
