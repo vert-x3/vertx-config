@@ -263,12 +263,12 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
       .map(s -> s.get(context.owner()))
       .collect(Collectors.toList());
 
-    return CompositeFuture.all(futures).map(compositeFuture -> {
+    return context.succeededFuture().compose(v -> CompositeFuture.all(futures).map(compositeFuture -> {
       // Merge the different futures
       JsonObject json = new JsonObject();
       futures.forEach(future -> json.mergeIn((JsonObject) future.result(), true));
       return json;
-    }).map(json -> processor != null ? processor.apply(json) : json);
+    }).map(json -> processor != null ? processor.apply(json) : json));
   }
 
   /**
