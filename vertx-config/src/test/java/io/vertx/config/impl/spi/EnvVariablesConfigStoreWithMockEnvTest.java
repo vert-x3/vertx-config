@@ -42,8 +42,8 @@ public class EnvVariablesConfigStoreWithMockEnvTest extends ConfigStoreTestBase 
     retriever = ConfigRetriever.create(vertx,
       new ConfigRetrieverOptions()
         .addStore(new ConfigStoreOptions().setType("mock-env").setConfig(new JsonObject()
-          .put("raw-data", true)
-          .put("env", Collections.singletonMap("name", "12345678901234567890"))
+            .put("raw-data", true)
+            .put("env", Collections.singletonMap("mock.name", "12345678901234567890"))
           )
         )
     );
@@ -53,7 +53,7 @@ public class EnvVariablesConfigStoreWithMockEnvTest extends ConfigStoreTestBase 
     retriever.getConfig().onComplete(ar -> {
       assertThat(ar.succeeded()).isTrue();
       assertThat(ar.result().getString("PATH")).isNotNull();
-      assertThat(ar.result().getString("name")).isEqualTo("12345678901234567890");
+      assertThat(ar.result().getString("mock.name")).isEqualTo("12345678901234567890");
       done.set(true);
     });
     await().untilAtomic(done, is(true));
@@ -63,7 +63,10 @@ public class EnvVariablesConfigStoreWithMockEnvTest extends ConfigStoreTestBase 
   public void testLoadingFromEnvWithoutRawData() {
     retriever = ConfigRetriever.create(vertx,
       new ConfigRetrieverOptions()
-        .addStore(new ConfigStoreOptions().setType("mock-env").setConfig(new JsonObject().put("env", Collections.singletonMap("name", "12345678901234567890"))))
+        .addStore(new ConfigStoreOptions().setType("mock-env").setConfig(new JsonObject()
+            .put("env", Collections.singletonMap("mock.name", "12345678901234567890"))
+          )
+        )
     );
 
     AtomicBoolean done = new AtomicBoolean();
@@ -72,7 +75,34 @@ public class EnvVariablesConfigStoreWithMockEnvTest extends ConfigStoreTestBase 
       assertThat(ar.succeeded()).isTrue();
       try {
         // We don't mind the value (truncated, we just want to make sure it doesn't throw an exception)
-        assertThat(ar.result().getInteger("name")).isNotNull();
+        assertThat(ar.result().getInteger("mock.name")).isNotNull();
+      } catch (ClassCastException e) {
+        throw new AssertionError("Should not throw exception", e);
+      }
+      done.set(true);
+    });
+    await().untilAtomic(done, is(true));
+  }
+
+  @Test
+  public void testHierarchicalLoadingFromEnv() {
+    retriever = ConfigRetriever.create(vertx,
+      new ConfigRetrieverOptions()
+        .addStore(new ConfigStoreOptions().setType("mock-env").setConfig(new JsonObject()
+            .put("hierarchical", true)
+            .put("env", Collections.singletonMap("mock.name", "12345678901234567890"))
+          )
+        )
+    );
+
+    AtomicBoolean done = new AtomicBoolean();
+
+    retriever.getConfig().onComplete(ar -> {
+      assertThat(ar.succeeded()).isTrue();
+      try {
+        // We don't mind the value (truncated, we just want to make sure it doesn't throw an exception)
+        assertThat(ar.result().getJsonObject("mock")).isNotNull();
+        assertThat(ar.result().getJsonObject("mock").getInteger("name")).isNotNull();
       } catch (ClassCastException e) {
         throw new AssertionError("Should not throw exception", e);
       }

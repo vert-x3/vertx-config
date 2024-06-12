@@ -49,6 +49,27 @@ public class JsonObjectHelper {
     json.put(name, rawData ? value : convert(value));
   }
 
+  public static void put(JsonObject json, String name, String value, boolean rawData, boolean hierarchical) {
+    if (!hierarchical) {
+      put(json, name, value, rawData);
+    } else {
+      List<String> path = Arrays.asList(name.split("\\."));
+      if (path.size() == 1) {
+        put(json, name, value, rawData);
+      } else {
+        JsonObject current = json;
+        for (int i = 0; i < path.size() - 1; i++) {
+          String key = path.get(i);
+          if (!current.containsKey(key)) {
+            current.put(key, new JsonObject());
+          }
+          current = current.getJsonObject(key);
+        }
+        put(current, path.get(path.size() - 1), value, rawData);
+      }
+    }
+  }
+
   public static Object convert(String value) {
     Objects.requireNonNull(value);
 

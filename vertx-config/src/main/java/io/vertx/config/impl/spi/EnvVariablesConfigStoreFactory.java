@@ -49,6 +49,6 @@ public class EnvVariablesConfigStoreFactory implements ConfigStoreFactory {
 
   @Override
   public ConfigStore create(Vertx vertx, JsonObject configuration) {
-    return new EnvVariablesConfigStore(vertx, configuration.getBoolean("raw-data", false), configuration.getJsonArray("keys"), getenv);
+    return new EnvVariablesConfigStore(vertx, configuration.getBoolean("raw-data", false), configuration.getBoolean("hierarchical", false), configuration.getJsonArray("keys"), getenv);
   }
 }
