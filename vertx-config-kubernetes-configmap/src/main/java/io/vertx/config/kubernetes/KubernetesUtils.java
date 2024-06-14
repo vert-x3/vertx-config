@@ -26,5 +26,6 @@ public class KubernetesUtils {
 
   public static final String OPENSHIFT_KUBERNETES_TOKEN_FILE = "/var/run/secrets/kubernetes.io/serviceaccount/token";
 
-}
+  public static final String OPENSHIFT_KUBERNETES_NAMESPACE_FILE = "/var/run/secrets/kubernetes.io/serviceaccount/namespace";
 
+}
