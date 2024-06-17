@@ -30,7 +30,6 @@
   <artifactId>vertx-config-consul</artifactId>
 
   <properties>
-    <doc.skip>false</doc.skip>
     <embedded.consul.version>0.3.0</embedded.consul.version>
   </properties>
 

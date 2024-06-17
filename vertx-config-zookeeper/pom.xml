@@ -31,7 +31,6 @@
 
   <properties>
     <curator.version>2.13.0</curator.version>
-    <doc.skip>false</doc.skip>
   </properties>
 
   <dependencies>

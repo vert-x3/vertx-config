@@ -29,7 +29,6 @@
 
   <properties>
     <jgit.version>4.4.1.201607150455-r</jgit.version>
-    <doc.skip>false</doc.skip>
   </properties>
 
   <artifactId>vertx-config-git</artifactId>
