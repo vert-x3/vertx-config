@@ -21,7 +21,7 @@ import io.vertx.config.spi.ConfigProcessor;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.impl.ContextInternal;
+import io.vertx.core.internal.ContextInternal;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 import org.yaml.snakeyaml.LoaderOptions;

@@ -19,8 +19,8 @@ package io.vertx.config.spi.utils;
 
 import io.vertx.config.spi.ConfigProcessor;
 import io.vertx.core.*;
-import io.vertx.core.impl.logging.Logger;
-import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.internal.logging.Logger;
+import io.vertx.core.internal.logging.LoggerFactory;
 import io.vertx.core.json.JsonObject;
 
 import java.io.File;
