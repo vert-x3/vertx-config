@@ -30,7 +30,7 @@
       
     <artifactId>vertx-config-parent</artifactId>
       
-    <version>4.5.10</version>
+    <version>4.5.11-SNAPSHOT</version>
       
     <packaging>pom</packaging>
       
@@ -38,7 +38,7 @@
             
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
             
-        <stack.version>4.5.10</stack.version>
+        <stack.version>4.5.11-SNAPSHOT</stack.version>
             
         <doc.skip>true</doc.skip>
             
