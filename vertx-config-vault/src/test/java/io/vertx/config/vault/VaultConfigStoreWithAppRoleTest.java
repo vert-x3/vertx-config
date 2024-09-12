@@ -41,11 +41,11 @@ public class VaultConfigStoreWithAppRoleTest extends VaultConfigStoreTestBase {
 
     client = new SlimVaultClient(vertx, process.getConfigurationWithRootToken());
 
-    client.read("auth/approle/role/testrole/role-id",
-      secret -> appRoleId = secret.result().getData().getString("role_id"));
+    client.read("auth/approle/role/testrole/role-id")
+      .onComplete(secret -> appRoleId = secret.result().getData().getString("role_id"));
 
-    client.write("auth/approle/role/testrole/secret-id", new JsonObject(),
-      secret -> secretId = secret.result().getData().getString("secret_id"));
+    client.write("auth/approle/role/testrole/secret-id", new JsonObject())
+      .onComplete(secret -> secretId = secret.result().getData().getString("secret_id"));
 
     await().until(() -> appRoleId != null && secretId != null);
 

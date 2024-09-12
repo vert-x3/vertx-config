@@ -70,12 +70,12 @@ public class VaultClientWithCertTest {
       client.setToken(token);
 
       // Try to write and read some secrets - using the "user" policy
-      client.write(rw_path, new JsonObject().put("value", value), x -> {
+      client.write(rw_path, new JsonObject().put("value", value)).onComplete(x -> {
         if (x.failed()) {
           x.cause().printStackTrace();
         }
         tc.assertTrue(x.succeeded());
-        client.read(rw_path, y -> {
+        client.read(rw_path).onComplete(y -> {
           tc.assertTrue(y.succeeded());
           tc.assertEquals(value, y.result().getData().getString("value"));
           async.complete();
@@ -146,7 +146,7 @@ public class VaultClientWithCertTest {
   }
 
   private void checkWeCanLoginAndAccessRestrictedSecrets(TestContext tc) {
-    client.loginWithCert(getLoginTestHandler(client, tc));
+    client.loginWithCert().onComplete(getLoginTestHandler(client, tc));
   }
 
 

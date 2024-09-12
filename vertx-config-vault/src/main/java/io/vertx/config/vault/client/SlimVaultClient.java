@@ -17,10 +17,7 @@
 
 package io.vertx.config.vault.client;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -73,6 +70,9 @@ public class SlimVaultClient {
     }
   }
 
+  public Future<Secret> read(String path) {
+    return Future.future(p -> read(path, p));
+  }
 
   /**
    * Reads a secret from `path`.
@@ -80,26 +80,30 @@ public class SlimVaultClient {
    * @param path            the path
    * @param responseHandler the callback invoked with the result
    */
-  public void read(String path, Handler<AsyncResult<Secret>> responseHandler) {
+  public void read(String path, Completable<Secret> responseHandler) {
     Objects.requireNonNull(responseHandler);
 
     client.get("/v1/" + Objects.requireNonNull(path))
       .putHeader(TOKEN_HEADER, Objects.requireNonNull(getToken(), "No token to access the vault"))
       .send().onComplete(response -> {
         if (response.failed()) {
-          responseHandler.handle(VaultException.toFailure("Unable to access the Vault", response.cause()));
+          responseHandler.fail(VaultException.toFailure("Unable to access the Vault", response.cause()));
           return;
         }
 
         HttpResponse<Buffer> result = response.result();
         if (result.statusCode() != 200) {
-          responseHandler.handle(VaultException.toFailure(result.statusMessage(), result.statusCode(),
+          responseHandler.fail(VaultException.toFailure(result.statusMessage(), result.statusCode(),
             result.bodyAsString()));
         } else {
           Secret secret = new Secret(result.bodyAsJsonObject());
-          responseHandler.handle(Future.succeededFuture(secret));
+          responseHandler.succeed(secret);
         }
       });
+  }
+
+  public Future<Secret> write(String path, JsonObject secrets) {
+    return Future.future(p -> write(path, secrets, p));
   }
 
   /**
@@ -108,29 +112,33 @@ public class SlimVaultClient {
    * @param path          the path
    * @param resultHandler the callback invoked with the result
    */
-  public void write(String path, JsonObject secrets, Handler<AsyncResult<Secret>> resultHandler) {
+  public void write(String path, JsonObject secrets, Completable<Secret> resultHandler) {
     Objects.requireNonNull(resultHandler);
     client.post("/v1/" + Objects.requireNonNull(path))
       .putHeader(TOKEN_HEADER, Objects.requireNonNull(getToken(), "The token must be set"))
       .sendJsonObject(Objects.requireNonNull(secrets, "The secret must be set")).onComplete(ar -> {
           if (ar.failed()) {
-            resultHandler.handle(VaultException.toFailure("Unable to access the Vault", ar.cause()));
+            resultHandler.fail(VaultException.toFailure("Unable to access the Vault", ar.cause()));
             return;
           }
 
           HttpResponse<Buffer> response = ar.result();
           switch (response.statusCode()) {
             case 200:
-              resultHandler.handle(Future.succeededFuture(new Secret(response.bodyAsJsonObject())));
+              resultHandler.succeed(new Secret(response.bodyAsJsonObject()));
               break;
             case 204:
-              resultHandler.handle(Future.succeededFuture());
+              resultHandler.succeed();
               break;
             default:
-              resultHandler.handle(VaultException.toFailure(response.statusMessage(), response.statusCode(),
+              resultHandler.fail(VaultException.toFailure(response.statusMessage(), response.statusCode(),
                 response.bodyAsString()));
           }
         });
+  }
+
+  public Future<List<String>> list(String path) {
+    return Future.future(p -> list(path, p));
   }
 
   /**
@@ -139,31 +147,35 @@ public class SlimVaultClient {
    * @param path          the path
    * @param resultHandler the callback invoked with the result
    */
-  public void list(String path, Handler<AsyncResult<List<String>>> resultHandler) {
+  public void list(String path, Completable<List<String>> resultHandler) {
     Objects.requireNonNull(path, "The path is required to list secrets");
     String fullPath = path + "?list=true";
     Objects.requireNonNull(resultHandler);
 
-    read(fullPath, ar -> {
-      if (ar.failed() && !(ar.cause() instanceof VaultException)) {
-        resultHandler.handle(Future.failedFuture(ar.cause()));
-      } else if (ar.failed()) {
-        if (((VaultException) ar.cause()).getStatusCode() == 404) {
-          resultHandler.handle(Future.succeededFuture(Collections.emptyList()));
+    read(fullPath, (res, err) -> {
+      if (res != null && !(err instanceof VaultException)) {
+        resultHandler.fail(err);
+      } else if (err != null) {
+        if (((VaultException) err).getStatusCode() == 404) {
+          resultHandler.succeed(Collections.emptyList());
         } else {
-          resultHandler.handle(Future.failedFuture(ar.cause()));
+          resultHandler.fail(err);
         }
       } else {
-        JsonArray keys = ar.result().getData().getJsonArray("keys");
+        JsonArray keys = res.getData().getJsonArray("keys");
         if (keys == null) {
-          resultHandler.handle(Future.failedFuture("Cannot find keys"));
+          resultHandler.fail("Cannot find keys");
         } else {
           List<String> list = new ArrayList<>();
           keys.forEach(o -> list.add((String) o));
-          resultHandler.handle(Future.succeededFuture(list));
+          resultHandler.succeed(list);
         }
       }
     });
+  }
+
+  public Future<Void> delete(String path) {
+    return Future.future(p -> delete(path, p));
   }
 
   /**
@@ -172,24 +184,28 @@ public class SlimVaultClient {
    * @param path          the path
    * @param resultHandler the callback invoked with the result
    */
-  public void delete(String path, Handler<AsyncResult<Void>> resultHandler) {
+  public void delete(String path, Completable<Void> resultHandler) {
     Objects.requireNonNull(resultHandler);
     client.delete("/v1/" + Objects.requireNonNull(path))
       .putHeader(TOKEN_HEADER, Objects.requireNonNull(getToken(), "The token must be set"))
       .send().onComplete(ar -> {
         if (ar.failed()) {
-          resultHandler.handle(VaultException.toFailure("Unable to access the Vault", ar.cause()));
+          resultHandler.fail(VaultException.toFailure("Unable to access the Vault", ar.cause()));
           return;
         }
 
         HttpResponse<Buffer> response = ar.result();
         if (response.statusCode() != 204) {
-          resultHandler.handle(VaultException.toFailure(response.statusMessage(), response.statusCode(),
+          resultHandler.fail(VaultException.toFailure(response.statusMessage(), response.statusCode(),
             response.bodyAsString()));
         } else {
-          resultHandler.handle(Future.succeededFuture());
+          resultHandler.succeed();
         }
       });
+  }
+
+  public Future<Auth> createToken(TokenRequest tokenRequest) {
+    return Future.future(p -> createToken(tokenRequest, p));
   }
 
   /**
@@ -198,28 +214,31 @@ public class SlimVaultClient {
    * @param tokenRequest  the token request
    * @param resultHandler the callback invoked with the result.
    */
-  public void createToken(TokenRequest tokenRequest, Handler<AsyncResult<Auth>> resultHandler) {
+  public void createToken(TokenRequest tokenRequest, Completable<Auth> resultHandler) {
     client.post("/v1/auth/token/create" + ((tokenRequest.getRole() == null) ? "" : "/" + tokenRequest.getRole()))
       .putHeader(TOKEN_HEADER, Objects.requireNonNull(getToken(), "The token must be set"))
       .sendJsonObject(tokenRequest.toPayload()).onComplete(ar -> {
         if (ar.failed()) {
-          resultHandler.handle(VaultException.toFailure("Unable to access the Vault", ar.cause()));
+          resultHandler.fail(VaultException.toFailure("Unable to access the Vault", ar.cause()));
           return;
         }
         manageAuthResult(resultHandler, ar.result());
       });
   }
 
-  private void manageAuthResult(Handler<AsyncResult<Auth>> resultHandler, HttpResponse<Buffer> response) {
+  private void manageAuthResult(Completable<Auth> resultHandler, HttpResponse<Buffer> response) {
     if (response.statusCode() != 200) {
-      resultHandler.handle(VaultException.toFailure(response.statusMessage(), response.statusCode(),
+      resultHandler.fail(VaultException.toFailure(response.statusMessage(), response.statusCode(),
         response.bodyAsString()));
     } else {
       JsonObject object = response.bodyAsJsonObject();
-      resultHandler.handle(Future.succeededFuture(new Auth(object.getJsonObject("auth"))));
+      resultHandler.succeed(new Auth(object.getJsonObject("auth")));
     }
   }
 
+  public Future<Auth> loginWithAppRole(String roleId, String secretId) {
+    return Future.future(p -> loginWithAppRole(roleId, secretId, p));
+  }
   /**
    * Logs in against the `AppRole` backend.
    *
@@ -227,7 +246,7 @@ public class SlimVaultClient {
    * @param secretId      the secret id
    * @param resultHandler the callback invoked with the result
    */
-  public void loginWithAppRole(String roleId, String secretId, Handler<AsyncResult<Auth>>
+  public void loginWithAppRole(String roleId, String secretId, Completable<Auth>
     resultHandler) {
     JsonObject payload = new JsonObject()
       .put("role_id", Objects.requireNonNull(roleId, "The role must not be null"))
@@ -236,12 +255,16 @@ public class SlimVaultClient {
     client.post("/v1/auth/approle/login")
       .sendJsonObject(payload).onComplete(ar -> {
         if (ar.failed()) {
-          resultHandler.handle(VaultException.toFailure("Unable to access the Vault", ar.cause()));
+          resultHandler.fail(VaultException.toFailure("Unable to access the Vault", ar.cause()));
           return;
         }
 
         manageAuthResult(resultHandler, ar.result());
       });
+  }
+
+  public Future<Auth> loginWithUserCredentials(String username, String password) {
+    return Future.future(p -> loginWithUserCredentials(username, password, p));
   }
 
   /**
@@ -251,7 +274,7 @@ public class SlimVaultClient {
    * @param password      the password
    * @param resultHandler the callback invoked with the result
    */
-  public void loginWithUserCredentials(String username, String password, Handler<AsyncResult<Auth>>
+  public void loginWithUserCredentials(String username, String password, Completable<Auth>
     resultHandler) {
     JsonObject payload = new JsonObject()
       .put("password", Objects.requireNonNull(password, "The password must not be null"));
@@ -259,7 +282,7 @@ public class SlimVaultClient {
     client.post("/v1/auth/userpass/login/" + Objects.requireNonNull(username, "The username must not be null"))
       .sendJsonObject(payload).onComplete(ar -> {
         if (ar.failed()) {
-          resultHandler.handle(VaultException.toFailure("Unable to access the Vault", ar.cause()));
+          resultHandler.fail(VaultException.toFailure("Unable to access the Vault", ar.cause()));
           return;
         }
 
@@ -267,21 +290,29 @@ public class SlimVaultClient {
       });
   }
 
+  public Future<Auth> loginWithCert() {
+    return Future.future(p -> loginWithCert(p));
+  }
+
   /**
    * Logs in against the `Cert` backend. Certificates are configured directly on the client instance.
    *
    * @param resultHandler the callback invoked with the result
    */
-  public void loginWithCert(Handler<AsyncResult<Auth>> resultHandler) {
+  public void loginWithCert(Completable<Auth> resultHandler) {
     client.post("/v1/auth/cert/login")
       .send().onComplete(ar -> {
         if (ar.failed()) {
-          resultHandler.handle(VaultException.toFailure("Unable to access the Vault", ar.cause()));
+          resultHandler.fail(VaultException.toFailure("Unable to access the Vault", ar.cause()));
           return;
         }
 
         manageAuthResult(resultHandler, ar.result());
       });
+  }
+
+  public Future<Auth> renewSelf(long leaseDurationInSecond) {
+    return Future.future(p -> renewSelf(leaseDurationInSecond, p));
   }
 
   /**
@@ -290,7 +321,7 @@ public class SlimVaultClient {
    * @param leaseDurationInSecond the extension in second
    * @param resultHandler         the callback invoked with the result
    */
-  public void renewSelf(long leaseDurationInSecond, Handler<AsyncResult<Auth>> resultHandler) {
+  public void renewSelf(long leaseDurationInSecond, Completable<Auth> resultHandler) {
     JsonObject payload = null;
     if (leaseDurationInSecond > 0) {
       payload = new JsonObject().put("increment", leaseDurationInSecond);
@@ -300,7 +331,7 @@ public class SlimVaultClient {
 
     Handler<AsyncResult<HttpResponse<Buffer>>> handler = ar -> {
       if (ar.failed()) {
-        resultHandler.handle(VaultException.toFailure("Unable to access the Vault: " + ar.cause().getMessage(), ar.cause()));
+        resultHandler.fail(VaultException.toFailure("Unable to access the Vault: " + ar.cause().getMessage(), ar.cause()));
         return;
       }
       manageAuthResult(resultHandler, ar.result());
@@ -313,30 +344,34 @@ public class SlimVaultClient {
     }
   }
 
+  public Future<Lookup> lookupSelf() {
+    return Future.future(p -> lookupSelf(p));
+  }
+
   /**
    * Looks up for the current token metadata.
    *
    * @param resultHandler the callback invoked with the result
    */
-  public void lookupSelf(Handler<AsyncResult<Lookup>> resultHandler) {
+  public void lookupSelf(Completable<Lookup> resultHandler) {
     client.get("/v1/auth/token/lookup-self")
       .putHeader(TOKEN_HEADER, Objects.requireNonNull(getToken(), "The token must not be null"))
       .send().onComplete(ar -> {
         if (ar.failed()) {
-          resultHandler.handle(VaultException.toFailure("Unable to access the Vault", ar.cause()));
+          resultHandler.fail(VaultException.toFailure("Unable to access the Vault", ar.cause()));
           return;
         }
         HttpResponse<Buffer> response = ar.result();
         if (response.statusCode() != 200) {
-          resultHandler.handle(VaultException.toFailure(response.statusMessage(), response.statusCode(),
+          resultHandler.fail(VaultException.toFailure(response.statusMessage(), response.statusCode(),
             response.bodyAsString()));
         } else {
           JsonObject object = response.bodyAsJsonObject();
           JsonObject data = object.getJsonObject("data");
           if (data == null) {
-            resultHandler.handle(Future.succeededFuture());
+            resultHandler.succeed();
           } else {
-            resultHandler.handle(Future.succeededFuture(new Lookup(data)));
+            resultHandler.succeed(new Lookup(data));
           }
         }
       });

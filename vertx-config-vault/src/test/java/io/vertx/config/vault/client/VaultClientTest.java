@@ -72,9 +72,9 @@ public class VaultClientTest {
     final String path = "secret/hello";
     final String value = "world";
 
-    client.write(path, new JsonObject().put("value", value), x -> {
+    client.write(path, new JsonObject().put("value", value)).onComplete(x -> {
       tc.assertTrue(x.succeeded());
-      client.read(path, ar -> {
+      client.read(path).onComplete(ar -> {
         tc.assertTrue(ar.succeeded());
         tc.assertEquals(value, ar.result().getData().getString("value"));
         async.complete();
@@ -91,9 +91,9 @@ public class VaultClientTest {
     final String value = null;
 
     Async async = tc.async();
-    client.write(path, new JsonObject().put("value", value), x -> {
+    client.write(path, new JsonObject().put("value", value)).onComplete(x -> {
       tc.assertTrue(x.succeeded());
-      client.read(path, ar -> {
+      client.read(path).onComplete(ar -> {
         tc.assertTrue(ar.succeeded());
         tc.assertNull(ar.result().getData().getString("value"));
         async.complete();
@@ -107,9 +107,9 @@ public class VaultClientTest {
   @Test
   public void testList(TestContext tc) throws VaultException {
     Async async = tc.async();
-    client.write("secret/hello", new JsonObject().put("value", "world"), x -> {
+    client.write("secret/hello", new JsonObject().put("value", "world")).onComplete(x -> {
       tc.assertTrue(x.succeeded());
-      client.list("secret", ar -> {
+      client.list("secret").onComplete(ar -> {
         tc.assertTrue(ar.succeeded());
         tc.assertTrue(ar.result().contains("hello"));
         async.complete();
@@ -123,16 +123,16 @@ public class VaultClientTest {
   @Test
   public void testDelete(TestContext tc) throws VaultException {
     Async async = tc.async();
-    client.write("secret/hello", new JsonObject().put("value", "world"), x -> {
+    client.write("secret/hello", new JsonObject().put("value", "world")).onComplete(x -> {
       tc.assertTrue(x.succeeded());
-      client.list("secret", y -> {
+      client.list("secret").onComplete(y -> {
         tc.assertTrue(y.succeeded());
         tc.assertTrue(y.result().contains("hello"));
 
-        client.delete("secret/hello", z -> {
+        client.delete("secret/hello").onComplete(z -> {
           tc.assertTrue(z.succeeded());
 
-          client.list("secret", a -> {
+          client.list("secret").onComplete(a -> {
             tc.assertTrue(a.succeeded());
             tc.assertFalse(a.result().contains("hello"));
             async.complete();
@@ -151,7 +151,7 @@ public class VaultClientTest {
     JsonObject configuration = process.getConfiguration();
     configuration.put("token", "this-is-not-the-token");
     client = new SlimVaultClient(vertx, configuration);
-    client.read("secret/null", ar -> {
+    client.read("secret/null").onComplete(ar -> {
       tc.assertTrue(ar.failed());
       Throwable cause = ar.cause();
       tc.assertNotNull(cause);
@@ -171,7 +171,7 @@ public class VaultClientTest {
     configuration.put("token", "this-is-not-the-token");
     client = new SlimVaultClient(vertx, configuration);
 
-    client.write("secret/null", new JsonObject().put("value", "foo"), ar -> {
+    client.write("secret/null", new JsonObject().put("value", "foo")).onComplete(ar -> {
       tc.assertTrue(ar.failed());
       Throwable cause = ar.cause();
       tc.assertTrue(cause instanceof VaultException);
@@ -187,7 +187,7 @@ public class VaultClientTest {
   public void testReadExceptionMessageIncludesErrorsReturnedByVaultOn404(TestContext tc) throws VaultException {
     Async async = tc.async();
 
-    client.read("secret/" + UUID.randomUUID().toString(), ar -> {
+    client.read("secret/" + UUID.randomUUID().toString()).onComplete(ar -> {
       tc.assertTrue(ar.failed());
       Throwable cause = ar.cause();
       tc.assertNotNull(cause);
@@ -220,8 +220,8 @@ public class VaultClientTest {
     );
 
 
-    client.write(path, json, x ->
-      client.read(path, ar -> {
+    client.write(path, json).onComplete(x ->
+      client.read(path).onComplete(ar -> {
         tc.assertTrue(ar.succeeded());
         Secret result = ar.result();
         result.getData().fieldNames().forEach(s -> tc.assertTrue(result.getData().getValue(s).equals(json.getValue(s))));
@@ -237,7 +237,7 @@ public class VaultClientTest {
   public void testCreateTokenWithRequest(TestContext tc) throws VaultException {
     Async async = tc.async();
 
-    client.createToken(new TokenRequest().setTTL("1h"), ar -> {
+    client.createToken(new TokenRequest().setTTL("1h")).onComplete(ar -> {
       tc.assertTrue(ar.succeeded());
       tc.assertNotNull(ar.result().getClientToken());
       tc.assertNotNull(ar.result().getAccessor());
@@ -251,9 +251,9 @@ public class VaultClientTest {
       final String path = "secret/hello";
       final String value = "world " + UUID.randomUUID().toString();
 
-      client.write(path, new JsonObject().put("value", value), x -> {
+      client.write(path, new JsonObject().put("value", value)).onComplete(x -> {
         tc.assertTrue(x.succeeded());
-        client.read(path, ar2 -> {
+        client.read(path).onComplete(ar2 -> {
           tc.assertTrue(ar2.succeeded());
           tc.assertEquals(value, ar2.result().getData().getString("value"));
           async.complete();
@@ -270,7 +270,7 @@ public class VaultClientTest {
     Async async = tc.async();
 
     // 1 - Generate a client token
-    client.createToken(new TokenRequest().setTTL("1h"), step1 -> {
+    client.createToken(new TokenRequest().setTTL("1h")).onComplete(step1 -> {
       tc.assertTrue(step1.succeeded());
       String token = step1.result().getClientToken();
       tc.assertNotNull(token);
@@ -278,7 +278,7 @@ public class VaultClientTest {
         process.getConfiguration().put("token", token));
 
       // 2 - renew with -1
-      client.renewSelf(-1, step2 -> {
+      client.renewSelf(-1).onComplete(step2 -> {
         tc.assertTrue(step2.succeeded());
         String token_2 = step2.result().getClientToken();
         tc.assertNotNull(token_2);
@@ -287,7 +287,7 @@ public class VaultClientTest {
           process.getConfiguration().put("token", token_2));
 
         // 3 - renew with an explicit increment (duration in second)
-        client.renewSelf(20, step3 -> {
+        client.renewSelf(20).onComplete(step3 -> {
           tc.assertTrue(step3.succeeded());
           String token_3 = step3.result().getClientToken();
           tc.assertNotNull(token_3);
@@ -308,7 +308,7 @@ public class VaultClientTest {
     Async async = tc.async();
 
     // 1 - Generate a client token
-    client.createToken(new TokenRequest().setTTL("1h"), step1 -> {
+    client.createToken(new TokenRequest().setTTL("1h")).onComplete(step1 -> {
       tc.assertTrue(step1.succeeded());
       String token = step1.result().getClientToken();
       tc.assertNotNull(token);
@@ -316,7 +316,7 @@ public class VaultClientTest {
         process.getConfiguration().put("token", token));
 
       // 2 - Lookup
-      client.lookupSelf(step2 -> {
+      client.lookupSelf().onComplete(step2 -> {
         tc.assertTrue(step2.succeeded());
         String token_2 = step2.result().getId();
         tc.assertEquals(token, token_2);

@@ -67,7 +67,7 @@ public class VaultClientWithUsernameTest {
   @Test
   public void testLoginWithUsername(TestContext tc) throws VaultException {
     client = new SlimVaultClient(vertx, process.getConfiguration());
-    client.loginWithUserCredentials("fake-user", "fake-password",
+    client.loginWithUserCredentials("fake-user", "fake-password").onComplete(
       VaultClientWithCertTest.getLoginTestHandler(client, tc));
   }
 

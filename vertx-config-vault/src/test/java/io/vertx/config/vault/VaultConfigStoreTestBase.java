@@ -74,12 +74,12 @@ public abstract class VaultConfigStoreTestBase {
 
     Promise<Void> keyValueV1Promise = Promise.promise();
 
-    client.write("secret/app/foo", secret, ar -> {
+    client.write("secret/app/foo", secret).onComplete(ar -> {
       if (ar.failed()) {
         ar.cause().printStackTrace();
       }
       tc.assertTrue(ar.succeeded());
-      client.write("secret/app/update", secret, ar2 -> {
+      client.write("secret/app/update", secret).onComplete(ar2 -> {
         tc.assertTrue(ar.succeeded());
         keyValueV1Promise.complete();
       });
@@ -87,12 +87,12 @@ public abstract class VaultConfigStoreTestBase {
 
     Promise<Void> keyValueV2Promise = Promise.promise();
 
-    client.write("secret-v2/data/app/foo", new JsonObject().put("data", secret), ar -> {
+    client.write("secret-v2/data/app/foo", new JsonObject().put("data", secret)).onComplete(ar -> {
       if (ar.failed()) {
         ar.cause().printStackTrace();
       }
       tc.assertTrue(ar.succeeded());
-      client.write("secret-v2/data/app/update", new JsonObject().put("data", secret), ar2 -> {
+      client.write("secret-v2/data/app/update", new JsonObject().put("data", secret)).onComplete(ar2 -> {
         tc.assertTrue(ar.succeeded());
         keyValueV2Promise.complete();
       });

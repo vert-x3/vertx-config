@@ -136,11 +136,8 @@ public class VaultConfigStore implements ConfigStore {
   }
 
   private Future<Void> renewToken() {
-    Promise<Void> promise = vertx.promise();
-    client.renewSelf(config.getLong("lease-duration", 3600L), auth -> {
-      manageAuthenticationResult(promise, auth);
-    });
-    return promise.future();
+    return client.renewSelf(config.getLong("lease-duration", 3600L))
+      .compose(this::manageAuthenticationResult);
   }
 
 
@@ -168,7 +165,6 @@ public class VaultConfigStore implements ConfigStore {
   }
 
   private Future<Void> loginWithUserName() {
-    Promise<Void> promise = vertx.promise();
     JsonObject req = config.getJsonObject("user-credentials");
     Objects.requireNonNull(req, "When using username, the `user-credentials` must be set in the " +
       "configuration");
@@ -182,21 +178,16 @@ public class VaultConfigStore implements ConfigStore {
       "configuration");
 
 
-    client
-      .loginWithUserCredentials(username, password, auth -> manageAuthenticationResult(promise, auth));
-    return promise.future();
+    return client.loginWithUserCredentials(username, password).compose(auth -> manageAuthenticationResult(auth));
   }
 
   private Future<Void> loginWithCert() {
-    Promise<Void> promise = vertx.promise();
     // No validation, certs are configured on the client itself
-    client.loginWithCert(auth -> manageAuthenticationResult(promise, auth));
-    return promise.future();
+    return client.loginWithCert().compose(auth -> manageAuthenticationResult(auth));
   }
 
 
   private Future<Void> loginWithAppRole() {
-    Promise<Void> promise = vertx.promise();
     JsonObject req = config.getJsonObject("approle");
     Objects.requireNonNull(req, "When using approle, the `app-role` must be set in the " +
       "configuration");
@@ -206,12 +197,10 @@ public class VaultConfigStore implements ConfigStore {
     Objects.requireNonNull(roleId, "When using approle, the role-id must be set in the `approle` configuration");
     Objects.requireNonNull(secretId, "When using approle, the secret-id must be set in the `approle` configuration");
 
-    client.loginWithAppRole(roleId, secretId, auth -> manageAuthenticationResult(promise, auth));
-    return promise.future();
+    return client.loginWithAppRole(roleId, secretId).compose(auth -> manageAuthenticationResult(auth));
   }
 
   private Future<Void> loginWithToken() {
-    Promise<Void> promise = vertx.promise();
     JsonObject req = config.getJsonObject("token-request");
     Objects.requireNonNull(req, "When using a token creation policy, the `token-request` must be set in the " +
       "configuration");
@@ -219,25 +208,19 @@ public class VaultConfigStore implements ConfigStore {
     String token = req.getString("token");
     Objects.requireNonNull(req, "When using a token creation policy, the `token-request` must be set in the " +
       "configuration and contains the `token` entry with the original token");
-    client
+    return client
       .setToken(token)
-      .createToken(new TokenRequest(req), auth -> manageAuthenticationResult(promise, auth));
-    return promise.future();
+      .createToken(new TokenRequest(req)).compose(auth -> manageAuthenticationResult(auth));
   }
 
-  private void manageAuthenticationResult(Promise<Void> future, AsyncResult<Auth> auth) {
-    if (auth.failed()) {
-      future.fail(auth.cause());
+  private Future<Void> manageAuthenticationResult(Auth authentication) {
+    if (authentication.getClientToken() == null) {
+      return Future.failedFuture("Authentication failed, the token is null");
     } else {
-      Auth authentication = auth.result();
-      if (authentication.getClientToken() == null) {
-        future.fail("Authentication failed, the token is null");
-      } else {
-        client.setToken(authentication.getClientToken());
-        this.renewable = authentication.isRenewable();
-        this.validity = System.currentTimeMillis() + (authentication.getLeaseDuration() * 1000);
-        future.complete();
-      }
+      client.setToken(authentication.getClientToken());
+      this.renewable = authentication.isRenewable();
+      this.validity = System.currentTimeMillis() + (authentication.getLeaseDuration() * 1000);
+      return Future.succeededFuture();
     }
   }
 

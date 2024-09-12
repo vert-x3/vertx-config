@@ -44,19 +44,17 @@ public class VaultException extends Exception {
     statusCode = -1;
   }
 
-  public static <T> AsyncResult<T> toFailure(String message, Throwable cause) {
-    VaultException exception = new VaultException(message, cause);
-    return Future.failedFuture(exception);
+  public static <T> VaultException toFailure(String message, Throwable cause) {
+    return new VaultException(message, cause);
   }
 
-  public static <T> AsyncResult<T> toFailure(String status, int code, String body) {
+  public static <T> VaultException toFailure(String status, int code, String body) {
     StringBuilder message = new StringBuilder();
     message.append("Vault responded with HTTP status: ").append(status);
     if (body != null && !body.isEmpty()) {
       message.append("\nResponse body:").append(body);
     }
-    VaultException exception = new VaultException(message.toString(), code);
-    return Future.failedFuture(exception);
+    return new VaultException(message.toString(), code);
   }
 
   public static <T> AsyncResult<T> toFailure(String message) {
