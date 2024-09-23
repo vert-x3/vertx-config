@@ -127,7 +127,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
     }
   }
 
-  static String extractFormatFromFileExtension(String path) {
+  public static String extractFormatFromFileExtension(String path) {
     int index = path.lastIndexOf(".");
     if (index == -1) {
       // Default format
