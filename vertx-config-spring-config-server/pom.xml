@@ -35,11 +35,6 @@
       <artifactId>vertx-config</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>com.typesafe</groupId>
-      <artifactId>config</artifactId>
-      <version>1.4.1</version>
-    </dependency>
 
     <!-- Override for testing -->
     <dependency>
