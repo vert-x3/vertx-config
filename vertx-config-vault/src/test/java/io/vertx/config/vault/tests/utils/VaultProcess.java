@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-import static org.awaitility.Awaitility.await;
+import static io.vertx.config.vault.tests.VaultConfigStoreTestBase.awaitUntil;
 import static org.hamcrest.core.Is.is;
 
 /**
@@ -146,7 +146,7 @@ public class VaultProcess {
       throw new RuntimeException(e);
     }
 
-    await().untilAtomic(ready, is(true));
+    awaitUntil(() -> ready.get());
     System.out.println("Vault Server ready - but not yet initialized");
   }
 

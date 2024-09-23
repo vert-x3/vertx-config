@@ -37,11 +37,9 @@ import org.junit.runner.RunWith;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.is;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -70,8 +68,7 @@ public class GitConfigStoreWithGithubTest {
   }
 
   @After
-  public void tearDown() {
-    AtomicBoolean done = new AtomicBoolean();
+  public void tearDown() throws Exception {
     if (retriever != null) {
       retriever.close();
     }
@@ -80,9 +77,7 @@ public class GitConfigStoreWithGithubTest {
       git.close();
     }
 
-    vertx.close().onComplete(v -> done.set(true));
-
-    await().untilAtomic(done, is(true));
+    vertx.close().await(20, TimeUnit.SECONDS);
   }
 
   @Test

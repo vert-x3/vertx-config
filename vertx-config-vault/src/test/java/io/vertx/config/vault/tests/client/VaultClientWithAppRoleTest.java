@@ -29,7 +29,7 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 
-import static org.awaitility.Awaitility.await;
+import static io.vertx.config.vault.tests.VaultConfigStoreTestBase.awaitUntil;
 
 
 /**
@@ -69,7 +69,7 @@ public class VaultClientWithAppRoleTest {
     client.write("auth/approle/role/testrole/secret-id", new JsonObject())
       .onComplete(secret -> secretId = secret.result().getData().getString("secret_id"));
 
-    await().until(() -> appRoleId != null && secretId != null);
+    awaitUntil(() -> appRoleId != null && secretId != null);
   }
 
   @After

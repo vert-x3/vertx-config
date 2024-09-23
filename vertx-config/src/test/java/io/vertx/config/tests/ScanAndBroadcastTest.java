@@ -37,13 +37,12 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -57,36 +56,26 @@ public class ScanAndBroadcastTest {
   private ConfigRetriever retriever;
 
   @Before
-  public void setUp(TestContext tc) {
+  public void setUp(TestContext tc) throws Exception {
     vertx = Vertx.vertx();
     vertx.exceptionHandler(tc.exceptionHandler());
 
     http = new JsonObject();
 
-    AtomicBoolean done = new AtomicBoolean();
     vertx.createHttpServer()
       .requestHandler(request -> {
         if (request.path().endsWith("/conf")) {
           request.response().end(http.encodePrettily());
         }
       })
-      .listen(8080).onComplete(tc.asyncAssertSuccess(s -> {
-        done.set(true);
-        server = s;
-      }));
-
-    await().untilAtomic(done, is(true));
+      .listen(8080)
+      .await(20, TimeUnit.SECONDS);
   }
 
   @After
-  public void tearDown() {
+  public void tearDown() throws Exception {
     retriever.close();
-    AtomicBoolean done = new AtomicBoolean();
-    server.close().onComplete(x -> done.set(true));
-    await().untilAtomic(done, is(true));
-    done.set(false);
-    vertx.close().onComplete(x -> done.set(true));
-    await().untilAtomic(done, is(true));
+    vertx.close().await(20, TimeUnit.SECONDS);
   }
 
   private static List<ConfigStoreOptions> stores() {
@@ -104,8 +93,8 @@ public class ScanAndBroadcastTest {
   }
 
   @Test
-  public void testScanning() {
-    AtomicBoolean done = new AtomicBoolean();
+  public void testScanning(TestContext tc) {
+    Async done = tc.async();
     vertx.runOnContext(v -> {
       retriever = ConfigRetriever.create(vertx,
         new ConfigRetrieverOptions().setScanPeriod(1000).setStores(stores()));
@@ -126,16 +115,16 @@ public class ScanAndBroadcastTest {
         http.put("some-key", "some-value");
         assertWaitUntil(() -> current.get() != null, x2 -> {
           assertThat(current.get().getString("some-key")).isEqualTo("some-value");
-          done.set(true);
+          done.complete();
         });
       });
     });
-    await().untilAtomic(done, is(true));
+    done.awaitSuccess(20_000);
   }
 
   @Test
-  public void testScanningWithBeforeAndAfterFunctions() {
-    AtomicBoolean done = new AtomicBoolean();
+  public void testScanningWithBeforeAndAfterFunctions(TestContext tc) {
+    Async done = tc.async();
     AtomicInteger before = new AtomicInteger();
     vertx.runOnContext(v -> {
       retriever = ConfigRetriever.create(vertx,
@@ -164,12 +153,12 @@ public class ScanAndBroadcastTest {
         http.put("some-key", "some-value");
         assertWaitUntil(() -> current.get() != null, x2 -> {
           assertThat(current.get().getString("some-key")).isEqualTo("SOME-VALUE");
-          done.set(true);
+          done.complete();
         });
       });
     });
-    await().untilAtomic(done, is(true));
-    assertThat(before.get()).isGreaterThanOrEqualTo(1);
+    done.awaitSuccess(20_000);
+    assertTrue(before.get() >= 1);
   }
 
   private void assertWaitUntil(Callable<Boolean> condition, Handler<AsyncResult<Void>> next) {

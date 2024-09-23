@@ -31,18 +31,23 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.*;
+import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BooleanSupplier;
 
-import static org.awaitility.Awaitility.await;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
+@RunWith(VertxUnitRunner.class)
 public abstract class VaultConfigStoreTestBase {
 
   protected static VaultProcess process;
@@ -272,7 +277,7 @@ public abstract class VaultConfigStoreTestBase {
    * Tests the periodic configuration updates.
    */
   @Test
-  public void testConfigurationUpdates(TestContext tc) {
+  public void testConfigurationUpdates(TestContext tc) throws Exception {
     JsonObject additionalConfig = getRetrieverConfiguration();
     JsonObject config = additionalConfig.copy()
       .put("path", "secret/app/update");
@@ -291,16 +296,9 @@ public abstract class VaultConfigStoreTestBase {
       }
     });
 
-    AtomicBoolean done = new AtomicBoolean();
-    retriever.getConfig().onComplete(json -> {
-      tc.assertTrue(json.succeeded());
-      JsonObject content = json.result();
-      tc.assertEquals("hello", content.getString("message"));
-      done.set(true);
+    JsonObject res = retriever.getConfig().await(20, TimeUnit.SECONDS);
+    tc.assertEquals("hello", res.getString("message"));
 
-    });
-
-    await().untilAtomic(done, is(true));
     process.run("write " + VaultProcess.CA_CERT_ARG + " secret/app/update @src/test/resources/some-secret.json");
   }
 
@@ -396,7 +394,7 @@ public abstract class VaultConfigStoreTestBase {
         process.shutdown();
         process = new VaultProcess();
         process.initAndUnsealVault();
-        await().until(process::isRunning);
+        awaitUntil(process::isRunning);
         return null;
       }).onComplete(step2 -> {
         tc.assertTrue(process.isRunning());
@@ -409,6 +407,16 @@ public abstract class VaultConfigStoreTestBase {
         });
       });
     });
+  }
+
+  public static void awaitUntil(BooleanSupplier bs) {
+    long now = System.currentTimeMillis();
+    while (true) {
+      assertTrue(System.currentTimeMillis() - now < 20_000);
+      if (bs.getAsBoolean()) {
+        break;
+      }
+    }
   }
 
   /**

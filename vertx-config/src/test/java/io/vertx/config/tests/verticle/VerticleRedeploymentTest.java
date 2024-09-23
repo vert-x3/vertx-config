@@ -27,11 +27,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -42,32 +43,31 @@ public class VerticleRedeploymentTest {
   private Vertx vertx;
   private HttpServer server;
   private JsonObject http;
+  private ArrayBlockingQueue<String> mark;
 
   @Before
-  public void setUp(TestContext tc) {
+  public void setUp(TestContext tc) throws Exception {
+    mark = new ArrayBlockingQueue<>(20);
     vertx = Vertx.vertx();
     vertx.exceptionHandler(tc.exceptionHandler());
 
+    vertx.eventBus().consumer("test.address", msg -> {
+      mark.add(msg.body().toString());
+    });
+
     http = new JsonObject().put("mark", "v1");
 
-    AtomicBoolean done = new AtomicBoolean();
-    vertx.createHttpServer()
+    server = vertx.createHttpServer()
         .requestHandler(request -> {
           if (request.path().endsWith("/conf")) {
             request.response().end(http.encodePrettily());
           }
         })
-        .listen(8080).onComplete(tc.asyncAssertSuccess(s -> {
-          done.set(true);
-          server = s;
-        }));
+        .listen(8080).await(20, TimeUnit.SECONDS);
 
-    await().untilAtomic(done, is(true));
-    done.set(false);
-
-    vertx.deployVerticle(MyMainVerticle.class.getName()).onComplete(deployed -> done.set(deployed.succeeded()));
-
-    await().untilAtomic(done, is(true));
+    vertx
+      .deployVerticle(MyMainVerticle.class.getName())
+      .await(20, TimeUnit.SECONDS);
   }
 
   @After
@@ -77,11 +77,9 @@ public class VerticleRedeploymentTest {
   }
 
   @Test
-  public void testRedeployment() {
-    assertThat(MyVerticle.mark).isEqualTo("v1");
+  public void testRedeployment() throws Exception {
+    assertEquals("v1", mark.take());
     http.put("mark", "v2");
-
-    await().until(() -> MyVerticle.mark.equalsIgnoreCase("v2"));
+    assertEquals("v2", mark.take());
   }
-
 }

@@ -24,11 +24,9 @@ import io.vertx.ext.unit.TestContext;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.is;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -52,10 +50,9 @@ public class HttpConfigStoreTest extends ConfigStoreTestBase {
     "}";
 
   @Before
-  public void init() {
+  public void init()  throws Exception {
     factory = new HttpConfigStoreFactory();
 
-    AtomicBoolean done = new AtomicBoolean();
     vertx.createHttpServer()
       .requestHandler(request -> {
         if (request.path().endsWith("/A")) {
@@ -84,11 +81,7 @@ public class HttpConfigStoreTest extends ConfigStoreTestBase {
           request.response().setStatusCode(302).putHeader("Location", "/A").end();
         }
       })
-      .listen(8080).onComplete(s -> {
-        done.set(true);
-      });
-
-    await().untilAtomic(done, is(true));
+      .listen(8080).await(20, TimeUnit.SECONDS);
   }
 
 

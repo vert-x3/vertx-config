@@ -22,8 +22,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.runner.RunWith;
 
-import static org.awaitility.Awaitility.await;
-
 /**
  * Tests the behavior when using the approle backend.
  *
@@ -47,7 +45,7 @@ public class VaultConfigStoreWithAppRoleTest extends VaultConfigStoreTestBase {
     client.write("auth/approle/role/testrole/secret-id", new JsonObject())
       .onComplete(secret -> secretId = secret.result().getData().getString("secret_id"));
 
-    await().until(() -> appRoleId != null && secretId != null);
+    awaitUntil(() -> appRoleId != null && secretId != null);
 
     assert process.isRunning();
   }

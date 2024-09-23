@@ -41,11 +41,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -77,8 +78,7 @@ public class GitConfigStoreTest {
   }
 
   @After
-  public void tearDown() {
-    AtomicBoolean done = new AtomicBoolean();
+  public void tearDown() throws Exception {
     if (retriever != null) {
       retriever.close();
     }
@@ -90,9 +90,7 @@ public class GitConfigStoreTest {
       bare.close();
     }
 
-    vertx.close().onComplete(v -> done.set(true));
-
-    await().untilAtomic(done, is(true));
+    vertx.close().await(20, TimeUnit.SECONDS);
   }
 
   @Test
@@ -485,7 +483,7 @@ public class GitConfigStoreTest {
   }
 
   @Test
-  public void testConfigurationUpdate() throws IOException, GitAPIException {
+  public void testConfigurationUpdate() throws IOException, GitAPIException, Exception {
     add(git, root, new File("src/test/resources/files/a.json"), "dir");
     push(git);
 
@@ -498,23 +496,28 @@ public class GitConfigStoreTest {
                 .add(new JsonObject().put("pattern", "dir/*.json"))
             ))));
 
-    AtomicBoolean done = new AtomicBoolean();
-    retriever.getConfig().onComplete(ar -> {
-      assertThat(ar.succeeded()).isTrue();
-      assertThat(ar.result().getString("a.name")).isEqualTo("A");
-      done.set(true);
-    });
-    await().untilAtomic(done, is(true));
+    JsonObject res = retriever.getConfig().await(20, TimeUnit.SECONDS);
+    assertEquals("A", res.getString("a.name"));
 
     updateA();
 
-    await().until(() ->
+    awaitUntil(() ->
         "A2".equals(retriever.getCachedConfig().getString("a.name"))
             && "B".equalsIgnoreCase(retriever.getCachedConfig().getString("b.name")));
   }
 
+  private void awaitUntil(BooleanSupplier bs) {
+    long now = System.currentTimeMillis();
+    while (true) {
+      assertTrue(System.currentTimeMillis() - now < 20_000);
+      if (bs.getAsBoolean()) {
+        break;
+      }
+    }
+  }
+
   @Test
-  public void testConfigurationUpdateWithMergeIssue_Commit(TestContext tc) throws IOException, GitAPIException {
+  public void testConfigurationUpdateWithMergeIssue_Commit(TestContext tc) throws IOException, GitAPIException, Exception {
     add(git, root, new File("src/test/resources/files/a.json"), "dir");
     push(git);
 
@@ -527,13 +530,8 @@ public class GitConfigStoreTest {
                 .add(new JsonObject().put("pattern", "dir/*.json"))
             ))));
 
-    AtomicBoolean done = new AtomicBoolean();
-    retriever.getConfig().onComplete(ar -> {
-      assertThat(ar.succeeded()).isTrue();
-      assertThat(ar.result().getString("a.name")).isEqualTo("A");
-      done.set(true);
-    });
-    await().untilAtomic(done, is(true));
+    JsonObject res = retriever.getConfig().await(20, TimeUnit.SECONDS);
+    assertEquals("A", res.getString("a.name"));
 
 
     // Edit the file in the work dir
@@ -545,14 +543,9 @@ public class GitConfigStoreTest {
     git.commit().setMessage("update A").setAuthor("clement", "clement@apache.org")
         .setCommitter("clement", "clement@apache.org").call();
 
-    done.set(false);
-    retriever.getConfig().onComplete(ar -> {
-      assertThat(ar.succeeded()).isTrue();
-      assertThat(ar.result().getString("a.name")).isEqualTo("A");
-      assertThat(ar.result().getString("added")).isEqualTo("added");
-      done.set(true);
-    });
-    await().untilAtomic(done, is(true));
+    res = retriever.getConfig().await(20, TimeUnit.SECONDS);
+    assertEquals("A", res.getString("a.name"));
+    assertEquals("added", res.getString("added"));
 
     updateA();
 
@@ -565,7 +558,7 @@ public class GitConfigStoreTest {
   }
 
   @Test
-  public void testConfigurationUpdateWithMergeIssue_Edit(TestContext tc) throws IOException, GitAPIException {
+  public void testConfigurationUpdateWithMergeIssue_Edit(TestContext tc) throws IOException, GitAPIException, Exception {
     add(git, root, new File("src/test/resources/files/a.json"), "dir");
     push(git);
 
@@ -578,13 +571,8 @@ public class GitConfigStoreTest {
                 .add(new JsonObject().put("pattern", "dir/*.json"))
             ))));
 
-    AtomicBoolean done = new AtomicBoolean();
-    retriever.getConfig().onComplete(ar -> {
-      assertThat(ar.succeeded()).isTrue();
-      assertThat(ar.result().getString("a.name")).isEqualTo("A");
-      done.set(true);
-    });
-    await().untilAtomic(done, is(true));
+    JsonObject res = retriever.getConfig().await(20, TimeUnit.SECONDS);
+    assertEquals("A", res.getString("a.name"));
 
 
     // Edit the file in the work dir
@@ -592,13 +580,8 @@ public class GitConfigStoreTest {
     assertThat(a).isFile();
     FileUtils.write(a, new JsonObject().put("a.name", "A-modified").put("conflict", "A").encodePrettily(), StandardCharsets.UTF_8);
 
-    done.set(false);
-    retriever.getConfig().onComplete(ar -> {
-      assertThat(ar.succeeded()).isTrue();
-      assertThat(ar.result().getString("a.name")).isEqualTo("A-modified");
-      done.set(true);
-    });
-    await().untilAtomic(done, is(true));
+    res = retriever.getConfig().await(20, TimeUnit.SECONDS);
+    assertEquals("A-modified", res.getString("a.name"));
 
     updateA();
 
@@ -611,7 +594,7 @@ public class GitConfigStoreTest {
   }
 
   @Test
-  public void testUsingAnExistingRepo() throws IOException, GitAPIException {
+  public void testUsingAnExistingRepo() throws IOException, GitAPIException, Exception {
     git.close();
     root = new File("target/junk/work");
     git = connect(bareRoot, root);
@@ -627,17 +610,12 @@ public class GitConfigStoreTest {
                 .add(new JsonObject().put("pattern", "dir/*.json"))
             ))));
 
-    AtomicBoolean done = new AtomicBoolean();
-    retriever.getConfig().onComplete(ar -> {
-      assertThat(ar.succeeded()).isTrue();
-      assertThat(ar.result().getString("a.name")).isEqualTo("A");
-      done.set(true);
-    });
-    await().untilAtomic(done, is(true));
+    JsonObject res = retriever.getConfig().await(20, TimeUnit.SECONDS);
+    assertEquals("A", res.getString("a.name"));
 
     updateA();
 
-    await().until(() ->
+    awaitUntil(() ->
         "A2".equals(retriever.getCachedConfig().getString("a.name"))
             && "B".equalsIgnoreCase(retriever.getCachedConfig().getString("b.name")));
   }
@@ -662,17 +640,12 @@ public class GitConfigStoreTest {
                 .add(new JsonObject().put("pattern", "dir/*.json"))
             ))));
 
-    AtomicBoolean done = new AtomicBoolean();
-    retriever.getConfig().onComplete(ar -> {
-      assertThat(ar.succeeded()).isTrue();
-      assertThat(ar.result().getString("a.name")).isEqualTo("A");
-      done.set(true);
-    });
-    await().untilAtomic(done, is(true));
+    JsonObject res = retriever.getConfig().await(20, TimeUnit.SECONDS);
+    assertEquals("A", res.getString("a.name"));
 
     updateA();
 
-    await().until(() ->
+    awaitUntil(() ->
         "A2".equals(retriever.getCachedConfig().getString("a.name"))
             && "B".equalsIgnoreCase(retriever.getCachedConfig().getString("b.name")));
   }

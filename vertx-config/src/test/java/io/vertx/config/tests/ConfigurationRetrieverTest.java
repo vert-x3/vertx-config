@@ -37,9 +37,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -316,6 +314,7 @@ public class ConfigurationRetrieverTest {
     });
   }
 
+  // Does that really makes sense ?
   @Test
   public void testExceptionWhenCallbackFailed(TestContext tc) {
     List<ConfigStoreOptions> options = new ArrayList<>();
@@ -324,7 +323,11 @@ public class ConfigurationRetrieverTest {
     retriever = ConfigRetriever.create(vertx, new ConfigRetrieverOptions().setStores(options));
 
     AtomicReference<Throwable> reference = new AtomicReference<>();
-    vertx.exceptionHandler(reference::set);
+    Async async = tc.async();
+    vertx.exceptionHandler(err -> {
+      reference.set(err);
+      async.complete();
+    });
 
     retriever.getConfig().onComplete(ar -> {
       tc.assertTrue(ar.succeeded());
@@ -334,8 +337,9 @@ public class ConfigurationRetrieverTest {
       ar.result().getBoolean("int");
     });
 
-    await().untilAtomic(reference, is(notNullValue()));
-    assertThat(reference.get()).isInstanceOf(ClassCastException.class).hasMessageContaining("java.lang.Integer");
+    async.awaitSuccess(20_000);
+    assertTrue(reference.get() instanceof ClassCastException);
+    assertTrue(reference.get().getMessage().contains("java.lang.Integer"));
   }
 
   @Test

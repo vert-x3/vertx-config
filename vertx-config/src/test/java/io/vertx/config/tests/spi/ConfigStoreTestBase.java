@@ -35,10 +35,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.is;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -61,8 +58,7 @@ public abstract class ConfigStoreTestBase {
   }
 
   @After
-  public void tearDown(TestContext context) {
-    AtomicBoolean done = new AtomicBoolean();
+  public void tearDown(TestContext context) throws Exception {
     if (store != null) {
       Async async = context.async();
       store.close().onComplete(v -> async.complete());
@@ -73,9 +69,7 @@ public abstract class ConfigStoreTestBase {
       retriever.close();
     }
 
-    vertx.close().onComplete(v -> done.set(true));
-
-    await().untilAtomic(done, is(true));
+    vertx.close().await(20, TimeUnit.SECONDS);
   }
 
   protected void getJsonConfiguration(Vertx vertx, ConfigStore store, Handler<AsyncResult<JsonObject>> handler) {

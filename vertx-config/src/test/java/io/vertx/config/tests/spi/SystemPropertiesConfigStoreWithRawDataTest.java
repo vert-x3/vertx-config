@@ -23,11 +23,11 @@ import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.json.JsonObject;
 import org.junit.Test;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
 
 /**
  * This test checks the behavior when using the "raw-data" attribute.
@@ -40,7 +40,7 @@ public class SystemPropertiesConfigStoreWithRawDataTest extends ConfigStoreTestB
 //  public final RestoreSystemProperties restoreSystemProperties = new RestoreSystemProperties();
 
   @Test
-  public void testLoadingFromSysUsingRawData() {
+  public void testLoadingFromSysUsingRawData() throws Exception {
     retriever = ConfigRetriever.create(vertx,
       new ConfigRetrieverOptions()
         .addStore(new ConfigStoreOptions().setType("sys").setConfig(new JsonObject().put("raw-data", true)))
@@ -50,36 +50,26 @@ public class SystemPropertiesConfigStoreWithRawDataTest extends ConfigStoreTestB
 
     System.setProperty("name", "12345678901234567890");
 
-    retriever.getConfig().onComplete(ar -> {
-      assertThat(ar.succeeded()).isTrue();
-      assertThat(ar.result().getString("name")).isEqualTo("12345678901234567890");
-      done.set(true);
-    });
-    await().untilAtomic(done, is(true));
+    JsonObject res = retriever.getConfig().await(20, TimeUnit.SECONDS);
+    assertEquals("12345678901234567890", res.getString("name"));
   }
 
   @Test
-  public void testLoadingFromSysWithoutRawData() {
+  public void testLoadingFromSysWithoutRawData() throws Exception {
     retriever = ConfigRetriever.create(vertx,
       new ConfigRetrieverOptions()
         .addStore(new ConfigStoreOptions().setType("sys"))
     );
 
-    AtomicBoolean done = new AtomicBoolean();
-
     System.setProperty("name", "12345678901234567891");
 
 
-    retriever.getConfig().onComplete(ar -> {
-      assertThat(ar.succeeded()).isTrue();
-      try {
-        // We don't mind the value (truncated, we just want to make sure it doesn't throw an exception)
-        assertThat(ar.result().getInteger("name")).isNotNull();
-      } catch (ClassCastException e) {
-        throw new AssertionError("Should not throw exception", e);
-      }
-      done.set(true);
-    });
-    await().untilAtomic(done, is(true));
+    JsonObject res = retriever.getConfig().await(20, TimeUnit.SECONDS);
+    try {
+      // We don't mind the value (truncated, we just want to make sure it doesn't throw an exception)
+      assertThat(res.getInteger("name")).isNotNull();
+    } catch (ClassCastException e) {
+      throw new AssertionError("Should not throw exception", e);
+    }
   }
 }

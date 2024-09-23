@@ -24,11 +24,11 @@ import io.vertx.core.json.JsonObject;
 import org.junit.Test;
 
 import java.util.Collections;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * This test checks the behavior when using the "raw-data" attribute.
@@ -38,7 +38,7 @@ import static org.hamcrest.Matchers.is;
 public class EnvVariablesConfigStoreWithMockEnvTest extends ConfigStoreTestBase {
 
   @Test
-  public void testLoadingFromEnvUsingRawData() {
+  public void testLoadingFromEnvUsingRawData() throws Exception {
     retriever = ConfigRetriever.create(vertx,
       new ConfigRetrieverOptions()
         .addStore(new ConfigStoreOptions().setType("mock-env").setConfig(new JsonObject()
@@ -48,36 +48,24 @@ public class EnvVariablesConfigStoreWithMockEnvTest extends ConfigStoreTestBase 
         )
     );
 
-    AtomicBoolean done = new AtomicBoolean();
-
-    retriever.getConfig().onComplete(ar -> {
-      assertThat(ar.succeeded()).isTrue();
-      assertThat(ar.result().getString("PATH")).isNotNull();
-      assertThat(ar.result().getString("name")).isEqualTo("12345678901234567890");
-      done.set(true);
-    });
-    await().untilAtomic(done, is(true));
+    JsonObject res = retriever.getConfig().await(20, TimeUnit.SECONDS);
+    assertNotNull(res.getString("PATH"));
+    assertEquals("12345678901234567890", res.getString("name"));
   }
 
   @Test
-  public void testLoadingFromEnvWithoutRawData() {
+  public void testLoadingFromEnvWithoutRawData() throws Exception {
     retriever = ConfigRetriever.create(vertx,
       new ConfigRetrieverOptions()
         .addStore(new ConfigStoreOptions().setType("mock-env").setConfig(new JsonObject().put("env", Collections.singletonMap("name", "12345678901234567890"))))
     );
 
-    AtomicBoolean done = new AtomicBoolean();
-
-    retriever.getConfig().onComplete(ar -> {
-      assertThat(ar.succeeded()).isTrue();
-      try {
-        // We don't mind the value (truncated, we just want to make sure it doesn't throw an exception)
-        assertThat(ar.result().getInteger("name")).isNotNull();
-      } catch (ClassCastException e) {
-        throw new AssertionError("Should not throw exception", e);
-      }
-      done.set(true);
-    });
-    await().untilAtomic(done, is(true));
+    JsonObject res = retriever.getConfig().await(20, TimeUnit.SECONDS);
+    try {
+      // We don't mind the value (truncated, we just want to make sure it doesn't throw an exception)
+      assertThat(res.getInteger("name")).isNotNull();
+    } catch (ClassCastException e) {
+      throw new AssertionError("Should not throw exception", e);
+    }
   }
 }

@@ -24,10 +24,9 @@ import io.vertx.core.AbstractVerticle;
  */
 public class MyVerticle extends AbstractVerticle {
 
-  public static String mark;
-
   @Override
   public void start() throws Exception {
-    mark = config().getString("mark");
+    String mark = config().getString("mark");
+    vertx.eventBus().send("test.address", mark);
   }
 }
