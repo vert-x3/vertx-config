@@ -15,4 +15,4 @@
 #
 #
 
-io.vertx.config.impl.spi.MockEnvVariablesConfigStoreFactory
+io.vertx.config.tests.spi.MockEnvVariablesConfigStoreFactory

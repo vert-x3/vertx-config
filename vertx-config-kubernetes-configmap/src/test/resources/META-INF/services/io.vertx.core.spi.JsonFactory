@@ -1,1 +1,1 @@
-io.vertx.config.kubernetes.JsonFactory
+io.vertx.config.kubernetes.tests.JsonFactory

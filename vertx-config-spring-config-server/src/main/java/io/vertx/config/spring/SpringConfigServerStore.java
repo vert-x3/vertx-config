@@ -23,6 +23,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpResponseExpectation;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.core.internal.VertxInternal;
 import io.vertx.core.json.JsonArray;
@@ -40,20 +41,17 @@ import java.util.Objects;
  */
 class SpringConfigServerStore implements ConfigStore {
 
-  private final VertxInternal vertx;
   private final String path;
   private final String authHeaderValue;
   private final HttpClient client;
   private final long timeout;
 
   SpringConfigServerStore(Vertx vertx, JsonObject configuration) {
-    this.vertx = (VertxInternal) vertx;
     String url = configuration.getString("url");
     this.timeout = configuration.getLong("timeout", 3000L);
     Objects.requireNonNull(url);
 
-    HttpClientOptions options = new HttpClientOptions(
-      configuration.getJsonObject("httpClientConfiguration", new JsonObject()));
+    HttpClientOptions options = new HttpClientOptions(configuration.getJsonObject("httpClientConfiguration", new JsonObject()));
     try {
       URL u = new URL(url);
       options.setDefaultHost(u.getHost());
@@ -82,13 +80,11 @@ class SpringConfigServerStore implements ConfigStore {
     }
 
     client = vertx.createHttpClient(options);
-
   }
 
   @Override
   public Future<Void> close() {
-    client.close();
-    return vertx.getOrCreateContext().succeededFuture();
+    return client.close();
   }
 
   @Override
@@ -101,17 +97,11 @@ class SpringConfigServerStore implements ConfigStore {
       .flatMap(request ->
         request
           .send()
-          .flatMap(response -> {
-          if (response.statusCode() != 200) {
-            return Future.failedFuture("Invalid response from server: " + response.statusCode() + " - "
-              + response.statusMessage());
-          } else {
-            return response
-              .body()
-              .map(Buffer::toJsonObject)
-              .flatMap(this::parse);
-          }
-        })
+          .expecting(HttpResponseExpectation.SC_OK)
+          .flatMap(response -> response
+            .body()
+            .map(Buffer::toJsonObject)
+            .flatMap(this::parse))
       );
   }
 

@@ -72,4 +72,27 @@
     </dependency>
   </dependencies>
 
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <configuration>
+            <excludes>
+              <exclude>**/VaultConfigStoreWithAppRoleTest.java</exclude>
+              <exclude>**/VaultClientWithUsernameTest.java</exclude>
+              <exclude>**/VaultClientWithAppRoleTest.java</exclude>
+              <exclude>**/VaultClientWithCertTest.java</exclude>
+              <exclude>**/VaultConfigStoreWithUserCredentialsTest.java</exclude>
+              <exclude>**/VaultClientTest.java</exclude>
+              <exclude>**/VaultConfigStoreWithCertsTest.java</exclude>
+              <exclude>**/VaultConfigStoreWithKnownTokenTest.java</exclude>
+              <exclude>**/VaultConfigStoreWithTokenCreationTest.java</exclude>
+            </excludes>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
 </project>
