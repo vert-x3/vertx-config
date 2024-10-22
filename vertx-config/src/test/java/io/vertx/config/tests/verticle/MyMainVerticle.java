@@ -18,9 +18,7 @@
 package io.vertx.config.tests.verticle;
 
 import io.vertx.config.ConfigRetriever;
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Promise;
+import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
@@ -28,13 +26,13 @@ import io.vertx.config.ConfigStoreOptions;
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class MyMainVerticle extends AbstractVerticle {
+public class MyMainVerticle extends VerticleBase {
 
   private String deploymentId;
   private ConfigRetriever configurationRetriever;
 
   @Override
-  public void start(Promise<Void> future) throws Exception {
+  public Future<?> start() {
     configurationRetriever = ConfigRetriever.create(vertx,
         new ConfigRetrieverOptions()
             .setScanPeriod(500)
@@ -48,30 +46,24 @@ public class MyMainVerticle extends AbstractVerticle {
     configurationRetriever.listen(conf -> {
       if (deploymentId != null) {
         vertx.undeploy(deploymentId);
-        deployMyVerticle(conf.getNewConfiguration(), null);
+        deployMyVerticle(conf.getNewConfiguration());
       }
     });
 
     // Retrieve the current configuration.
-    configurationRetriever.getConfig().onComplete(ar -> {
-      JsonObject configuration = ar.result();
-      deployMyVerticle(configuration, future);
-    });
+    return configurationRetriever
+      .getConfig()
+      .compose(this::deployMyVerticle);
   }
 
-  private void deployMyVerticle(JsonObject conf, Promise<Void> completion) {
-    vertx.deployVerticle(MyVerticle.class.getName(),
-        new DeploymentOptions().setConfig(conf)).onComplete(deployed -> {
-          deploymentId = deployed.result();
-          if (completion != null) {
-            completion.complete();
-          }
-        }
-    );
+  private Future<?> deployMyVerticle(JsonObject conf) {
+    return vertx
+      .deployVerticle(MyVerticle.class.getName(), new DeploymentOptions().setConfig(conf))
+      .andThen(deployed -> deploymentId = deployed.result());
   }
 
   @Override
-  public void stop() throws Exception {
-    configurationRetriever.close();
+  public Future<?> stop() throws Exception {
+    return configurationRetriever.close();
   }
 }

@@ -14,15 +14,11 @@ package io.vertx.config.yaml.tests;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,11 +40,11 @@ public class YamlMultipleVerticlesTest {
     vertx.close();
   }
 
-  private static class ConfigYamlVerticle extends AbstractVerticle {
+  private static class ConfigYamlVerticle extends VerticleBase {
     private ConfigRetriever retriever;
 
     @Override
-    public void start(Promise<Void> startPromise) throws Exception {
+    public Future<?> start() throws Exception {
       ConfigStoreOptions store = new ConfigStoreOptions()
         .setType("file")
         .setFormat("yaml")
@@ -57,20 +53,13 @@ public class YamlMultipleVerticlesTest {
         );
       retriever = ConfigRetriever.create(vertx,
         new ConfigRetrieverOptions().addStore(store));
-      retriever.getConfig().onComplete(js -> {
-        if (js.succeeded()) {
-          String value = js.result().getString("key");
-          Assert.assertEquals("value", value);
-          startPromise.complete();
-        } else {
-          startPromise.fail(js.cause());
-        }
-      });
+      return retriever.getConfig()
+        .expecting(json -> "value".equals(json.getString("key")));
     }
 
     @Override
-    public void stop() throws Exception {
-      retriever.close();
+    public Future<?> stop() {
+      return retriever.close();
     }
   }
 

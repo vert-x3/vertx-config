@@ -77,7 +77,7 @@ public interface ConfigRetriever {
   /**
    * Closes the retriever.
    */
-  void close();
+  Future<Void> close();
 
   /**
    * Gets the last computed configuration.

@@ -17,16 +17,18 @@
 
 package io.vertx.config.tests.verticle;
 
-import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Future;
+import io.vertx.core.VerticleBase;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class MyVerticle extends AbstractVerticle {
+public class MyVerticle extends VerticleBase {
 
   @Override
-  public void start() throws Exception {
+  public Future<?> start() throws Exception {
     String mark = config().getString("mark");
     vertx.eventBus().send("test.address", mark);
+    return super.start();
   }
 }

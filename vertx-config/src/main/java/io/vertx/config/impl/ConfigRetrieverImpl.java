@@ -180,7 +180,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
   }
 
   @Override
-  public synchronized void close() {
+  public synchronized Future<Void> close() {
     if (scan != -1) {
       context.owner().cancelTimer(scan);
     }
@@ -190,6 +190,8 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
     for (ConfigurationProvider provider : providers) {
       provider.close();
     }
+
+    return context.owner().getOrCreateContext().succeededFuture();
   }
 
   @Override
