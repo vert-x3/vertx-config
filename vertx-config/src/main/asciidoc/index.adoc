@@ -45,7 +45,7 @@ compile 'io.vertx:vertx-config:${maven.version}'
 
 Once done, you first need to instantiate the {@link io.vertx.config.ConfigRetriever}:
 
-[source]
+[source,$lang]
 ----
 {@link examples.ConfigExamples#example1(io.vertx.core.Vertx)}
 ----
@@ -61,7 +61,7 @@ this order):
 
 You can configure your own stores:
 
-[source]
+[source,$lang]
 ----
 {@link examples.ConfigExamples#example2(io.vertx.core.Vertx)}
 ----
@@ -71,7 +71,7 @@ More details about the overloading rules and available stores are available belo
 is logged, but the processing does not fail. Instead, an empty JSON object is returned (`{}`). To mark a store as
 optional, use the `optional` attribute:
 
-[source]
+[source,$lang]
 ----
 {@link examples.ConfigExamples#example2_optional(io.vertx.core.Vertx)}
 ----
@@ -79,7 +79,7 @@ optional, use the `optional` attribute:
 Once you have the instance of the Config Retriever, _retrieve_ the configuration
 as follows:
 
-[source]
+[source,$lang]
 ----
 {@link examples.ConfigExamples#example3(ConfigRetriever)}
 ----
@@ -114,7 +114,7 @@ This section gives a few examples of usage.
 The following example can be placed in the `start` method of a verticle. It retrieves the configuration (using the
 default stores), and configure an HTTP server with the content of the configuration.
 
-[source]
+[source,$lang]
 ----
 {@link examples.HttpGreetingVerticle#start()}
 ----
@@ -123,7 +123,7 @@ default stores), and configure an HTTP server with the content of the configurat
 
 The following example configures 2 verticles using the configurations contained in the `verticles.json` file:
 
-[source]
+[source,$lang]
 ----
 {@link examples.VerticleDeployment#deploymentOfVerticles()}
 ----
@@ -133,7 +133,7 @@ The following example configures 2 verticles using the configurations contained 
 You can also configure Vert.x directly. For this, you need a temporary Vert.x instance used to retrieve the
 configuration. Then the actual instance is created:
 
-[source]
+[source,$lang]
 ----
 {@link examples.VerticleDeployment#configureVertx()}
 ----
@@ -145,7 +145,7 @@ the reaction yourself. For instance, you can un-deploy and redeploy verticle or 
 The following example shows this latter case. It sends the new configuration on the event bus. Interested verticles can
 listen for this address and update themselves:
 
-[source]
+[source,$lang]
 ----
 {@link examples.VerticleDeployment#propagateConfigurationInTheEventBus()}
 ----
@@ -336,11 +336,12 @@ in contrast to the previous method with a flat structure.
 
 Example:
 
-....
+[source,properties]
+----
 server.host=localhost
 server.port=8080
 multiple.values=1,2,3
-....
+----
 
 Get values:
 
