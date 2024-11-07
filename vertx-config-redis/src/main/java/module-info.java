@@ -22,7 +22,7 @@ module io.vertx.config.redis {
   requires static io.vertx.codegen.api;
   requires static io.vertx.codegen.json;
 
-  requires io.vertx.client.redis;
+  requires io.vertx.redis.client;
   requires io.vertx.config;
   requires io.vertx.core;
 

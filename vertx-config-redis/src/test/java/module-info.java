@@ -17,7 +17,7 @@
 open module io.vertx.config.redis.tests {
   requires io.vertx.config;
   requires io.vertx.config.redis;
-  requires io.vertx.client.redis;
+  requires io.vertx.redis.client;
   requires io.vertx.core;
   requires io.vertx.testing.unit;
   requires junit;
