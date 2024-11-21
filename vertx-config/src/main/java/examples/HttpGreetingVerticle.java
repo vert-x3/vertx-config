@@ -13,7 +13,7 @@ public class HttpGreetingVerticle extends AbstractVerticle {
       JsonObject result = json.result();
 
       vertx.createHttpServer()
-        .requestHandler(req -> result.getString("message"))
+        .requestHandler(req -> req.response().end(json.getString("message")))
         .listen(result.getInteger("port"));
     });
   }
