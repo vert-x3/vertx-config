@@ -12,7 +12,7 @@ public class HttpGreetingVerticle extends VerticleBase {
     return retriever
       .getConfig()
       .compose(json -> vertx.createHttpServer()
-        .requestHandler(req -> json.getString("message"))
+        .requestHandler(req -> req.response().end(json.getString("message")))
         .listen(json.getInteger("port"))
       );
   }
