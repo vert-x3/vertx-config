@@ -14,7 +14,7 @@
  * under the License.
  *
  */
-@ModuleGen(name = "vertx-config", groupPackage = "io.vertx", useFutures = true)
+@ModuleGen(name = "vertx-config", groupPackage = "io.vertx")
 package io.vertx.config.vault;
 
 import io.vertx.codegen.annotations.ModuleGen;
