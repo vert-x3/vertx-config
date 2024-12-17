@@ -25,9 +25,9 @@ module io.vertx.config.git {
   requires io.vertx.config;
   requires io.vertx.core;
   requires io.vertx.core.logging;
-  requires jsch;
-  requires org.eclipse.jgit;
-  requires org.eclipse.jgit.ssh.jsch;
+  requires jsch; // automatic
+  requires org.eclipse.jgit; // named automatic
+  requires org.eclipse.jgit.ssh.jsch; // named automatic
 
   exports io.vertx.config.git;
 
