@@ -17,7 +17,6 @@
 
 package io.vertx.config.spi.utils;
 
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -34,16 +33,6 @@ import java.util.Properties;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 public class JsonObjectHelper {
-
-  /**
-   * Deprecated. {@link JsonObject} now has a {@link JsonObject#toBuffer()} method.
-   *
-   * @deprecated use {@link JsonObject#toBuffer()} instead
-   */
-  @Deprecated
-  public static Buffer toBuffer(JsonObject json) {
-    return json.toBuffer();
-  }
 
   public static void put(JsonObject json, String name, String value, boolean rawData) {
     json.put(name, rawData ? value : convert(value));
