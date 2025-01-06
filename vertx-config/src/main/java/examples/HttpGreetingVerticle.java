@@ -9,12 +9,12 @@ public class HttpGreetingVerticle extends AbstractVerticle {
   @Override
   public void start() {
     ConfigRetriever retriever = ConfigRetriever.create(vertx);
-    retriever.getConfig().onComplete(json -> {
-      JsonObject result = json.result();
+    retriever.getConfig().onComplete(result -> {
+      JsonObject json = result.result();
 
       vertx.createHttpServer()
         .requestHandler(req -> req.response().end(json.getString("message")))
-        .listen(result.getInteger("port"));
+        .listen(json.getInteger("port"));
     });
   }
 }
