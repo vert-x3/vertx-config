@@ -226,7 +226,7 @@ public class ConfigurationRetrieverTest {
   }
 
   private void cleanupConf() {
-    vertx.fileSystem().deleteRecursiveBlocking("conf", true);
+    vertx.fileSystem().deleteRecursiveBlocking("conf");
   }
 
   @Test
