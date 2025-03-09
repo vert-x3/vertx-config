@@ -153,7 +153,7 @@ public class ConfigRetrieverImpl implements ConfigRetriever {
     if (value != null  && ! value.trim().isEmpty()) {
       return value.trim();
     }
-    File file = context.owner().resolveFile(DEFAULT_CONFIG_PATH);
+    File file = context.owner().fileResolver().resolve(DEFAULT_CONFIG_PATH);
     boolean exists = file != null && file.exists();
     if (exists) {
       return file.getAbsolutePath();
