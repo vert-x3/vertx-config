@@ -19,6 +19,7 @@ package io.vertx.config.kubernetes;
 
 import io.vertx.config.spi.ConfigStore;
 import io.vertx.config.spi.utils.JsonObjectHelper;
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
@@ -44,13 +45,13 @@ public class ConfigMapStore implements ConfigStore {
   private static final Base64.Decoder DECODER = Base64.getDecoder();
   private final VertxInternal vertx;
   private final JsonObject configuration;
-  private final String namespace;
   private final String name;
   private final String key;
   private final boolean secret;
   private final boolean optional;
 
   private final WebClient client;
+  private String namespace;
   private String token;
 
 
@@ -58,16 +59,7 @@ public class ConfigMapStore implements ConfigStore {
     this.vertx = (VertxInternal) vertx;
     this.configuration = configuration;
 
-    String ns = configuration.getString("namespace");
-    if (ns == null) {
-      if (KUBERNETES_NAMESPACE != null) {
-        ns = KUBERNETES_NAMESPACE;
-      } else {
-        ns = "default";
-      }
-    }
     this.optional = configuration.getBoolean("optional", true);
-    this.namespace = ns;
     this.name = configuration.getString("name");
     this.key = configuration.getString("key");
     this.secret = configuration.getBoolean("secret", false);
@@ -127,6 +119,30 @@ public class ConfigMapStore implements ConfigStore {
       });
   }
 
+  private Future<String> getNamespace() {
+    String namespace = configuration.getString("namespace");
+    if (namespace != null && !namespace.trim().isEmpty()) {
+      this.namespace = namespace;
+      return vertx.getOrCreateContext().succeededFuture(namespace);
+    }
+
+    if (KUBERNETES_NAMESPACE != null) {
+      this.namespace = KUBERNETES_NAMESPACE;
+      return vertx.getOrCreateContext().succeededFuture(namespace);
+    }
+
+    // Read from file
+    return vertx.fileSystem().readFile(KubernetesUtils.OPENSHIFT_KUBERNETES_NAMESPACE_FILE)
+      .recover(throwable -> optional ? Future.succeededFuture(Buffer.buffer()) : Future.failedFuture(throwable))
+      .map(Buffer::toString)
+      .onSuccess(ns -> {
+          this.namespace = ns;
+        })
+      .onFailure(t->{
+          this.namespace = "default";
+        });
+  }
+
   @Override
   public Future<Buffer> get() {
     Future<String> retrieveToken;
@@ -136,34 +152,45 @@ public class ConfigMapStore implements ConfigStore {
       retrieveToken = vertx.getOrCreateContext().succeededFuture(token);
     }
 
-    return retrieveToken.flatMap(token -> {
-      if (token.isEmpty()) {
-        return Future.succeededFuture(Buffer.buffer("{}"));
-      }
+    Future<String> retrieveNamespace;
+    if (namespace == null) {
+      retrieveNamespace = getNamespace();
+    } else {
+      retrieveNamespace = vertx.getOrCreateContext().succeededFuture(namespace);
+    }
 
-      String path = "/api/v1/namespaces/" + namespace;
-      if (secret) {
-        path += "/secrets/" + name;
-      } else {
-        path += "/configmaps/" + name;
-      }
+    return CompositeFuture.all(retrieveToken, retrieveNamespace).flatMap(compFut->{
+        String token = compFut.resultAt(0);
+        String namespace = compFut.resultAt(1);
 
-      return client.get(path)
-        .putHeader("Authorization", "Bearer " + token)
-        .send()
-        .flatMap(response -> {
-          if (response.statusCode() == 404) {
-            return handle404();
-          }
-          if (response.statusCode() == 403) {
-            return handle403();
-          }
-          if (response.statusCode() != 200) {
-            return handleOtherErrors(response);
-          }
-          return handle200(response);
-        });
-    });
+        if (token.isEmpty()) {
+          return Future.succeededFuture(Buffer.buffer("{}"));
+        }
+
+        String path = "/api/v1/namespaces/" + namespace;
+        if (secret) {
+          path += "/secrets/" + name;
+        } else {
+          path += "/configmaps/" + name;
+        }
+
+        return client.get(path)
+          .putHeader("Authorization", "Bearer " + token)
+          .send()
+          .flatMap(response -> {
+              if (response.statusCode() == 404) {
+                return handle404();
+              }
+              if (response.statusCode() == 403) {
+                return handle403();
+              }
+              if (response.statusCode() != 200) {
+                return handleOtherErrors(response);
+              }
+              return handle200(response);
+            });
+
+      });
   }
 
   private Future<Buffer> handle404() {
