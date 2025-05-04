@@ -1,0 +1,6 @@
+# Comment
+works = "this does"
+
+[object]
+a = "This too"
+b = not-this-though
