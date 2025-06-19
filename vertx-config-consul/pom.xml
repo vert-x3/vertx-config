@@ -28,6 +28,7 @@
   </parent>
 
   <artifactId>vertx-config-consul</artifactId>
+  <name>Vert.x Config Consul</name>
 
   <properties>
     <doc.skip>false</doc.skip>

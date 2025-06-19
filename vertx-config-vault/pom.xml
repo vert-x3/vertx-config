@@ -28,6 +28,7 @@
   </parent>
 
   <artifactId>vertx-config-vault</artifactId>
+  <name>Vert.x Config Vault</name>
 
   <properties>
     <doc.skip>false</doc.skip>

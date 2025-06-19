@@ -27,6 +27,7 @@
   </parent>
 
   <artifactId>vertx-config</artifactId>
+  <name>Vert.x Config</name>
 
   <properties>
     <doc.skip>false</doc.skip>

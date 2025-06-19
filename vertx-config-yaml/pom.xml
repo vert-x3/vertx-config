@@ -28,6 +28,7 @@
   </parent>
 
   <artifactId>vertx-config-yaml</artifactId>
+  <name>Vert.x Config YAML</name>
 
   <properties>
     <doc.skip>false</doc.skip>

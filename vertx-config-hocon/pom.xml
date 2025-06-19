@@ -28,6 +28,7 @@
   </parent>
 
   <artifactId>vertx-config-hocon</artifactId>
+  <name>Vert.x Config HOCON</name>
 
   <properties>
     <doc.skip>false</doc.skip>

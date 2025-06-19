@@ -28,6 +28,7 @@
   </parent>
 
   <artifactId>vertx-config-redis</artifactId>
+  <name>Vert.x Config Redis</name>
 
   <properties>
     <doc.skip>false</doc.skip>

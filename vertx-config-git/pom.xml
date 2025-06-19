@@ -33,6 +33,7 @@
   </properties>
 
   <artifactId>vertx-config-git</artifactId>
+  <name>Vert.x Config Git</name>
 
   <dependencies>
     <dependency>

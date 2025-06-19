@@ -28,6 +28,7 @@
   </parent>
 
   <artifactId>vertx-config-spring-config-server</artifactId>
+  <name>Vert.x Config Spring Config Server</name>
 
   <properties>
     <doc.skip>false</doc.skip>
