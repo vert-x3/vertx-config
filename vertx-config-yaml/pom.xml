@@ -29,6 +29,8 @@
 
   <artifactId>vertx-config-yaml</artifactId>
 
+  <name>Vert.x Config YAML</name>
+
   <dependencies>
     <dependency>
       <groupId>io.vertx</groupId>

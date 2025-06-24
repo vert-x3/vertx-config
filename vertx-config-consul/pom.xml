@@ -29,6 +29,8 @@
 
   <artifactId>vertx-config-consul</artifactId>
 
+  <name>Vert.x Config Consul</name>
+
   <properties>
     <embedded.consul.version>0.3.0</embedded.consul.version>
   </properties>

@@ -29,6 +29,8 @@
 
   <artifactId>vertx-config-vault</artifactId>
 
+  <name>Vert.x Config Vault</name>
+
   <dependencies>
     <dependency>
       <groupId>io.vertx</groupId>

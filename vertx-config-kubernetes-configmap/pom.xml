@@ -29,6 +29,8 @@
 
   <artifactId>vertx-config-kubernetes-configmap</artifactId>
 
+  <name>Vert.x Config Kubernetes ConfigMaps</name>
+
   <properties>
     <kubernetes-client-version>1.4.35</kubernetes-client-version>
   </properties>

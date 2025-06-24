@@ -28,4 +28,6 @@
 
   <artifactId>vertx-config</artifactId>
 
+  <name>Vert.x Config</name>
+
 </project>

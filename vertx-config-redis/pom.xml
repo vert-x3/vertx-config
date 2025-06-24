@@ -29,6 +29,8 @@
 
   <artifactId>vertx-config-redis</artifactId>
 
+  <name>Vert.x Config Redis</name>
+
   <dependencies>
     <dependency>
       <groupId>io.vertx</groupId>

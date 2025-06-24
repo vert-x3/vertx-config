@@ -27,6 +27,8 @@
   <version>5.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
+  <name>Vert.x Config Parent</name>
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <testcontainers.version>1.20.1</testcontainers.version>
