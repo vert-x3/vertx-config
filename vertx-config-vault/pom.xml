@@ -86,7 +86,6 @@
               <exclude>**/VaultClientWithAppRoleTest.java</exclude>
               <exclude>**/VaultClientWithCertTest.java</exclude>
               <exclude>**/VaultConfigStoreWithUserCredentialsTest.java</exclude>
-              <exclude>**/VaultClientTest.java</exclude>
               <exclude>**/VaultConfigStoreWithCertsTest.java</exclude>
               <exclude>**/VaultConfigStoreWithKnownTokenTest.java</exclude>
               <exclude>**/VaultConfigStoreWithTokenCreationTest.java</exclude>

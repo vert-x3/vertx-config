@@ -153,7 +153,7 @@ public class SlimVaultClient {
     Objects.requireNonNull(resultHandler);
 
     read(fullPath, (res, err) -> {
-      if (res != null && !(err instanceof VaultException)) {
+      if (res == null && !(err instanceof VaultException)) {
         resultHandler.fail(err);
       } else if (err != null) {
         if (((VaultException) err).getStatusCode() == 404) {
