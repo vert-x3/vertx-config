@@ -24,7 +24,7 @@
   </parent>
 
   <artifactId>vertx-config-parent</artifactId>
-  <version>5.0.10-SNAPSHOT</version>
+  <version>5.0.10</version>
   <packaging>pom</packaging>
 
   <name>Vert.x Config Parent</name>
