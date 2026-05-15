@@ -32,7 +32,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>

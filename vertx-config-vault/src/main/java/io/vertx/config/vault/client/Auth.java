@@ -22,7 +22,6 @@ import io.vertx.codegen.json.annotations.JsonGen;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Represents Auth result.

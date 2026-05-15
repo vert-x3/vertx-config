@@ -32,7 +32,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import static io.vertx.config.vault.tests.VaultConfigStoreTestBase.awaitUntil;
-import static org.hamcrest.core.Is.is;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
