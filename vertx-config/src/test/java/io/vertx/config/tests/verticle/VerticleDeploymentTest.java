@@ -17,6 +17,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.concurrent.TimeUnit;
+
 @RunWith(VertxUnitRunner.class)
 public class VerticleDeploymentTest {
 
@@ -31,8 +33,8 @@ public class VerticleDeploymentTest {
   }
 
   @After
-  public void tearDown() {
-    vertx.close();
+  public void tearDown() throws Exception {
+    vertx.close().await(20, TimeUnit.SECONDS);
   }
 
   @Test

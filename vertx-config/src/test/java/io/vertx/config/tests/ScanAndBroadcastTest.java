@@ -74,7 +74,9 @@ public class ScanAndBroadcastTest {
 
   @After
   public void tearDown() throws Exception {
-    retriever.close();
+    if (retriever != null) {
+      retriever.close();
+    }
     vertx.close().await(20, TimeUnit.SECONDS);
   }
 
