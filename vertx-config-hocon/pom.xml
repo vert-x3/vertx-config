@@ -27,6 +27,7 @@
     <version>5.1.0-SNAPSHOT</version>
   </parent>
 
+  <name>vertx-config-hocon</name>
   <artifactId>vertx-config-hocon</artifactId>
 
   <dependencies>

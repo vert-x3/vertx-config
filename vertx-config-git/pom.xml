@@ -31,6 +31,7 @@
     <jgit.version>6.10.0.202406032230-r</jgit.version>
   </properties>
 
+  <name>vertx-config-git</name>
   <artifactId>vertx-config-git</artifactId>
 
   <dependencies>
