@@ -38,10 +38,8 @@ import org.junit.runner.RunWith;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
 
-import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertTrue;
 
 /**

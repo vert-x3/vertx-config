@@ -21,7 +21,6 @@ import io.vertx.codegen.annotations.DataObject;
 import io.vertx.codegen.json.annotations.JsonGen;
 import io.vertx.core.json.JsonObject;
 
-import java.util.Map;
 
 /**
  * Represent Secret result.

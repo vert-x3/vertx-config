@@ -19,7 +19,6 @@ package io.vertx.config.vault;
 
 import io.vertx.config.spi.ConfigStore;
 import io.vertx.config.vault.client.*;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
