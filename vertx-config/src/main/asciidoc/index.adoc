@@ -442,3 +442,10 @@ include::consul-store.adoc[]
 include::spring-store.adoc[]
 
 include::vault-store.adoc[]
+
+== Fat-Jar considerations when additional formats and stores are use
+
+If you are using maven-shade-plugin to create your fat-jar remember to include the transformer https://maven.apache.org/plugins/maven-shade-plugin/examples/resource-transformers.html[``ServicesResourceTransformer``]
+This will merge all the **META-INF/services** in one, otherwise you will have missing implementations define in your jar.
+
+This is already addressed if you create your project from https://start.vertx.io/,
