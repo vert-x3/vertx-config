@@ -1,0 +1,45 @@
+=== TOML Configuration Format
+
+The TOML Configuration Format extends the Vert.x Configuration Retriever and
+provides the support for the TOML Configuration Format.
+
+==== Using the TOML Configuration Format
+
+To use the TOML Configuration Format, add the following dependency to the
+_dependencies_ section of your build descriptor:
+
+* Maven (in your `pom.xml`):
+
+[source,xml,subs="+attributes"]
+----
+<dependency>
+  <groupId>io.vertx.config.toml</groupId>
+  <artifactId>vertx-config-toml</artifactId>
+  <version>${maven.version}</version>
+</dependency>
+<dependency>
+  <groupId>io.vertx</groupId>
+  <artifactId>vertx-config</artifactId>
+  <version>${maven.version}</version>
+</dependency>
+----
+
+* Gradle (in your `build.gradle` file):
+
+[source,groovy,subs="+attributes"]
+----
+compile 'io.vertx:vertx-config:${maven.version}'
+compile 'io.vertx.config.toml:vertx-config-toml:${maven.version}'
+----
+
+==== Configuring the store to use TOML
+
+Once added to your classpath or dependencies, you need to configure the
+{@link io.vertx.config.ConfigRetriever} to use this format:
+
+[source, $lang]
+----
+{@link examples.ConfigTomlExamples#example1(io.vertx.core.Vertx)}
+----
+
+You just need to set `format` to `toml`.
