@@ -79,7 +79,9 @@ public class VaultDownloader {
       throw new IllegalStateException("Unsupported operating system");
     }
 
-    if (ArchUtils.getProcessor().is64Bit()) {
+    if (ArchUtils.getProcessor().isAarch64()) {
+      url.append("arm64.zip");
+    } else if (ArchUtils.getProcessor().is64Bit()) {
       url.append("amd64.zip");
     } else {
       url.append("386.zip");
