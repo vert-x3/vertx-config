@@ -201,6 +201,10 @@ public class VaultProcess {
     return getConfiguration().put("token", token);
   }
 
+  public JsonObject getConfigurationWithRootTokenAndNamespace() {
+    return getConfigurationWithRootToken().put("namespace", "team1");
+  }
+
   public void setupBackendAppRole() {
     if ("appRole".equals(backend)) {
       return;

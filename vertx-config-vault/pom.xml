@@ -89,6 +89,7 @@
               <exclude>**/VaultConfigStoreWithCertsTest.java</exclude>
               <exclude>**/VaultConfigStoreWithKnownTokenTest.java</exclude>
               <exclude>**/VaultConfigStoreWithTokenCreationTest.java</exclude>
+              <exclude>**/VaultClientWithNamespaceTest.java</exclude>
             </excludes>
           </configuration>
         </plugin>
