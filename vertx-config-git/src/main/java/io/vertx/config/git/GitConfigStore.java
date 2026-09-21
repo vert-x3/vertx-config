@@ -142,8 +142,13 @@ public class GitConfigStore implements ConfigStore {
         }
         return git;
       } else {
+        boolean hasBranch = git.branchList()
+          .call()
+          .stream()
+          .anyMatch(b -> b.getName().equals("refs/heads/" + branch));
         git.checkout()
           .setName(branch)
+          .setCreateBranch(!hasBranch)
           .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK)
           .setStartPoint(remote + "/" + branch)
           .call();
