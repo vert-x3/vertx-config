@@ -56,6 +56,7 @@ The `vault_config` object can contain the HTTP client / Web client configuration
 certificates, port and host. The `path` and `host` entries are mandatory. The `path` indicates the secret to
 retrieve. The `host` is the hostname of the Vault server. By default the port 8200 is used. SSL is disabled by
 default, but you should enable it for production settings.
+Use entry `namespace` to add a `X-Vault-Namespace` HTTP request header. If your server is not a _Vault Enterprise_ version, it will ignore the header.
 
 Then, you need to use one of the following method to configure the token to use or the authentication mechanism.
 

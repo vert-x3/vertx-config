@@ -39,8 +39,10 @@ import java.util.Objects;
 public class SlimVaultClient {
 
   public static final String TOKEN_HEADER = "X-Vault-Token";
+  public static final String NAMESPACE_HEADER = "X-Vault-Namespace";
   private final WebClient client;
   private String token;
+  private String namespace;
 
   /**
    * Creates an instance of {@link SlimVaultClient}.
@@ -59,6 +61,10 @@ public class SlimVaultClient {
     );
 
     setToken(configuration.getString("token"));
+    String namespace = configuration.getString("namespace");
+    if (namespace != null && !namespace.isEmpty()) {
+      setNamespace(configuration.getString("namespace"));
+    }
   }
 
   /**
@@ -83,8 +89,12 @@ public class SlimVaultClient {
   public void read(String path, Completable<Secret> responseHandler) {
     Objects.requireNonNull(responseHandler);
 
-    client.get("/v1/" + Objects.requireNonNull(path))
-      .putHeader(TOKEN_HEADER, Objects.requireNonNull(getToken(), "No token to access the vault"))
+    HttpRequest<Buffer> request = client.get("/v1/" + Objects.requireNonNull(path))
+      .putHeader(TOKEN_HEADER, Objects.requireNonNull(getToken(), "No token to access the vault"));
+    if (hasNamespace()) {
+      request.putHeader(NAMESPACE_HEADER, Objects.requireNonNull(getNamespace(), "No namespace to access the vault"));
+    }
+    request
       .send().onComplete(response -> {
         if (response.failed()) {
           responseHandler.fail(VaultException.toFailure("Unable to access the Vault", response.cause()));
@@ -114,8 +124,12 @@ public class SlimVaultClient {
    */
   public void write(String path, JsonObject secrets, Completable<Secret> resultHandler) {
     Objects.requireNonNull(resultHandler);
-    client.post("/v1/" + Objects.requireNonNull(path))
-      .putHeader(TOKEN_HEADER, Objects.requireNonNull(getToken(), "The token must be set"))
+    HttpRequest<Buffer> request = client.post("/v1/" + Objects.requireNonNull(path))
+      .putHeader(TOKEN_HEADER, Objects.requireNonNull(getToken(), "The token must be set"));
+    if (hasNamespace()) {
+      request.putHeader(NAMESPACE_HEADER, Objects.requireNonNull(getNamespace(), "No namespace to access the vault"));
+    }
+    request
       .sendJsonObject(Objects.requireNonNull(secrets, "The secret must be set")).onComplete(ar -> {
           if (ar.failed()) {
             resultHandler.fail(VaultException.toFailure("Unable to access the Vault", ar.cause()));
@@ -186,8 +200,12 @@ public class SlimVaultClient {
    */
   public void delete(String path, Completable<Void> resultHandler) {
     Objects.requireNonNull(resultHandler);
-    client.delete("/v1/" + Objects.requireNonNull(path))
-      .putHeader(TOKEN_HEADER, Objects.requireNonNull(getToken(), "The token must be set"))
+    HttpRequest<Buffer> request = client.delete("/v1/" + Objects.requireNonNull(path))
+      .putHeader(TOKEN_HEADER, Objects.requireNonNull(getToken(), "The token must be set"));
+    if (hasNamespace()) {
+      request.putHeader(NAMESPACE_HEADER, Objects.requireNonNull(getNamespace(), "No namespace to access the vault"));
+    }
+    request
       .send().onComplete(ar -> {
         if (ar.failed()) {
           resultHandler.fail(VaultException.toFailure("Unable to access the Vault", ar.cause()));
@@ -215,8 +233,13 @@ public class SlimVaultClient {
    * @param resultHandler the callback invoked with the result.
    */
   public void createToken(TokenRequest tokenRequest, Completable<Auth> resultHandler) {
-    client.post("/v1/auth/token/create" + ((tokenRequest.getRole() == null) ? "" : "/" + tokenRequest.getRole()))
-      .putHeader(TOKEN_HEADER, Objects.requireNonNull(getToken(), "The token must be set"))
+    HttpRequest<Buffer> request =
+      client.post("/v1/auth/token/create" + ((tokenRequest.getRole() == null) ? "" : "/" + tokenRequest.getRole()))
+        .putHeader(TOKEN_HEADER, Objects.requireNonNull(getToken(), "The token must be set"));
+    if (hasNamespace()) {
+      request.putHeader(NAMESPACE_HEADER, Objects.requireNonNull(getNamespace(), "No namespace to access the vault"));
+    }
+    request
       .sendJsonObject(tokenRequest.toPayload()).onComplete(ar -> {
         if (ar.failed()) {
           resultHandler.fail(VaultException.toFailure("Unable to access the Vault", ar.cause()));
@@ -252,7 +275,11 @@ public class SlimVaultClient {
       .put("role_id", Objects.requireNonNull(roleId, "The role must not be null"))
       .put("secret_id", Objects.requireNonNull(secretId, "The secret must not be null"));
 
-    client.post("/v1/auth/approle/login")
+    HttpRequest<Buffer> request = client.post("/v1/auth/approle/login");
+    if (hasNamespace()) {
+      request.putHeader(NAMESPACE_HEADER, Objects.requireNonNull(getNamespace(), "No namespace to access the vault"));
+    }
+    request
       .sendJsonObject(payload).onComplete(ar -> {
         if (ar.failed()) {
           resultHandler.fail(VaultException.toFailure("Unable to access the Vault", ar.cause()));
@@ -279,7 +306,12 @@ public class SlimVaultClient {
     JsonObject payload = new JsonObject()
       .put("password", Objects.requireNonNull(password, "The password must not be null"));
 
-    client.post("/v1/auth/userpass/login/" + Objects.requireNonNull(username, "The username must not be null"))
+    HttpRequest<Buffer> request =
+      client.post("/v1/auth/userpass/login/" + Objects.requireNonNull(username, "The username must not be null"));
+    if (hasNamespace()) {
+      request.putHeader(NAMESPACE_HEADER, Objects.requireNonNull(getNamespace(), "No namespace to access the vault"));
+    }
+    request
       .sendJsonObject(payload).onComplete(ar -> {
         if (ar.failed()) {
           resultHandler.fail(VaultException.toFailure("Unable to access the Vault", ar.cause()));
@@ -300,7 +332,12 @@ public class SlimVaultClient {
    * @param resultHandler the callback invoked with the result
    */
   public void loginWithCert(Completable<Auth> resultHandler) {
-    client.post("/v1/auth/cert/login")
+    HttpRequest<Buffer> request =
+      client.post("/v1/auth/cert/login");
+    if (hasNamespace()) {
+      request.putHeader(NAMESPACE_HEADER, Objects.requireNonNull(getNamespace(), "No namespace to access the vault"));
+    }
+    request
       .send().onComplete(ar -> {
         if (ar.failed()) {
           resultHandler.fail(VaultException.toFailure("Unable to access the Vault", ar.cause()));
@@ -328,6 +365,9 @@ public class SlimVaultClient {
     }
     HttpRequest<Buffer> request = client.post("/v1/auth/token/renew-self")
       .putHeader(TOKEN_HEADER, Objects.requireNonNull(getToken(), "The token must not be null"));
+    if (hasNamespace()) {
+      request.putHeader(NAMESPACE_HEADER, Objects.requireNonNull(getNamespace(), "No namespace to access the vault"));
+    }
 
     Handler<AsyncResult<HttpResponse<Buffer>>> handler = ar -> {
       if (ar.failed()) {
@@ -354,8 +394,13 @@ public class SlimVaultClient {
    * @param resultHandler the callback invoked with the result
    */
   public void lookupSelf(Completable<Lookup> resultHandler) {
-    client.get("/v1/auth/token/lookup-self")
-      .putHeader(TOKEN_HEADER, Objects.requireNonNull(getToken(), "The token must not be null"))
+    HttpRequest<Buffer> request =
+      client.get("/v1/auth/token/lookup-self")
+        .putHeader(TOKEN_HEADER, Objects.requireNonNull(getToken(), "The token must not be null"));
+    if (hasNamespace()) {
+      request.putHeader(NAMESPACE_HEADER, Objects.requireNonNull(getNamespace(), "No namespace to access the vault"));
+    }
+    request
       .send().onComplete(ar -> {
         if (ar.failed()) {
           resultHandler.fail(VaultException.toFailure("Unable to access the Vault", ar.cause()));
@@ -393,5 +438,27 @@ public class SlimVaultClient {
   public synchronized SlimVaultClient setToken(String token) {
     this.token = token;
     return this;
+  }
+
+/**
+ * @return the current namespace.
+ */
+public synchronized String getNamespace() {
+  return namespace;
+}
+
+  /**
+   * Sets the namespace.
+   *
+   * @param namespace the new namespace
+   * @return the current {@link SlimVaultClient}
+   */
+  public synchronized SlimVaultClient setNamespace(String namespace) {
+    this.namespace = namespace;
+    return this;
+  }
+
+  private boolean hasNamespace() {
+    return namespace != null && !namespace.isEmpty();
   }
 }

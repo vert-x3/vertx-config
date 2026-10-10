@@ -47,6 +47,9 @@ public class ConfigVaultExamples {
       .put("port", 8200) // The port
       .put("ssl", true); // Whether or not SSL is used (disabled by default)
 
+    // Namespace (Vault enterprise only)
+    vault_config.put("namespace", "team1");
+
     // Certificates
     PemKeyCertOptions certs = new PemKeyCertOptions()
       .addCertPath("target/vault/config/ssl/client-cert.pem")
