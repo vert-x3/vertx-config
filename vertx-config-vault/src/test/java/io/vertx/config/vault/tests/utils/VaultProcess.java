@@ -39,7 +39,7 @@ import static io.vertx.config.vault.tests.VaultConfigStoreTestBase.awaitUntil;
 public class VaultProcess {
 
 
-  public static final String VAULT_VERSION = "1.1.2";
+  public static final String VAULT_VERSION = "1.8.0";
   public static final String CA_CERT_ARG = "-ca-cert=target/vault/config/ssl/cert.pem";
   private File executable;
   private String unseal;
